@@ -1,0 +1,10 @@
+@extends('layouts.app')
+@section('title', 'Crear cuenta')
+@section('content')
+<section class="auth-wrap"><div class="auth-aside"><span class="eyebrow">Súmate a la comunidad</span><h1>El primer paso para encontrarnos.</h1><p>Crea una cuenta para comprar o publicar cosechas en el mercado comunitario.</p><div class="auth-symbol">Ch</div></div><div class="auth-card"><span class="eyebrow">Registro</span><h2>Crear cuenta</h2><form method="post" action="{{ route('register.store') }}">@csrf
+<label>Nombre completo<input name="name" value="{{ old('name') }}" autocomplete="name" maxlength="120" required></label><label>Correo electrónico<input type="email" name="email" value="{{ old('email') }}" autocomplete="email" required></label>
+<label>Quiero participar como<select name="role" required><option value="comprador" @selected(old('role', 'comprador') === 'comprador')>Comprador/a</option><option value="productor" @selected(old('role') === 'productor')>Productor/a</option></select></label>
+<label>Comunidad (opcional)<select name="community_id"><option value="">Selecciona tu comunidad</option>@foreach ($communities as $community)<option value="{{ $community->id }}" @selected((string) old('community_id') === (string) $community->id)>{{ $community->name }}</option>@endforeach</select></label>
+<label>Contraseña <small>(mínimo 10 caracteres)</small><input type="password" name="password" autocomplete="new-password" required></label><label>Repite la contraseña<input type="password" name="password_confirmation" autocomplete="new-password" required></label><button class="button button-full" type="submit">Crear cuenta</button></form>
+<p class="form-foot">¿Ya tienes cuenta? <a href="{{ route('login') }}">Inicia sesión</a></p><p class="privacy-note">Tu información se usará para gestionar tu cuenta dentro del proyecto.</p></div></section>
+@endsection

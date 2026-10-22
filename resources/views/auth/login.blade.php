@@ -1,0 +1,6 @@
+@extends('layouts.app')
+@section('title', 'Ingresar')
+@section('content')
+<section class="auth-wrap"><div class="auth-aside"><span class="eyebrow">Bienvenido de vuelta</span><h1>Conectamos comunidad y cosecha.</h1><p>Ingresa para consultar tus pedidos, publicar cosechas o compartir información útil.</p><div class="auth-symbol">Ch</div></div><div class="auth-card"><span class="eyebrow">Tu cuenta</span><h2>Iniciar sesión</h2><form method="post" action="{{ route('login.store') }}">@csrf
+<label>Correo electrónico<input type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus></label><label>Contraseña<input type="password" name="password" autocomplete="current-password" required></label><label class="check-row"><input type="checkbox" name="remember" value="1"> Mantener mi sesión</label><button class="button button-full" type="submit">Ingresar</button></form><p class="form-foot">¿Aún no tienes cuenta? <a href="{{ route('register') }}">Regístrate</a></p></div></section>
+@endsection

@@ -1,0 +1,8 @@
+@extends('layouts.app')
+@section('title', 'Mis pedidos')
+@section('content')
+<section class="page-hero"><div><span class="eyebrow">Mercado comunitario</span><h1>Mis pedidos</h1><p>Consulta las solicitudes de compra que has enviado.</p></div><a class="button button-outline" href="{{ route('market.index') }}">Volver al mercado</a></section>
+<section class="section section-top"><div class="panel">@forelse ($orders as $order)<article class="order-detail"><div class="panel-heading"><div><h2>Pedido #{{ $order->id }}</h2><small>{{ $order->created_at->format('d/m/Y H:i') }}</small></div><span class="status-pill">{{ ucfirst($order->status) }}</span></div>
+@foreach ($order->items as $item)<div class="order-row"><div><strong>{{ $item->product?->name ?: 'Producto retirado' }}</strong><small>{{ number_format((float) $item->quantity, 2) }} · {{ $item->product?->unit ?: 'unidad' }} · Productor/a: {{ $item->product?->seller?->name ?: 'No disponible' }}</small></div><strong>S/ {{ number_format((float) $item->subtotal, 2) }}</strong></div>@endforeach
+<div class="order-total">Total <strong>S/ {{ number_format((float) $order->total, 2) }}</strong></div>@if ($order->notes)<p class="muted">Nota: {{ $order->notes }}</p>@endif</article>@empty<div class="empty-state"><span>🧺</span><h3>Tus pedidos aparecerán aquí</h3><p>Busca productos locales en el mercado para empezar.</p><a class="button" href="{{ route('market.index') }}">Explorar productos</a></div>@endforelse</div><div class="pagination">{{ $orders->links() }}</div></section>
+@endsection

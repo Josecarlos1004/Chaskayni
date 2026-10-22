@@ -1,0 +1,8 @@
+@extends('layouts.app')
+@section('title', 'Mercado comunitario')
+@section('content')
+<section class="page-hero"><div><span class="eyebrow">Compra local</span><h1>Mercado comunitario</h1><p>Explora productos publicados directamente por productores.</p></div>@auth @if (auth()->user()->isProducer())<a class="button" href="{{ route('products.create') }}">+ Publicar cosecha</a>@endif @else<a class="button" href="{{ route('register') }}">Únete a Chaskayni</a>@endauth</section>
+<section class="section section-top"><form class="filter-bar" method="get" action="{{ route('market.index') }}"><label class="search-field"><span aria-hidden="true">⌕</span><input name="q" type="search" value="{{ request('q') }}" placeholder="Busca un producto o categoría"></label><label class="select-field"><span class="sr-only">Categoría</span><select name="category"><option value="">Todas las categorías</option>@foreach ($categories as $category)<option value="{{ $category }}" @selected(request('category') === $category)>{{ $category }}</option>@endforeach</select></label><button class="button button-small" type="submit">Filtrar</button></form>
+@if ($products->isNotEmpty())<div class="product-grid">@foreach ($products as $product) @include('components.product-card', ['product' => $product]) @endforeach</div><div class="pagination">{{ $products->links() }}</div>@else<div class="empty-state"><span>⌕</span><h3>No encontramos publicaciones</h3><p>Prueba otra búsqueda o vuelve más tarde.</p><a class="button button-outline" href="{{ route('market.index') }}">Limpiar filtros</a></div>@endif
+</section>
+@endsection

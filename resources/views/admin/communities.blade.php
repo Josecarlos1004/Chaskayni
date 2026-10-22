@@ -1,0 +1,9 @@
+@extends('layouts.app')
+@section('title', 'Administrar comunidades')
+@section('content')
+<section class="page-hero"><div><span class="eyebrow">Administración</span><h1>Comunidades</h1><p>Registra las comunidades disponibles para las cuentas y publicaciones.</p></div><a class="button" href="{{ route('admin.alerts.create') }}">+ Publicar alerta</a></section>
+<section class="section section-top admin-grid"><div class="form-card"><span class="eyebrow">Nueva comunidad</span><h2>Registrar comunidad</h2><form method="post" action="{{ route('admin.communities.store') }}">@csrf
+<label>Nombre<input name="name" value="{{ old('name') }}" maxlength="120" required></label><div class="form-row"><label>Distrito (opcional)<input name="district" value="{{ old('district') }}" maxlength="120"></label><label>Provincia<input name="province" value="{{ old('province', 'Cusco') }}" maxlength="120" required></label></div><label>Descripción<textarea name="description" rows="3" maxlength="2000">{{ old('description') }}</textarea></label><button class="button" type="submit">Guardar comunidad</button></form></div>
+<div class="panel"><div class="panel-heading"><h2>Comunidades registradas</h2><a class="text-link" href="{{ route('admin.reports.index') }}">Ver reportes →</a></div>
+@forelse ($communities as $community)<div class="order-row"><div><strong>{{ $community->name }}</strong><small>{{ $community->district ?: $community->province }} · {{ $community->users_count }} cuentas · {{ $community->products_count }} publicaciones</small></div></div>@empty<div class="empty-inline"><p>Aún no hay comunidades. Registra la información real del equipo.</p></div>@endforelse</div></section>
+@endsection
