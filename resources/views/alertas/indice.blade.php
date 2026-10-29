@@ -1,0 +1,6 @@
+@extends('layouts.app')
+@section('title', 'Alertas comunitarias')
+@section('content')
+<section class="encabezado-pagina"><div><span class="sobrelinea">Información comunitaria</span><h1>Alertas y avisos</h1><p>Consulta únicamente avisos registrados por el equipo del proyecto.</p></div></section>
+<section class="seccion seccion-superior">@if ($alertas->isNotEmpty())<div class="cuadricula-alertas cuadricula-alertas-amplia">@foreach ($alertas as $alerta)<article class="tarjeta-alerta"><span class="nivel-alerta">{{ ucfirst($alerta->level) }}</span><h2>{{ $alerta->title }}</h2><p>{{ $alerta->message }}</p><div class="pie-alerta"><span>{{ $alerta->comunidad?->name ?: 'Alerta general' }}</span><span>{{ $alerta->created_at->format('d/m/Y') }}</span></div>@if ($alerta->ends_at)<small>Vigente hasta {{ $alerta->ends_at->format('d/m/Y H:i') }}</small>@endif</article>@endforeach</div><div class="paginacion">{{ $alertas->links() }}</div>@else<div class="estado-vacio"><span>⌁</span><h3>No hay alertas publicadas</h3><p>Cuando el equipo verifique y publique un aviso, lo encontrarás aquí.</p></div>@endif</section>
+@endsection

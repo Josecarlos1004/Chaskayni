@@ -1,0 +1,8 @@
+@extends('layouts.app')
+@section('title', 'Publicar alerta')
+@section('content')
+<section class="pagina-formulario"><a class="enlace-regreso" href="{{ route('administracion.comunidades.indice') }}">← Administración</a><div class="tarjeta-formulario"><span class="sobrelinea">Aviso verificado</span><h1>Publicar alerta comunitaria</h1><p>Publica solo información revisada y registra su vigencia y alcance.</p><form method="post" action="{{ route('administracion.alertas.guardar') }}">@csrf
+<label>Título<input name="title" value="{{ old('title') }}" maxlength="160" required></label><label>Mensaje<textarea name="message" rows="5" maxlength="3000" required>{{ old('message') }}</textarea></label>
+<div class="fila-formulario"><label>Nivel<select name="level" required><option value="informacion">Información</option><option value="precaucion">Precaución</option><option value="urgente">Urgente</option></select></label><label>Comunidad<select name="community_id"><option value="">Todas las comunidades</option>@foreach ($comunidades as $comunidad)<option value="{{ $comunidad->id }}">{{ $comunidad->name }}</option>@endforeach</select></label></div>
+<div class="fila-formulario"><label>Inicio de vigencia (opcional)<input type="datetime-local" name="starts_at" value="{{ old('starts_at') }}"></label><label>Fin de vigencia (opcional)<input type="datetime-local" name="ends_at" value="{{ old('ends_at') }}"></label></div><div class="acciones-formulario"><a class="boton boton-claro" href="{{ route('administracion.comunidades.indice') }}">Cancelar</a><button class="boton" type="submit">Publicar alerta</button></div></form></div></section>
+@endsection

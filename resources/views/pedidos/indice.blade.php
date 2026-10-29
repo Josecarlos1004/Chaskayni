@@ -1,0 +1,8 @@
+@extends('layouts.app')
+@section('title', 'Mis pedidos')
+@section('content')
+<section class="encabezado-pagina"><div><span class="sobrelinea">Mercado comunitario</span><h1>Mis pedidos</h1><p>Consulta las solicitudes de compra que has enviado.</p></div><a class="boton boton-contorno" href="{{ route('mercado.indice') }}">Volver al mercado</a></section>
+<section class="seccion seccion-superior"><div class="panel">@forelse ($pedidos as $pedido)<article class="detalle-pedido"><div class="encabezado-panel"><div><h2>Pedido #{{ $pedido->id }}</h2><small>{{ $pedido->created_at->format('d/m/Y H:i') }}</small></div><span class="etiqueta-estado">{{ ucfirst($pedido->status) }}</span></div>
+@foreach ($pedido->detalles as $detalle)<div class="fila-pedido"><div><strong>{{ $detalle->producto?->name ?: 'Producto retirado' }}</strong><small>{{ number_format((float) $detalle->quantity, 2) }} · {{ $detalle->producto?->unit ?: 'unidad' }} · Productor/a: {{ $detalle->producto?->vendedor?->name ?: 'No disponible' }}</small></div><strong>S/ {{ number_format((float) $detalle->subtotal, 2) }}</strong></div>@endforeach
+<div class="total-pedido">Total <strong>S/ {{ number_format((float) $pedido->total, 2) }}</strong></div>@if ($pedido->notes)<p class="texto-atenuado">Nota: {{ $pedido->notes }}</p>@endif</article>@empty<div class="estado-vacio"><span>🧺</span><h3>Tus pedidos aparecerán aquí</h3><p>Busca productos locales en el mercado para empezar.</p><a class="boton" href="{{ route('mercado.indice') }}">Explorar productos</a></div>@endforelse</div><div class="paginacion">{{ $pedidos->links() }}</div></section>
+@endsection
