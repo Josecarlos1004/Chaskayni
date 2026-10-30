@@ -45,6 +45,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/comunidades', [AdministracionController::class, 'guardarComunidad'])->name('comunidades.guardar');
         Route::get('/alertas/crear', [AdministracionController::class, 'crearAlerta'])->name('alertas.crear');
         Route::post('/alertas', [AdministracionController::class, 'guardarAlerta'])->name('alertas.guardar');
+        Route::post('/alertas/temperatura', [AdministracionController::class, 'evaluarTemperatura'])->name('alertas.temperatura');
+        Route::patch('/alertas/{alertaHelada}/cerrar', [AdministracionController::class, 'cerrarAlerta'])->name('alertas.cerrar');
         Route::get('/reportes', [AdministracionController::class, 'listarReportes'])->name('reportes.indice');
         Route::patch('/reportes/{reporteRiesgo}', [AdministracionController::class, 'revisarReporte'])->name('reportes.revisar');
     });

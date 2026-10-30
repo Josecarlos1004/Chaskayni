@@ -18,3 +18,5 @@
 @media(max-width:800px){.cuadricula-administracion{grid-template-columns:1fr}}
 
 .insignia-cesta-salvada{position:absolute;right:13px;top:13px;padding:5px 10px;border-radius:99px;background:#f7e7ba;color:#51401c;font-size:.7rem;font-weight:800}.precio-producto-oferta s{margin-right:7px;color:var(--atenuado);font:500 .85rem "DM Sans",sans-serif}.leyenda-descuento{display:block;margin-top:2px;color:var(--verde);font-size:.75rem;font-weight:700}.opcion-cesta-salvada{display:flex!important;align-items:flex-start;gap:10px;color:var(--tinta);font-weight:600!important}.opcion-cesta-salvada input,.filtro-cesta-salvada input{width:auto;accent-color:var(--verde)}.opcion-cesta-salvada span small{display:block;color:var(--atenuado);font-weight:400}.filtro-cesta-salvada{white-space:nowrap}
+
+.formulario-alerta-manual{margin-top:24px}

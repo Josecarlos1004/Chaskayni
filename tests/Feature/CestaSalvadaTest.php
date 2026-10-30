@@ -28,7 +28,7 @@ class CestaSalvadaTest extends TestCase
         ]);
 
         $this->actingAs($productor)->post(route('productos.guardar'), [
-            'name' => 'Papa nativa de prueba',
+            'nombre' => 'Papa nativa de prueba',
             'categoria' => 'Tubérculos',
             'cantidad' => 10,
             'unidad' => 'kg',
@@ -36,7 +36,7 @@ class CestaSalvadaTest extends TestCase
             'cesta_salvada' => 1,
         ])->assertRedirect(route('mercado.indice'));
 
-        $producto = Producto::where('name', 'Papa nativa de prueba')->firstOrFail();
+        $producto = Producto::where('nombre', 'Papa nativa de prueba')->firstOrFail();
         $this->assertTrue($producto->cesta_salvada);
         $this->assertSame(7.0, $producto->precioUnitarioAplicado());
 
@@ -61,7 +61,7 @@ class CestaSalvadaTest extends TestCase
 
         Producto::create([
             'usuario_id' => $productor->id,
-            'name' => 'Cesta de papa',
+            'nombre' => 'Cesta de papa',
             'cantidad' => 5,
             'unidad' => 'kg',
             'precio_unitario' => 10,
@@ -70,7 +70,7 @@ class CestaSalvadaTest extends TestCase
         ]);
         Producto::create([
             'usuario_id' => $productor->id,
-            'name' => 'Papa regular',
+            'nombre' => 'Papa regular',
             'cantidad' => 5,
             'unidad' => 'kg',
             'precio_unitario' => 10,

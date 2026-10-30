@@ -17,8 +17,7 @@ class InicioController extends Controller
                 ->latest()
                 ->take(6)
                 ->get(),
-            'alertas' => AlertaHelada::with('comunidad')
-                ->where('estado', 'publicada')
+            'alertas' => AlertaHelada::activas()->with('comunidad')
                 ->latest()
                 ->take(3)
                 ->get(),
