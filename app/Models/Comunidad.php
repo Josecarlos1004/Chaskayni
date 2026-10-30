@@ -7,17 +7,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Comunidad extends Model
 {
-    protected $table = 'communities';
+    protected $table = 'comunidades';
 
-    protected $fillable = ['name', 'district', 'province', 'description'];
+    protected $fillable = ['nombre', 'distrito', 'provincia', 'descripcion'];
 
     public function usuarios(): HasMany
     {
-        return $this->hasMany(Usuario::class, 'community_id');
+        return $this->hasMany(Usuario::class, 'comunidad_id');
     }
 
     public function productos(): HasMany
     {
-        return $this->hasMany(Producto::class, 'community_id');
+        return $this->hasMany(Producto::class, 'comunidad_id');
     }
 }

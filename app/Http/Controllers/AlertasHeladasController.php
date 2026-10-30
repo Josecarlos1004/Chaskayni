@@ -11,7 +11,7 @@ class AlertasHeladasController extends Controller
     {
         return view('alertas.indice', [
             'alertas' => AlertaHelada::with(['comunidad', 'autor'])
-                ->where('status', 'publicada')
+                ->where('estado', 'publicada')
                 ->latest()
                 ->paginate(10),
         ]);

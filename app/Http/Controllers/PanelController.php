@@ -16,9 +16,9 @@ class PanelController extends Controller
         return view('panel', [
             'cantidadPublicaciones' => $usuario->productos()->count(),
             'cantidadPedidos' => $usuario->pedidos()->count(),
-            'cantidadAlertas' => AlertaHelada::where('status', 'publicada')->count(),
+            'cantidadAlertas' => AlertaHelada::where('estado', 'publicada')->count(),
             'pedidosRecientes' => Pedido::with('detalles.producto')
-                ->where('buyer_id', $usuario->id)
+                ->where('comprador_id', $usuario->id)
                 ->latest()
                 ->take(5)
                 ->get(),

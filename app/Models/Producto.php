@@ -8,15 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Producto extends Model
 {
-    protected $table = 'products';
+    protected $table = 'productos';
 
-    protected $fillable = ['user_id', 'community_id', 'name', 'category', 'description', 'quantity', 'unit', 'unit_price', 'image_url', 'cesta_salvada', 'status'];
+    protected $fillable = ['usuario_id', 'comunidad_id', 'nombre', 'categoria', 'descripcion', 'cantidad', 'unidad', 'precio_unitario', 'imagen_url', 'cesta_salvada', 'estado'];
 
     protected function casts(): array
     {
         return [
-            'quantity' => 'decimal:2',
-            'unit_price' => 'decimal:2',
+            'cantidad' => 'decimal:2',
+            'precio_unitario' => 'decimal:2',
             'cesta_salvada' => 'boolean',
         ];
     }
@@ -24,23 +24,23 @@ class Producto extends Model
     /** Calcula el precio unitario con descuento cuando la publicación es una cesta salvada. */
     public function precioUnitarioAplicado(): float
     {
-        $precio = (float) $this->unit_price;
+        $precio = (float) $this->precio_unitario;
 
         return round($this->cesta_salvada ? $precio * 0.70 : $precio, 2);
     }
 
     public function vendedor(): BelongsTo
     {
-        return $this->belongsTo(Usuario::class, 'user_id');
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
     public function comunidad(): BelongsTo
     {
-        return $this->belongsTo(Comunidad::class, 'community_id');
+        return $this->belongsTo(Comunidad::class, 'comunidad_id');
     }
 
     public function detallesPedido(): HasMany
     {
-        return $this->hasMany(DetallePedido::class, 'product_id');
+        return $this->hasMany(DetallePedido::class, 'producto_id');
     }
 }

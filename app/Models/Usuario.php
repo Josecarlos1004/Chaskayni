@@ -12,7 +12,7 @@ class Usuario extends Authenticatable
 
     protected $table = 'users';
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'community_id'];
+    protected $fillable = ['name', 'email', 'password', 'rol', 'comunidad_id'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -23,26 +23,26 @@ class Usuario extends Authenticatable
 
     public function comunidad()
     {
-        return $this->belongsTo(Comunidad::class, 'community_id');
+        return $this->belongsTo(Comunidad::class, 'comunidad_id');
     }
 
     public function productos()
     {
-        return $this->hasMany(Producto::class, 'user_id');
+        return $this->hasMany(Producto::class, 'usuario_id');
     }
 
     public function pedidos()
     {
-        return $this->hasMany(Pedido::class, 'buyer_id');
+        return $this->hasMany(Pedido::class, 'comprador_id');
     }
 
     public function esProductor(): bool
     {
-        return in_array($this->role, ['productor', 'administrador'], true);
+        return in_array($this->rol, ['productor', 'administrador'], true);
     }
 
     public function esAdministrador(): bool
     {
-        return $this->role === 'administrador';
+        return $this->rol === 'administrador';
     }
 }

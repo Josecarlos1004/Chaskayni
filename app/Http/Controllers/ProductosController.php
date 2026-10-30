@@ -22,7 +22,7 @@ class ProductosController extends Controller
 
         return view('productos.formulario', [
             'producto' => new Producto,
-            'comunidades' => Comunidad::orderBy('name')->get(),
+            'comunidades' => Comunidad::orderBy('nombre')->get(),
         ]);
     }
 
@@ -30,9 +30,9 @@ class ProductosController extends Controller
     {
         $this->verificarProductor();
         $datos = $this->validarDatos($request);
-        $datos['user_id'] = Auth::id();
-        $datos['community_id'] = $datos['community_id'] ?? Auth::user()->community_id;
-        $datos['status'] = 'disponible';
+        $datos['usuario_id'] = Auth::id();
+        $datos['comunidad_id'] = $datos['comunidad_id'] ?? Auth::user()->comunidad_id;
+        $datos['estado'] = 'disponible';
 
         Producto::create($datos);
 
@@ -45,7 +45,7 @@ class ProductosController extends Controller
 
         return view('productos.formulario', [
             'producto' => $producto,
-            'comunidades' => Comunidad::orderBy('name')->get(),
+            'comunidades' => Comunidad::orderBy('nombre')->get(),
         ]);
     }
 
@@ -63,7 +63,7 @@ class ProductosController extends Controller
 
         // Si hay pedidos asociados, se oculta para conservar su historial.
         if ($producto->detallesPedido()->exists()) {
-            $producto->update(['status' => 'oculto']);
+            $producto->update(['estado' => 'oculto']);
         } else {
             $producto->delete();
         }
@@ -74,21 +74,21 @@ class ProductosController extends Controller
     private function verificarPropietario(Producto $producto): void
     {
         abort_unless(Auth::user()->esProductor(), 403);
-        abort_unless($producto->user_id === Auth::id() || Auth::user()->esAdministrador(), 403);
+        abort_unless($producto->usuario_id === Auth::id() || Auth::user()->esAdministrador(), 403);
     }
 
     private function validarDatos(Request $request): array
     {
         return $request->validate([
-            'name' => ['required', 'string', 'max:140'],
-            'category' => ['nullable', 'string', 'max:80'],
-            'description' => ['nullable', 'string', 'max:3000'],
-            'quantity' => ['required', 'numeric', 'gt:0', 'max:99999999'],
-            'unit' => ['required', 'in:kg,arroba,saco,unidad,litro'],
-            'unit_price' => ['required', 'numeric', 'min:0.01', 'max:99999999'],
-            'image_url' => ['nullable', 'url:http,https', 'max:2048'],
+            'nombre' => ['required', 'string', 'max:140'],
+            'categoria' => ['nullable', 'string', 'max:80'],
+            'descripcion' => ['nullable', 'string', 'max:3000'],
+            'cantidad' => ['required', 'numeric', 'gt:0', 'max:99999999'],
+            'unidad' => ['required', 'in:kg,arroba,saco,unidad,litro'],
+            'precio_unitario' => ['required', 'numeric', 'min:0.01', 'max:99999999'],
+            'imagen_url' => ['nullable', 'url:http,https', 'max:2048'],
             'cesta_salvada' => ['required', 'boolean'],
-            'community_id' => ['nullable', 'exists:communities,id'],
+            'comunidad_id' => ['nullable', 'exists:comunidades,id'],
         ]);
     }
 }

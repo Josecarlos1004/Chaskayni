@@ -17,7 +17,7 @@ class PedidosController extends Controller
     {
         return view('pedidos.indice', [
             'pedidos' => Pedido::with('detalles.producto.vendedor')
-                ->where('buyer_id', Auth::id())
+                ->where('comprador_id', Auth::id())
                 ->latest()
                 ->paginate(10),
         ]);
@@ -25,42 +25,42 @@ class PedidosController extends Controller
 
     public function store(Request $request, Producto $producto): RedirectResponse
     {
-        abort_if(Auth::user()->role === 'productor', 403, 'Las cuentas de productor no pueden comprar.');
+        abort_if(Auth::user()->rol === 'productor', 403, 'Las cuentas de productor no pueden comprar.');
         $datos = $request->validate([
-            'quantity' => ['required', 'numeric', 'gt:0', 'max:99999999'],
-            'notes' => ['nullable', 'string', 'max:1000'],
+            'cantidad' => ['required', 'numeric', 'gt:0', 'max:99999999'],
+            'notas' => ['nullable', 'string', 'max:1000'],
         ]);
 
         // El bloqueo evita descontar las mismas existencias en compras simultáneas.
         DB::transaction(function () use ($producto, $datos) {
             $productoBloqueado = Producto::query()->lockForUpdate()->findOrFail($producto->id);
-            $cantidad = (float) $datos['quantity'];
+            $cantidad = (float) $datos['cantidad'];
 
-            abort_unless($productoBloqueado->status === 'disponible', 422, 'Este producto no está disponible.');
-            abort_if($productoBloqueado->user_id === Auth::id(), 422, 'No puedes pedir tu propia publicación.');
-            abort_if($cantidad > (float) $productoBloqueado->quantity, 422, 'No hay suficiente cantidad disponible.');
+            abort_unless($productoBloqueado->estado === 'disponible', 422, 'Este producto no está disponible.');
+            abort_if($productoBloqueado->usuario_id === Auth::id(), 422, 'No puedes pedir tu propia publicación.');
+            abort_if($cantidad > (float) $productoBloqueado->cantidad, 422, 'No hay suficiente cantidad disponible.');
 
             $precioUnitario = $productoBloqueado->precioUnitarioAplicado();
             $subtotal = round($cantidad * $precioUnitario, 2);
             $pedido = Pedido::create([
-                'buyer_id' => Auth::id(),
-                'status' => 'pendiente',
+                'comprador_id' => Auth::id(),
+                'estado' => 'pendiente',
                 'total' => $subtotal,
-                'notes' => $datos['notes'] ?? null,
+                'notas' => $datos['notas'] ?? null,
             ]);
 
             DetallePedido::create([
-                'order_id' => $pedido->id,
-                'product_id' => $productoBloqueado->id,
-                'quantity' => $cantidad,
+                'pedido_id' => $pedido->id,
+                'producto_id' => $productoBloqueado->id,
+                'cantidad' => $cantidad,
                 // Conserva el precio de esta compra aunque después cambie el precio publicado.
-                'unit_price' => $precioUnitario,
+                'precio_unitario' => $precioUnitario,
                 'subtotal' => $subtotal,
             ]);
 
-            $productoBloqueado->quantity = round((float) $productoBloqueado->quantity - $cantidad, 2);
-            if ((float) $productoBloqueado->quantity <= 0) {
-                $productoBloqueado->status = 'agotado';
+            $productoBloqueado->cantidad = round((float) $productoBloqueado->cantidad - $cantidad, 2);
+            if ((float) $productoBloqueado->cantidad <= 0) {
+                $productoBloqueado->estado = 'agotado';
             }
             $productoBloqueado->save();
         });

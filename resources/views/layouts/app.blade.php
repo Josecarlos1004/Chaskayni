@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><title>@yield('title', 'Chaskayni') · Chaskayni</title><link rel="stylesheet" href="{{ asset('css/app.css') }}"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><titulo>@yield('titulo', 'Chaskayni') · Chaskayni</titulo><link rel="stylesheet" href="{{ asset('css/app.css') }}"></head>
 <body>
 <header class="encabezado-sitio">
     <a class="marca" href="{{ route('inicio') }}"><span class="sello-marca">Ch</span><span>chaskayni<small>mercado y apoyo comunitario</small></span></a>
@@ -12,8 +12,8 @@
     </nav>
 </header>
 <main>
-@if (session('success'))<div class="aviso aviso-exito" role="status">{{ session('success') }}</div>@endif
-@if ($errors->any())<div class="aviso aviso-error" role="alert"><strong>Revisa estos datos:</strong><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+@if (session('success'))<div class="aviso aviso-exito" rol="estado">{{ session('success') }}</div>@endif
+@if ($errors->any())<div class="aviso aviso-error" rol="alert"><strong>Revisa estos datos:</strong><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 @yield('content')
 </main>
 <footer class="pie-sitio"><a class="marca marca-pie" href="{{ route('inicio') }}"><span class="sello-marca">Ch</span><span>chaskayni<small>Conectando comunidad y cosecha</small></span></a><p>Proyecto académico · Cusco, Perú</p></footer>

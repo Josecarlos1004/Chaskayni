@@ -1,10 +1,10 @@
 @extends('layouts.app')
-@section('title', 'Crear cuenta')
+@section('titulo', 'Crear cuenta')
 @section('content')
 <section class="contenedor-acceso"><div class="lateral-acceso"><span class="sobrelinea">Súmate a la comunidad</span><h1>El primer paso para encontrarnos.</h1><p>Crea una cuenta para comprar o publicar cosechas en el mercado comunitario.</p><div class="simbolo-acceso">Ch</div></div><div class="tarjeta-acceso"><span class="sobrelinea">Registro</span><h2>Crear cuenta</h2><form method="post" action="{{ route('registro.guardar') }}">@csrf
 <label>Nombre completo<input name="name" value="{{ old('name') }}" autocomplete="name" maxlength="120" required></label><label>Correo electrónico<input type="email" name="email" value="{{ old('email') }}" autocomplete="email" required></label>
-<label>Quiero participar como<select name="role" required><option value="comprador" @selected(old('role', 'comprador') === 'comprador')>Comprador/a</option><option value="productor" @selected(old('role') === 'productor')>Productor/a</option></select></label>
-<label>Comunidad (opcional)<select name="community_id"><option value="">Selecciona tu comunidad</option>@foreach ($comunidades as $comunidad)<option value="{{ $comunidad->id }}" @selected((string) old('community_id') === (string) $comunidad->id)>{{ $comunidad->name }}</option>@endforeach</select></label>
+<label>Quiero participar como<select name="rol" required><option value="comprador" @selected(old('rol', 'comprador') === 'comprador')>Comprador/a</option><option value="productor" @selected(old('rol') === 'productor')>Productor/a</option></select></label>
+<label>Comunidad (opcional)<select name="comunidad_id"><option value="">Selecciona tu comunidad</option>@foreach ($comunidades as $comunidad)<option value="{{ $comunidad->id }}" @selected((string) old('comunidad_id') === (string) $comunidad->id)>{{ $comunidad->nombre }}</option>@endforeach</select></label>
 <label>Contraseña <small>(mínimo 10 caracteres)</small><input type="password" name="password" autocomplete="new-password" required></label><label>Repite la contraseña<input type="password" name="password_confirmation" autocomplete="new-password" required></label><button class="boton boton-ancho-completo" type="submit">Crear cuenta</button></form>
 <p class="pie-formulario">¿Ya tienes cuenta? <a href="{{ route('login') }}">Inicia sesión</a></p><p class="nota-privacidad">Tu información se usará para gestionar tu cuenta dentro del proyecto.</p></div></section>
 @endsection

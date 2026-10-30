@@ -7,17 +7,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Refugio extends Model
 {
-    protected $table = 'shelters';
+    protected $table = 'refugios';
 
-    protected $fillable = ['community_id', 'name', 'address', 'description', 'capacity', 'active'];
+    protected $fillable = ['comunidad_id', 'name', 'direccion', 'descripcion', 'capacidad', 'activo'];
 
     protected function casts(): array
     {
-        return ['capacity' => 'integer', 'active' => 'boolean'];
+        return ['capacidad' => 'integer', 'activo' => 'boolean'];
     }
 
     public function comunidad(): BelongsTo
     {
-        return $this->belongsTo(Comunidad::class, 'community_id');
+        return $this->belongsTo(Comunidad::class, 'comunidad_id');
     }
 }

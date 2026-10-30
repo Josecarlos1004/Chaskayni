@@ -19,7 +19,7 @@ class AccesoController extends Controller
 
     public function formularioRegistro(): View
     {
-        return view('auth.registro', ['comunidades' => Comunidad::orderBy('name')->get()]);
+        return view('auth.registro', ['comunidades' => Comunidad::orderBy('nombre')->get()]);
     }
 
     public function ingresar(Request $request): RedirectResponse
@@ -44,16 +44,16 @@ class AccesoController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:190', 'unique:users,email'],
             'password' => ['required', 'string', 'min:10', 'confirmed'],
-            'role' => ['required', 'in:productor,comprador'],
-            'community_id' => ['nullable', 'exists:communities,id'],
+            'rol' => ['required', 'in:productor,comprador'],
+            'comunidad_id' => ['nullable', 'exists:comunidades,id'],
         ]);
 
         $usuario = Usuario::create([
             'name' => $datos['name'],
             'email' => $datos['email'],
             'password' => Hash::make($datos['password']),
-            'role' => $datos['role'],
-            'community_id' => $datos['community_id'] ?? null,
+            'rol' => $datos['rol'],
+            'comunidad_id' => $datos['comunidad_id'] ?? null,
         ]);
 
         Auth::login($usuario);

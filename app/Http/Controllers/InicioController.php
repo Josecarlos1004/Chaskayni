@@ -12,13 +12,13 @@ class InicioController extends Controller
     {
         return view('inicio', [
             'productos' => Producto::with(['vendedor', 'comunidad'])
-                ->where('status', 'disponible')
-                ->where('quantity', '>', 0)
+                ->where('estado', 'disponible')
+                ->where('cantidad', '>', 0)
                 ->latest()
                 ->take(6)
                 ->get(),
             'alertas' => AlertaHelada::with('comunidad')
-                ->where('status', 'publicada')
+                ->where('estado', 'publicada')
                 ->latest()
                 ->take(3)
                 ->get(),

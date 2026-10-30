@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Pedido extends Model
 {
-    protected $table = 'orders';
+    protected $table = 'pedidos';
 
-    protected $fillable = ['buyer_id', 'status', 'total', 'notes'];
+    protected $fillable = ['comprador_id', 'estado', 'total', 'notas'];
 
     protected function casts(): array
     {
@@ -19,11 +19,11 @@ class Pedido extends Model
 
     public function comprador(): BelongsTo
     {
-        return $this->belongsTo(Usuario::class, 'buyer_id');
+        return $this->belongsTo(Usuario::class, 'comprador_id');
     }
 
     public function detalles(): HasMany
     {
-        return $this->hasMany(DetallePedido::class, 'order_id');
+        return $this->hasMany(DetallePedido::class, 'pedido_id');
     }
 }

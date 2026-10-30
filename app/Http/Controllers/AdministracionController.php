@@ -22,7 +22,7 @@ class AdministracionController extends Controller
         $this->verificarAdministrador();
 
         return view('administracion.comunidades', [
-            'comunidades' => Comunidad::withCount(['usuarios', 'productos'])->orderBy('name')->get(),
+            'comunidades' => Comunidad::withCount(['usuarios', 'productos'])->orderBy('nombre')->get(),
         ]);
     }
 
@@ -30,10 +30,10 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
         $datos = $request->validate([
-            'name' => ['required', 'string', 'max:120', 'unique:communities,name'],
-            'district' => ['nullable', 'string', 'max:120'],
-            'province' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:2000'],
+            'nombre' => ['required', 'string', 'max:120', 'unique:comunidades,nombre'],
+            'distrito' => ['nullable', 'string', 'max:120'],
+            'provincia' => ['required', 'string', 'max:120'],
+            'descripcion' => ['nullable', 'string', 'max:2000'],
         ]);
         Comunidad::create($datos);
 
@@ -44,24 +44,24 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
 
-        return view('administracion.crear-alerta', ['comunidades' => Comunidad::orderBy('name')->get()]);
+        return view('administracion.crear-alerta', ['comunidades' => Comunidad::orderBy('nombre')->get()]);
     }
 
     public function guardarAlerta(Request $request): RedirectResponse
     {
         $this->verificarAdministrador();
         $datos = $request->validate([
-            'title' => ['required', 'string', 'max:160'],
-            'message' => ['required', 'string', 'max:3000'],
-            'level' => ['required', 'in:informacion,precaucion,urgente'],
-            'community_id' => ['nullable', 'exists:communities,id'],
-            'starts_at' => ['nullable', 'date'],
-            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'titulo' => ['required', 'string', 'max:160'],
+            'mensaje' => ['required', 'string', 'max:3000'],
+            'nivel' => ['required', 'in:informacion,precaucion,urgente'],
+            'comunidad_id' => ['nullable', 'exists:comunidades,id'],
+            'fecha_inicio' => ['nullable', 'date'],
+            'fecha_fin' => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
         ]);
         AlertaHelada::create([
             ...$datos,
-            'created_by' => Auth::id(),
-            'status' => 'publicada',
+            'creado_por' => Auth::id(),
+            'estado' => 'publicada',
         ]);
 
         return redirect()->route('alertas.indice')->with('success', 'La alerta fue publicada por administración.');
@@ -79,7 +79,7 @@ class AdministracionController extends Controller
     public function revisarReporte(Request $request, ReporteRiesgo $reporteRiesgo): RedirectResponse
     {
         $this->verificarAdministrador();
-        $datos = $request->validate(['status' => ['required', 'in:revisado,descartado']]);
+        $datos = $request->validate(['estado' => ['required', 'in:revisado,descartado']]);
         $reporteRiesgo->update($datos);
 
         return back()->with('success', 'Se actualizó el estado del reporte.');

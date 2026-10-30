@@ -7,22 +7,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AlertaHelada extends Model
 {
-    protected $table = 'frost_alerts';
+    protected $table = 'alertas_heladas';
 
-    protected $fillable = ['created_by', 'community_id', 'title', 'message', 'level', 'starts_at', 'ends_at', 'status'];
+    protected $fillable = ['creado_por', 'comunidad_id', 'titulo', 'mensaje', 'nivel', 'fecha_inicio', 'fecha_fin', 'estado'];
 
     protected function casts(): array
     {
-        return ['starts_at' => 'datetime', 'ends_at' => 'datetime'];
+        return ['fecha_inicio' => 'datetime', 'fecha_fin' => 'datetime'];
     }
 
     public function autor(): BelongsTo
     {
-        return $this->belongsTo(Usuario::class, 'created_by');
+        return $this->belongsTo(Usuario::class, 'creado_por');
     }
 
     public function comunidad(): BelongsTo
     {
-        return $this->belongsTo(Comunidad::class, 'community_id');
+        return $this->belongsTo(Comunidad::class, 'comunidad_id');
     }
 }

@@ -18,21 +18,21 @@ class CestaSalvadaTest extends TestCase
             'name' => 'Productor de prueba',
             'email' => 'productor@example.test',
             'password' => 'test-password',
-            'role' => 'productor',
+            'rol' => 'productor',
         ]);
         $comprador = Usuario::create([
             'name' => 'Comprador de prueba',
             'email' => 'comprador@example.test',
             'password' => 'test-password',
-            'role' => 'comprador',
+            'rol' => 'comprador',
         ]);
 
         $this->actingAs($productor)->post(route('productos.guardar'), [
             'name' => 'Papa nativa de prueba',
-            'category' => 'Tubérculos',
-            'quantity' => 10,
-            'unit' => 'kg',
-            'unit_price' => 10,
+            'categoria' => 'Tubérculos',
+            'cantidad' => 10,
+            'unidad' => 'kg',
+            'precio_unitario' => 10,
             'cesta_salvada' => 1,
         ])->assertRedirect(route('mercado.indice'));
 
@@ -41,13 +41,13 @@ class CestaSalvadaTest extends TestCase
         $this->assertSame(7.0, $producto->precioUnitarioAplicado());
 
         $this->actingAs($comprador)->post(route('pedidos.guardar', $producto), [
-            'quantity' => 2,
+            'cantidad' => 2,
         ])->assertRedirect(route('pedidos.indice'));
 
-        $detalle = DetallePedido::where('product_id', $producto->id)->firstOrFail();
-        $this->assertSame(7.0, (float) $detalle->unit_price);
+        $detalle = DetallePedido::where('producto_id', $producto->id)->firstOrFail();
+        $this->assertSame(7.0, (float) $detalle->precio_unitario);
         $this->assertSame(14.0, (float) $detalle->subtotal);
-        $this->assertSame(8.0, (float) $producto->fresh()->quantity);
+        $this->assertSame(8.0, (float) $producto->fresh()->cantidad);
     }
 
     public function test_filtro_muestra_solo_cestas_salvadas(): void
@@ -56,26 +56,26 @@ class CestaSalvadaTest extends TestCase
             'name' => 'Productor de prueba',
             'email' => 'productor-filtro@example.test',
             'password' => 'test-password',
-            'role' => 'productor',
+            'rol' => 'productor',
         ]);
 
         Producto::create([
-            'user_id' => $productor->id,
+            'usuario_id' => $productor->id,
             'name' => 'Cesta de papa',
-            'quantity' => 5,
-            'unit' => 'kg',
-            'unit_price' => 10,
+            'cantidad' => 5,
+            'unidad' => 'kg',
+            'precio_unitario' => 10,
             'cesta_salvada' => true,
-            'status' => 'disponible',
+            'estado' => 'disponible',
         ]);
         Producto::create([
-            'user_id' => $productor->id,
+            'usuario_id' => $productor->id,
             'name' => 'Papa regular',
-            'quantity' => 5,
-            'unit' => 'kg',
-            'unit_price' => 10,
+            'cantidad' => 5,
+            'unidad' => 'kg',
+            'precio_unitario' => 10,
             'cesta_salvada' => false,
-            'status' => 'disponible',
+            'estado' => 'disponible',
         ]);
 
         $this->get(route('mercado.indice', ['cesta_salvada' => 1]))
