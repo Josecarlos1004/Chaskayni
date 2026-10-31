@@ -9,11 +9,11 @@ class Refugio extends Model
 {
     protected $table = 'refugios';
 
-    protected $fillable = ['comunidad_id', 'name', 'direccion', 'descripcion', 'capacidad', 'activo'];
+    protected $fillable = ['comunidad_id', 'nombre', 'direccion', 'descripcion', 'capacidad', 'activo', 'latitud', 'longitud'];
 
     protected function casts(): array
     {
-        return ['capacidad' => 'integer', 'activo' => 'boolean'];
+        return ['capacidad' => 'integer', 'activo' => 'boolean', 'latitud' => 'float', 'longitud' => 'float'];
     }
 
     public function comunidad(): BelongsTo

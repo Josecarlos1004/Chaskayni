@@ -3,12 +3,26 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><titulo>@yield('titulo', 'Chaskayni') · Chaskayni</titulo><link rel="stylesheet" href="{{ asset('css/app.css') }}"></head>
 <body>
 <header class="encabezado-sitio">
-    <a class="marca" href="{{ route('inicio') }}"><span class="sello-marca">Ch</span><span>chaskayni<small>mercado y apoyo comunitario</small></span></a>
+    <a class="marca" href="{{ route('inicio') }}"><span class="sello-marca">Ch</span>
+    <span>chaskayni<small>mercado y apoyo comunitario</small>
+    </span></a>
     <button class="boton-menu" type="button" aria-label="Abrir menú" aria-expanded="false" onclick="document.body.classList.toggle('navegacion-abierta'); this.setAttribute('aria-expanded', document.body.classList.contains('navegacion-abierta'))">☰</button>
     <nav class="enlaces-navegacion" aria-label="Navegación principal">
-        <a href="{{ route('mercado.indice') }}">Mercado</a><a href="{{ route('alertas.indice') }}">Alertas</a>
-        @auth<a href="{{ route('panel') }}">Mi panel</a><a href="{{ route('pedidos.indice') }}">Mis pedidos</a>@if (auth()->user()->esAdministrador())<a href="{{ route('administracion.comunidades.indice') }}">Administración</a>@endif<form class="formulario-en-linea" action="{{ route('logout') }}" method="post">@csrf<button class="boton-navegacion" type="submit">Salir</button></form>
-        @else<a href="{{ route('login') }}">Ingresar</a><a class="boton boton-pequeno" href="{{ route('register') }}">Crear cuenta</a>@endauth
+        <a href="{{ route('mercado.indice') }}">Mercado</a>
+        <a href="{{ route('alertas.indice') }}">Alertas</a>
+        <a href="{{ route('mapa.indice') }}">Mapa comunitario</a>
+        @auth
+            <a href="{{ route('panel') }}">Mi panel</a>
+            <a href="{{ route('pedidos.indice') }}">Mis pedidos</a>
+            @if (auth()->user()->esAdministrador())
+                <a href="{{ route('administracion.comunidades.indice') }}">Administración</a>
+                <a href="{{ route('administracion.refugios.indice') }}">Refugios</a>
+            @endif
+            <form class="formulario-en-linea" action="{{ route('logout') }}" method="post">@csrf<button class="boton-navegacion" type="submit">Salir</button></form>
+        @else
+            <a href="{{ route('login') }}">Ingresar</a>
+            <a class="boton boton-pequeno" href="{{ route('register') }}">Crear cuenta</a>
+        @endauth
     </nav>
 </header>
 <main>

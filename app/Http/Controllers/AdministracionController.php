@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AlertaHelada;
 use App\Models\Comunidad;
 use App\Models\ReporteRiesgo;
+use App\Models\Refugio;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -141,5 +142,34 @@ class AdministracionController extends Controller
         $reporteRiesgo->update($datos);
 
         return back()->with('success', 'Se actualizó el estado del reporte.');
+    }
+
+    public function listarRefugios(): View
+    {
+        $this->verificarAdministrador();
+
+        return view('administracion.refugios', [
+            'comunidades' => Comunidad::orderBy('nombre')->get(),
+            'refugios' => Refugio::with('comunidad')->latest()->get(),
+            'datosMapa' => ['refugios' => Refugio::where('activo', true)->whereNotNull('latitud')->whereNotNull('longitud')->get(['nombre', 'direccion', 'latitud', 'longitud'])],
+        ]);
+    }
+
+    public function guardarRefugio(Request $request): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $datos = $request->validate([
+            'nombre' => ['required', 'string', 'max:160'],
+            'direccion' => ['required', 'string', 'max:255'],
+            'descripcion' => ['nullable', 'string', 'max:2000'],
+            'capacidad' => ['required', 'integer', 'between:0,100000'],
+            'comunidad_id' => ['nullable', 'exists:comunidades,id'],
+            'latitud' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'numeric', 'between:-180,180'],
+        ]);
+
+        Refugio::create([...$datos, 'activo' => true]);
+
+        return back()->with('success', 'El refugio quedó registrado.');
     }
 }
