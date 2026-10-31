@@ -1,7 +1,15 @@
 @extends('layouts.app')
 @section('titulo', 'Mapa comunitario')
 @section('content')
-<section class="encabezado-pagina"><div><span class="sobrelinea">Prevención comunitaria</span><h1>Mapa de refugios y riesgos</h1><p>Consulta refugios activos y reportes que ya fueron revisados por administración.</p></div>@auth<a class="boton boton-contorno" href="{{ route('riesgos.crear') }}">Reportar una situación</a>@endauth</section>
+<section class="encabezado-pagina"><div>
+    <span class="sobrelinea">Prevención comunitaria</span>
+    <h1>Mapa de refugios y riesgos</h1>
+    <p>Consulta refugios activos y reportes que ya fueron revisados por administración.</p>
+</div>
+@auth
+<a class="boton boton-contorno" href="{{ route('riesgos.crear') }}">Reportar una situación</a>
+@endauth
+</section>
 <section class="seccion seccion-superior">
     <div id="mapa-comunitario" class="mapa-comunitario" role="region" aria-label="Mapa de refugios y reportes revisados"></div>
     <p id="estado-mapa" class="texto-atenuado" aria-live="polite"></p>
