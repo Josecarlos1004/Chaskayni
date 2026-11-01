@@ -29,7 +29,7 @@ class AccesoController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credenciales, $request->boolean('remember'))) {
+        if (! Auth::attempt($credenciales + ['activo' => true], $request->boolean('remember'))) {
             return back()->withErrors(['email' => 'El correo o la contraseña no son correctos.'])->onlyInput('email');
         }
 

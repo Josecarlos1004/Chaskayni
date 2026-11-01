@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\AlertaHelada;
 use App\Models\Comunidad;
 use App\Models\ReporteRiesgo;
+use App\Models\Pedido;
+use App\Models\Producto;
 use App\Models\Refugio;
+use App\Models\Usuario;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AdministracionController extends Controller
@@ -16,6 +20,68 @@ class AdministracionController extends Controller
     private function verificarAdministrador(): void
     {
         abort_unless(Auth::user()->esAdministrador(), 403, 'Esta sección es solo para administración.');
+    }
+
+    /** Resume los indicadores principales y enlaza las herramientas administrativas. */
+    public function panel(): View
+    {
+        $this->verificarAdministrador();
+
+        return view('administracion.panel', [
+            'cantidadUsuarios' => Usuario::count(),
+            'cantidadProductos' => Producto::where('estado', 'disponible')->count(),
+            'cantidadPedidosPendientes' => Pedido::where('estado', 'pendiente')->count(),
+            'cantidadReportesPendientes' => ReporteRiesgo::where('estado', 'pendiente')->count(),
+            'cantidadAlertasActivas' => AlertaHelada::activas()->count(),
+            'cantidadRefugiosActivos' => Refugio::where('activo', true)->count(),
+        ]);
+    }
+
+    /** Lista cuentas para que administración pueda revisar roles y accesos. */
+    public function listarUsuarios(): View
+    {
+        $this->verificarAdministrador();
+
+        return view('administracion.usuarios', [
+            'usuarios' => Usuario::with('comunidad')->orderBy('name')->paginate(15),
+        ]);
+    }
+
+    /** Actualiza rol y acceso sin permitir que se desactive al último administrador. */
+    public function actualizarUsuario(Request $request, Usuario $usuario): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $datos = $request->validate([
+            'rol' => ['required', 'in:productor,comprador,administrador'],
+            'activo' => ['required', 'boolean'],
+        ]);
+
+        $activo = (bool) $datos['activo'];
+        if ($usuario->is(Auth::user()) && ($datos['rol'] !== 'administrador' || ! $activo)) {
+            return back()->withErrors(['cuenta' => 'No puedes quitarte el rol de administrador ni desactivar tu propia cuenta.']);
+        }
+
+        return DB::transaction(function () use ($usuario, $datos, $activo): RedirectResponse {
+            // Serializa cambios de administración para proteger la última cuenta activa.
+            $administradoresActivos = Usuario::where('rol', 'administrador')
+                ->where('activo', true)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get(['id']);
+
+            $seRetiraUltimoAdministrador = $usuario->rol === 'administrador'
+                && $usuario->activo
+                && ($datos['rol'] !== 'administrador' || ! $activo)
+                && $administradoresActivos->count() <= 1;
+
+            if ($seRetiraUltimoAdministrador) {
+                return back()->withErrors(['cuenta' => 'Debe quedar al menos una cuenta administradora activa.']);
+            }
+
+            $usuario->update(['rol' => $datos['rol'], 'activo' => $activo]);
+
+            return back()->with('success', 'Se actualizaron los permisos de la cuenta.');
+        });
     }
 
     public function listarComunidades(): View

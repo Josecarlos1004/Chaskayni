@@ -10,6 +10,7 @@ use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\ReportesRiesgoController;
+use App\Http\Middleware\VerificarCuentaActiva;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [InicioController::class, 'index'])->name('inicio');
@@ -29,7 +30,7 @@ Route::middleware('guest')->group(function () {
         ->name('registro.guardar');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
     Route::post('/salir', [AccesoController::class, 'salir'])->name('logout');
     Route::get('/panel', [PanelController::class, 'index'])->name('panel');
     Route::get('/pedidos', [PedidosController::class, 'index'])->name('pedidos.indice');
@@ -43,6 +44,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/reportes', [ReportesRiesgoController::class, 'store'])->name('riesgos.guardar');
 
     Route::prefix('administracion')->name('administracion.')->group(function () {
+        Route::get('/', [AdministracionController::class, 'panel'])->name('panel');
+        Route::get('/usuarios', [AdministracionController::class, 'listarUsuarios'])->name('usuarios.indice');
+        Route::patch('/usuarios/{usuario}', [AdministracionController::class, 'actualizarUsuario'])->name('usuarios.actualizar');
         Route::get('/comunidades', [AdministracionController::class, 'listarComunidades'])->name('comunidades.indice');
         Route::post('/comunidades', [AdministracionController::class, 'guardarComunidad'])->name('comunidades.guardar');
         Route::get('/alertas/crear', [AdministracionController::class, 'crearAlerta'])->name('alertas.crear');

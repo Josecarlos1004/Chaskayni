@@ -19,8 +19,8 @@
             <a href="{{ route('panel') }}">Mi panel</a>
             <a href="{{ route('pedidos.indice') }}">Mis pedidos</a>
             @if (auth()->user()->esAdministrador())
-                <a href="{{ route('administracion.comunidades.indice') }}">Administración</a>
-                <a href="{{ route('administracion.refugios.indice') }}">Refugios</a>
+                <a href="{{ route('administracion.panel') }}">Administración</a>
+                <a href="{{ route('administracion.usuarios.indice') }}">Cuentas</a>
             @endif
             <form class="formulario-en-linea" action="{{ route('logout') }}" method="post">@csrf<button class="boton-navegacion" type="submit">Salir</button></form>
         @else

@@ -10,7 +10,7 @@ class CrearAdministrador extends Command
 {
     protected $signature = 'app:crear-administrador';
 
-    protected $descripcion = 'Crea de forma interactiva la primera cuenta administradora';
+    protected $description = 'Crea de forma interactiva la primera cuenta administradora';
 
     public function handle(): int
     {
@@ -43,6 +43,7 @@ class CrearAdministrador extends Command
             'email' => $correo,
             'password' => Hash::make($contrasena),
             'rol' => 'administrador',
+            'activo' => true,
         ]);
 
         $this->info('Cuenta administradora creada. Inicia sesión desde la página de ingreso.');
