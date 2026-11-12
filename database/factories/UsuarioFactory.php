@@ -28,6 +28,7 @@ class UsuarioFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'activo' => true,
             'password' => static::$contrasena ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];

@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AccesoController extends Controller
@@ -19,7 +20,7 @@ class AccesoController extends Controller
 
     public function formularioRegistro(): View
     {
-        return view('auth.registro', ['comunidades' => Comunidad::orderBy('nombre')->get()]);
+        return view('auth.registro', ['comunidades' => Comunidad::where('activo', true)->orderBy('nombre')->get()]);
     }
 
     public function ingresar(Request $request): RedirectResponse
@@ -45,7 +46,7 @@ class AccesoController extends Controller
             'email' => ['required', 'email', 'max:190', 'unique:users,email'],
             'password' => ['required', 'string', 'min:10', 'confirmed'],
             'rol' => ['required', 'in:productor,comprador'],
-            'comunidad_id' => ['nullable', 'exists:comunidades,id'],
+            'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where('activo', true)],
         ]);
 
         $usuario = Usuario::create([

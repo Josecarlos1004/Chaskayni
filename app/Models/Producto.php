@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Producto extends Model
 {
@@ -27,6 +28,22 @@ class Producto extends Model
         $precio = (float) $this->precio_unitario;
 
         return round($this->cesta_salvada ? $precio * 0.70 : $precio, 2);
+    }
+
+    /** Devuelve la URL pública de la foto local o conserva una URL externa anterior. */
+    public function urlImagen(): ?string
+    {
+        if (! $this->imagen_url) {
+            return null;
+        }
+
+        if (filter_var($this->imagen_url, FILTER_VALIDATE_URL)) {
+            return $this->imagen_url;
+        }
+
+        return str_starts_with($this->imagen_url, 'productos/')
+            ? Storage::disk('public')->url($this->imagen_url)
+            : null;
     }
 
     public function vendedor(): BelongsTo

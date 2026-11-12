@@ -4,8 +4,8 @@ use App\Http\Controllers\AccesoController;
 use App\Http\Controllers\AdministracionController;
 use App\Http\Controllers\AlertasHeladasController;
 use App\Http\Controllers\InicioController;
-use App\Http\Controllers\MercadoController;
 use App\Http\Controllers\MapaComunitarioController;
+use App\Http\Controllers\MercadoController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductosController;
@@ -34,6 +34,8 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
     Route::post('/salir', [AccesoController::class, 'salir'])->name('logout');
     Route::get('/panel', [PanelController::class, 'index'])->name('panel');
     Route::get('/pedidos', [PedidosController::class, 'index'])->name('pedidos.indice');
+    Route::get('/pedidos-recibidos', [PedidosController::class, 'recibidos'])->name('pedidos.recibidos');
+    Route::patch('/pedidos/{pedido}/estado', [PedidosController::class, 'actualizarEstado'])->name('pedidos.estado');
     Route::post('/productos/{producto}/pedir', [PedidosController::class, 'store'])->name('pedidos.guardar');
     Route::get('/productos/crear', [ProductosController::class, 'create'])->name('productos.crear');
     Route::post('/productos', [ProductosController::class, 'store'])->name('productos.guardar');
@@ -49,6 +51,8 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
         Route::patch('/usuarios/{usuario}', [AdministracionController::class, 'actualizarUsuario'])->name('usuarios.actualizar');
         Route::get('/comunidades', [AdministracionController::class, 'listarComunidades'])->name('comunidades.indice');
         Route::post('/comunidades', [AdministracionController::class, 'guardarComunidad'])->name('comunidades.guardar');
+        Route::put('/comunidades/{comunidad}', [AdministracionController::class, 'actualizarComunidad'])->name('comunidades.actualizar');
+        Route::delete('/comunidades/{comunidad}', [AdministracionController::class, 'eliminarComunidad'])->name('comunidades.eliminar');
         Route::get('/alertas/crear', [AdministracionController::class, 'crearAlerta'])->name('alertas.crear');
         Route::post('/alertas', [AdministracionController::class, 'guardarAlerta'])->name('alertas.guardar');
         Route::post('/alertas/temperatura', [AdministracionController::class, 'evaluarTemperatura'])->name('alertas.temperatura');
@@ -57,5 +61,7 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
         Route::patch('/reportes/{reporteRiesgo}', [AdministracionController::class, 'revisarReporte'])->name('reportes.revisar');
         Route::get('/refugios', [AdministracionController::class, 'listarRefugios'])->name('refugios.indice');
         Route::post('/refugios', [AdministracionController::class, 'guardarRefugio'])->name('refugios.guardar');
+        Route::put('/refugios/{refugio}', [AdministracionController::class, 'actualizarRefugio'])->name('refugios.actualizar');
+        Route::delete('/refugios/{refugio}', [AdministracionController::class, 'eliminarRefugio'])->name('refugios.eliminar');
     });
 });

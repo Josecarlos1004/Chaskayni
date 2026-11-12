@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ReporteRiesgo;
-use App\Models\Refugio;
 use App\Models\Comunidad;
+use App\Models\Refugio;
+use App\Models\ReporteRiesgo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ReportesRiesgoController extends Controller
@@ -16,7 +17,7 @@ class ReportesRiesgoController extends Controller
     {
         return view('riesgos.crear', [
             'refugios' => Refugio::where('activo', true)->whereNotNull('latitud')->whereNotNull('longitud')->get(['id', 'nombre', 'latitud', 'longitud']),
-            'comunidades' => Comunidad::orderBy('nombre')->get(['id', 'nombre']),
+            'comunidades' => Comunidad::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
             'datosMapa' => ['refugios' => Refugio::where('activo', true)->whereNotNull('latitud')->whereNotNull('longitud')->get(['nombre', 'direccion', 'latitud', 'longitud'])],
         ]);
     }
@@ -28,13 +29,13 @@ class ReportesRiesgoController extends Controller
             'descripcion' => ['required', 'string', 'max:3000'],
             'latitud' => ['nullable', 'numeric', 'between:-90,90'],
             'longitud' => ['nullable', 'numeric', 'between:-180,180'],
-            'comunidad_id' => ['nullable', 'exists:comunidades,id'],
+            'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where('activo', true)],
         ]);
 
         ReporteRiesgo::create([
             ...$datos,
             'reportante_id' => Auth::id(),
-            'comunidad_id' => $datos['comunidad_id'] ?? Auth::user()->comunidad_id,
+            'comunidad_id' => $datos['comunidad_id'] ?? (Auth::user()->comunidad?->activo ? Auth::user()->comunidad_id : null),
         ]);
 
         return redirect()->route('panel')->with('success', 'Gracias. Tu reporte quedó pendiente de revisión.');

@@ -19,12 +19,14 @@ class CestaSalvadaTest extends TestCase
             'email' => 'productor@example.test',
             'password' => 'test-password',
             'rol' => 'productor',
+            'activo' => true,
         ]);
         $comprador = Usuario::create([
             'name' => 'Comprador de prueba',
             'email' => 'comprador@example.test',
             'password' => 'test-password',
             'rol' => 'comprador',
+            'activo' => true,
         ]);
 
         $this->actingAs($productor)->post(route('productos.guardar'), [
@@ -57,6 +59,7 @@ class CestaSalvadaTest extends TestCase
             'email' => 'productor-filtro@example.test',
             'password' => 'test-password',
             'rol' => 'productor',
+            'activo' => true,
         ]);
 
         Producto::create([

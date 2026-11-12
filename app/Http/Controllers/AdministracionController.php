@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\AlertaHelada;
 use App\Models\Comunidad;
-use App\Models\ReporteRiesgo;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Refugio;
+use App\Models\ReporteRiesgo;
 use App\Models\Usuario;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AdministracionController extends Controller
@@ -109,12 +110,38 @@ class AdministracionController extends Controller
         return back()->with('success', 'La comunidad quedó registrada.');
     }
 
+    /** Edita datos de una comunidad y permite suspender nuevas asociaciones. */
+    public function actualizarComunidad(Request $request, Comunidad $comunidad): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $datos = $request->validate([
+            'nombre' => ['required', 'string', 'max:120', Rule::unique('comunidades', 'nombre')->ignore($comunidad->id)],
+            'distrito' => ['nullable', 'string', 'max:120'],
+            'provincia' => ['required', 'string', 'max:120'],
+            'altitud_msnm' => ['nullable', 'integer', 'between:0,8000'],
+            'descripcion' => ['nullable', 'string', 'max:2000'],
+            'activo' => ['required', 'boolean'],
+        ]);
+        $comunidad->update([...$datos, 'activo' => (bool) $datos['activo']]);
+
+        return back()->with('success', 'Se actualizaron los datos de la comunidad.');
+    }
+
+    /** Elimina la comunidad; conserva las personas y publicaciones sin esa asociación. */
+    public function eliminarComunidad(Comunidad $comunidad): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $comunidad->delete();
+
+        return back()->with('success', 'Se eliminó la comunidad. Los registros relacionados se conservaron sin comunidad asociada.');
+    }
+
     public function crearAlerta(): View
     {
         $this->verificarAdministrador();
 
         return view('administracion.crear-alerta', [
-            'comunidades' => Comunidad::orderBy('nombre')->get(),
+            'comunidades' => Comunidad::where('activo', true)->orderBy('nombre')->get(),
         ]);
     }
 
@@ -125,7 +152,7 @@ class AdministracionController extends Controller
             'titulo' => ['required', 'string', 'max:160'],
             'mensaje' => ['required', 'string', 'max:3000'],
             'nivel' => ['required', 'in:informacion,precaucion,urgente'],
-            'comunidad_id' => ['nullable', 'exists:comunidades,id'],
+            'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where('activo', true)],
             'fecha_inicio' => ['nullable', 'date'],
             'fecha_fin' => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
         ]);
@@ -142,7 +169,7 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
         $datos = $request->validate([
-            'comunidad_id' => ['required', 'exists:comunidades,id'],
+            'comunidad_id' => ['required', Rule::exists('comunidades', 'id')->where('activo', true)],
             'temperatura_c' => ['required', 'numeric', 'between:-80,60'],
         ]);
         $temperatura = round((float) $datos['temperatura_c'], 2);
@@ -215,10 +242,43 @@ class AdministracionController extends Controller
         $this->verificarAdministrador();
 
         return view('administracion.refugios', [
-            'comunidades' => Comunidad::orderBy('nombre')->get(),
+            'comunidades' => Comunidad::where('activo', true)->orderBy('nombre')->get(),
+            'comunidadesTodas' => Comunidad::orderBy('nombre')->get(),
             'refugios' => Refugio::with('comunidad')->latest()->get(),
             'datosMapa' => ['refugios' => Refugio::where('activo', true)->whereNotNull('latitud')->whereNotNull('longitud')->get(['nombre', 'direccion', 'latitud', 'longitud'])],
         ]);
+    }
+
+    /** Actualiza un refugio y controla si sigue publicado en el mapa. */
+    public function actualizarRefugio(Request $request, Refugio $refugio): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $reglaComunidad = Rule::exists('comunidades', 'id');
+        if ((string) $request->input('comunidad_id') !== (string) $refugio->comunidad_id) {
+            $reglaComunidad->where('activo', true);
+        }
+        $datos = $request->validate([
+            'nombre' => ['required', 'string', 'max:160'],
+            'direccion' => ['required', 'string', 'max:255'],
+            'descripcion' => ['nullable', 'string', 'max:2000'],
+            'capacidad' => ['required', 'integer', 'between:0,100000'],
+            'comunidad_id' => ['nullable', $reglaComunidad],
+            'latitud' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'numeric', 'between:-180,180'],
+            'activo' => ['required', 'boolean'],
+        ]);
+        $refugio->update([...$datos, 'activo' => (bool) $datos['activo']]);
+
+        return back()->with('success', 'Se actualizaron los datos del refugio.');
+    }
+
+    /** Elimina el refugio del mapa y del registro administrativo. */
+    public function eliminarRefugio(Refugio $refugio): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $refugio->delete();
+
+        return back()->with('success', 'Se eliminó el refugio.');
     }
 
     public function guardarRefugio(Request $request): RedirectResponse
@@ -229,7 +289,7 @@ class AdministracionController extends Controller
             'direccion' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string', 'max:2000'],
             'capacidad' => ['required', 'integer', 'between:0,100000'],
-            'comunidad_id' => ['nullable', 'exists:comunidades,id'],
+            'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where('activo', true)],
             'latitud' => ['nullable', 'numeric', 'between:-90,90'],
             'longitud' => ['nullable', 'numeric', 'between:-180,180'],
         ]);

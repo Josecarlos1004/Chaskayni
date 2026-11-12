@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
+    /** Corrige el estado predeterminado y normaliza solo reportes pendientes mal guardados. */
     public function up(): void
     {
         DB::statement("ALTER TABLE reportes_riesgo ALTER COLUMN estado SET DEFAULT 'pendiente'");
@@ -20,6 +21,6 @@ return new class extends Migration
 
         DB::table('reportes_riesgo')
             ->where('estado', 'pendiente')
-            ->update(['estado' => "'pendiente'"]);
+            ->update(['estado' => "'recepcionado'"]);
     }
 };

@@ -18,6 +18,7 @@
         @auth
             <a href="{{ route('panel') }}">Mi panel</a>
             <a href="{{ route('pedidos.indice') }}">Mis pedidos</a>
+            @if (auth()->user()->esProductor())<a href="{{ route('pedidos.recibidos') }}">Pedidos recibidos</a>@endif
             @if (auth()->user()->esAdministrador())
                 <a href="{{ route('administracion.panel') }}">Administración</a>
                 <a href="{{ route('administracion.usuarios.indice') }}">Cuentas</a>

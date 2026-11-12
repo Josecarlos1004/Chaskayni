@@ -1,6 +1,6 @@
 <article class="tarjeta-producto">
 <div class="imagen-producto">
-@if ($producto->imagen_url)<img src="{{ $producto->imagen_url }}" alt="{{ $producto->nombre }}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.hidden=false"><div class="imagen-reemplazo" hidden>🌱<span>Producto local</span></div>
+@if ($producto->urlImagen())<img src="{{ $producto->urlImagen() }}" alt="{{ $producto->nombre }}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.hidden=false"><div class="imagen-reemplazo" hidden>🌱<span>Producto local</span></div>
 @else<div class="imagen-reemplazo">🌱<span>Producto local</span></div>@endif
 <span class="etiqueta">{{ $producto->categoria ?: 'Cosecha local' }}</span>@if ($producto->cesta_salvada)<span class="insignia-cesta-salvada">Cesta Salvadas · 30% menos</span>@endif</div>
 <div class="contenido-producto"><div class="datos-producto">{{ $producto->comunidad?->nombre ?: 'Comunidad de Cusco' }} · {{ $producto->vendedor->name }}</div><h3>{{ $producto->nombre }}</h3><p class="descripcion-producto">{{ $producto->descripcion ?: 'Producto publicado directamente por un productor de la comunidad.' }}</p>

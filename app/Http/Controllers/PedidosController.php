@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PedidosController extends Controller
@@ -21,6 +22,56 @@ class PedidosController extends Controller
                 ->latest()
                 ->paginate(10),
         ]);
+    }
+
+    /** Muestra las solicitudes de compra dirigidas a las publicaciones del productor. */
+    public function recibidos(): View
+    {
+        $usuario = Auth::user();
+        abort_unless($usuario->esProductor(), 403, 'Solo productores y administración pueden ver esta sección.');
+        $consulta = Pedido::with(['comprador', 'detalles.producto'])->latest();
+        if (! $usuario->esAdministrador()) {
+            $consulta->whereHas('detalles.producto', fn ($productos) => $productos->where('usuario_id', $usuario->id));
+        }
+
+        return view('pedidos.recibidos', ['pedidos' => $consulta->paginate(15)]);
+    }
+
+    /** Valida el flujo, evita cambios ajenos y devuelve existencias al rechazar. */
+    public function actualizarEstado(Request $request, Pedido $pedido): RedirectResponse
+    {
+        $usuario = Auth::user();
+        abort_unless($usuario->esProductor(), 403, 'Solo productores y administración pueden actualizar pedidos.');
+        $datos = $request->validate(['estado' => ['required', 'in:aceptado,rechazado,completado']]);
+        DB::transaction(function () use ($pedido, $usuario, $datos): void {
+            $pedidoBloqueado = Pedido::query()->lockForUpdate()->findOrFail($pedido->id);
+            $detalles = DetallePedido::where('pedido_id', $pedidoBloqueado->id)->orderBy('id')->lockForUpdate()->get();
+            abort_if($detalles->isEmpty(), 422, 'El pedido no tiene productos asociados.');
+            $productos = [];
+            foreach ($detalles as $detalle) {
+                $producto = Producto::query()->lockForUpdate()->findOrFail($detalle->producto_id);
+                abort_unless($usuario->esAdministrador() || (int) $producto->usuario_id === (int) $usuario->id, 403, 'No puedes modificar un pedido ajeno.');
+                $productos[] = [$detalle, $producto];
+            }
+            $estadoNuevo = $datos['estado'];
+            $transicion = ($pedidoBloqueado->estado === 'pendiente' && in_array($estadoNuevo, ['aceptado', 'rechazado'], true))
+                || ($pedidoBloqueado->estado === 'aceptado' && $estadoNuevo === 'completado');
+            if (! $transicion) {
+                throw ValidationException::withMessages(['estado' => 'Ese cambio no es válido para el estado actual del pedido.']);
+            }
+            if ($estadoNuevo === 'rechazado') {
+                foreach ($productos as [$detalle, $producto]) {
+                    $producto->cantidad = round((float) $producto->cantidad + (float) $detalle->cantidad, 2);
+                    if ($producto->estado === 'agotado' && (float) $producto->cantidad > 0) {
+                        $producto->estado = 'disponible';
+                    }
+                    $producto->save();
+                }
+            }
+            $pedidoBloqueado->update(['estado' => $estadoNuevo]);
+        });
+
+        return redirect()->route('pedidos.recibidos')->with('success', 'Se actualizó el pedido.');
     }
 
     public function store(Request $request, Producto $producto): RedirectResponse
