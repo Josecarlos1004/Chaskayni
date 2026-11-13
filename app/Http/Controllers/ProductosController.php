@@ -95,6 +95,18 @@ class ProductosController extends Controller
     {
         $this->verificarPropietario($producto);
 
+        if (Auth::user()->esAdministrador()) {
+            if ($producto->detallesPedido()->exists()) {
+                return back()->withErrors(['producto' => 'No se puede eliminar esta publicación porque forma parte de pedidos. Ocúltala para conservar el historial.']);
+            }
+
+            $imagen = $producto->imagen_url;
+            $producto->delete();
+            $this->eliminarImagenAlmacenada($imagen);
+
+            return back()->with('success', 'Se eliminó la publicación.');
+        }
+
         // Los productos con pedidos se ocultan para conservar el historial asociado.
         if ($producto->detallesPedido()->exists()) {
             $producto->update(['estado' => 'oculto']);

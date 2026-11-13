@@ -47,8 +47,11 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
 
     Route::prefix('administracion')->name('administracion.')->group(function () {
         Route::get('/', [AdministracionController::class, 'panel'])->name('panel');
+        Route::get('/productos', [AdministracionController::class, 'listarProductos'])->name('productos.indice');
+        Route::get('/alertas', [AdministracionController::class, 'listarAlertas'])->name('alertas.indice');
         Route::get('/usuarios', [AdministracionController::class, 'listarUsuarios'])->name('usuarios.indice');
         Route::patch('/usuarios/{usuario}', [AdministracionController::class, 'actualizarUsuario'])->name('usuarios.actualizar');
+        Route::delete('/usuarios/{usuario}', [AdministracionController::class, 'eliminarUsuario'])->name('usuarios.eliminar');
         Route::get('/comunidades', [AdministracionController::class, 'listarComunidades'])->name('comunidades.indice');
         Route::post('/comunidades', [AdministracionController::class, 'guardarComunidad'])->name('comunidades.guardar');
         Route::put('/comunidades/{comunidad}', [AdministracionController::class, 'actualizarComunidad'])->name('comunidades.actualizar');
@@ -57,8 +60,11 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
         Route::post('/alertas', [AdministracionController::class, 'guardarAlerta'])->name('alertas.guardar');
         Route::post('/alertas/temperatura', [AdministracionController::class, 'evaluarTemperatura'])->name('alertas.temperatura');
         Route::patch('/alertas/{alertaHelada}/cerrar', [AdministracionController::class, 'cerrarAlerta'])->name('alertas.cerrar');
+        Route::delete('/alertas/{alertaHelada}', [AdministracionController::class, 'eliminarAlerta'])->name('alertas.eliminar');
         Route::get('/reportes', [AdministracionController::class, 'listarReportes'])->name('reportes.indice');
         Route::patch('/reportes/{reporteRiesgo}', [AdministracionController::class, 'revisarReporte'])->name('reportes.revisar');
+        Route::delete('/reportes/{reporteRiesgo}', [AdministracionController::class, 'eliminarReporte'])->name('reportes.eliminar');
+        Route::delete('/pedidos/{pedido}', [AdministracionController::class, 'eliminarPedido'])->name('pedidos.eliminar');
         Route::get('/refugios', [AdministracionController::class, 'listarRefugios'])->name('refugios.indice');
         Route::post('/refugios', [AdministracionController::class, 'guardarRefugio'])->name('refugios.guardar');
         Route::put('/refugios/{refugio}', [AdministracionController::class, 'actualizarRefugio'])->name('refugios.actualizar');

@@ -48,6 +48,26 @@ class AdministracionController extends Controller
         ]);
     }
 
+    /** Muestra todas las publicaciones, incluidas las ocultas, para administración. */
+    public function listarProductos(): View
+    {
+        $this->verificarAdministrador();
+
+        return view('administracion.productos', [
+            'productos' => Producto::with(['vendedor', 'comunidad'])->latest()->paginate(12),
+        ]);
+    }
+
+    /** Muestra todas las alertas, incluso las que ya fueron cerradas. */
+    public function listarAlertas(): View
+    {
+        $this->verificarAdministrador();
+
+        return view('administracion.alertas', [
+            'alertas' => AlertaHelada::with(['comunidad', 'autor'])->latest()->paginate(15),
+        ]);
+    }
+
     /** Actualiza rol y acceso sin permitir que se desactive al último administrador. */
     public function actualizarUsuario(Request $request, Usuario $usuario): RedirectResponse
     {
@@ -83,6 +103,34 @@ class AdministracionController extends Controller
 
             return back()->with('success', 'Se actualizaron los permisos de la cuenta.');
         });
+    }
+
+    /** Elimina una cuenta solo si no tiene información vinculada que dependa de ella. */
+    public function eliminarUsuario(Usuario $usuario): RedirectResponse
+    {
+        $this->verificarAdministrador();
+
+        if ($usuario->is(Auth::user())) {
+            return back()->withErrors(['cuenta' => 'No puedes eliminar la cuenta con la que tienes abierta esta sesión.']);
+        }
+
+        $administradoresActivos = Usuario::where('rol', 'administrador')->where('activo', true)->count();
+        if ($usuario->rol === 'administrador' && $usuario->activo && $administradoresActivos <= 1) {
+            return back()->withErrors(['cuenta' => 'No se puede eliminar la última cuenta administradora activa.']);
+        }
+
+        $tieneRegistros = $usuario->productos()->exists()
+            || $usuario->pedidos()->exists()
+            || ReporteRiesgo::where('reportante_id', $usuario->id)->exists()
+            || AlertaHelada::where('creado_por', $usuario->id)->exists();
+
+        if ($tieneRegistros) {
+            return back()->withErrors(['cuenta' => 'Esta cuenta tiene publicaciones, pedidos o aportes vinculados. Desactívala para conservar el historial.']);
+        }
+
+        $usuario->delete();
+
+        return back()->with('success', 'Se eliminó la cuenta.');
     }
 
     public function listarComunidades(): View
@@ -219,6 +267,15 @@ class AdministracionController extends Controller
         return back()->with('success', 'La alerta se cerró.');
     }
 
+    /** Elimina una alerta individual publicada o cerrada por administración. */
+    public function eliminarAlerta(AlertaHelada $alertaHelada): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $alertaHelada->delete();
+
+        return back()->with('success', 'Se eliminó la alerta.');
+    }
+
     public function listarReportes(): View
     {
         $this->verificarAdministrador();
@@ -235,6 +292,43 @@ class AdministracionController extends Controller
         $reporteRiesgo->update($datos);
 
         return back()->with('success', 'Se actualizó el estado del reporte.');
+    }
+
+    /** Elimina un reporte individual después de que administración confirma la acción. */
+    public function eliminarReporte(ReporteRiesgo $reporteRiesgo): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $reporteRiesgo->delete();
+
+        return back()->with('success', 'Se eliminó el reporte comunitario.');
+    }
+
+    /** Cancela y elimina un pedido; devuelve existencias si seguía pendiente o aceptado. */
+    public function eliminarPedido(Pedido $pedido): RedirectResponse
+    {
+        $this->verificarAdministrador();
+
+        DB::transaction(function () use ($pedido): void {
+            $pedidoBloqueado = Pedido::query()->lockForUpdate()->findOrFail($pedido->id);
+            $detalles = $pedidoBloqueado->detalles()->orderBy('id')->lockForUpdate()->get();
+
+            if (in_array($pedidoBloqueado->estado, ['pendiente', 'aceptado'], true)) {
+                foreach ($detalles as $detalle) {
+                    $producto = Producto::query()->lockForUpdate()->find($detalle->producto_id);
+                    if ($producto) {
+                        $producto->cantidad = round((float) $producto->cantidad + (float) $detalle->cantidad, 2);
+                        if ($producto->estado === 'agotado' && (float) $producto->cantidad > 0) {
+                            $producto->estado = 'disponible';
+                        }
+                        $producto->save();
+                    }
+                }
+            }
+
+            $pedidoBloqueado->delete();
+        });
+
+        return back()->with('success', 'Se eliminó el pedido y se ajustaron las existencias cuando correspondía.');
     }
 
     public function listarRefugios(): View

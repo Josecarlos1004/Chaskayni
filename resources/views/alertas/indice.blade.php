@@ -36,6 +36,11 @@
                                 @method('patch')
                                 <button class="boton boton-sutil boton-pequeno" type="submit">Cerrar alerta</button>
                             </form>
+                            <form method="post" action="{{ route('administracion.alertas.eliminar', $alerta) }}" class="acciones-tarjeta" onsubmit="return confirm('¿Eliminar definitivamente esta alerta?')">
+                                @csrf
+                                @method('delete')
+                                <button class="boton boton-contorno boton-pequeno" type="submit">Eliminar alerta</button>
+                            </form>
                         @endif
                     @endauth
                 </article>

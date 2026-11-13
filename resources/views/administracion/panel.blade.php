@@ -17,6 +17,10 @@
     <div class="cuadricula-panel">
         <article class="panel"><span class="sobrelinea">Gestión comunitaria</span><h2>Herramientas de administración</h2>
             <div class="acciones-tarjeta">
+                <a class="boton boton-contorno" href="{{ route('administracion.usuarios.indice') }}">Cuentas</a>
+                <a class="boton boton-contorno" href="{{ route('administracion.productos.indice') }}">Publicaciones</a>
+                <a class="boton boton-contorno" href="{{ route('pedidos.recibidos') }}">Pedidos</a>
+                <a class="boton boton-contorno" href="{{ route('administracion.alertas.indice') }}">Alertas</a>
                 <a class="boton boton-contorno" href="{{ route('administracion.comunidades.indice') }}">Comunidades</a>
                 <a class="boton boton-contorno" href="{{ route('administracion.alertas.crear') }}">Publicar alerta</a>
                 <a class="boton boton-contorno" href="{{ route('administracion.reportes.indice') }}">Revisar reportes</a>

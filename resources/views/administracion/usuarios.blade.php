@@ -19,6 +19,12 @@
                     <label class="fila-casillas"><input type="hidden" name="activo" value="0"><input type="checkbox" name="activo" value="1" @checked($usuario->activo)> Cuenta activa</label>
                     <button class="boton boton-pequeno" type="submit">Guardar cambios</button>
                 </form>
+                @if (! $usuario->is(auth()->user()))
+                    <form method="post" action="{{ route('administracion.usuarios.eliminar', $usuario) }}" onsubmit="return confirm('¿Eliminar esta cuenta? Si tiene registros asociados, el sistema la conservará para proteger el historial.')">
+                        @csrf @method('delete')
+                        <button class="boton boton-contorno boton-pequeno" type="submit">Eliminar cuenta</button>
+                    </form>
+                @endif
             </article>
         @empty
             <div class="estado-vacio"><span>◎</span><h3>No hay cuentas registradas</h3><p>Las cuentas creadas aparecerán en esta lista.</p></div>
