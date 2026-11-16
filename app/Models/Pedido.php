@@ -26,4 +26,15 @@ class Pedido extends Model
     {
         return $this->hasMany(DetallePedido::class, 'pedido_id');
     }
+
+    /** Devuelve la clase visual correspondiente al estado actual del pedido. */
+    public function claseEstado(): string
+    {
+        return match ($this->estado) {
+            'aceptado' => 'estado-pedido-aceptado',
+            'rechazado' => 'estado-pedido-rechazado',
+            'completado' => 'estado-pedido-completado',
+            default => 'estado-pedido-pendiente',
+        };
+    }
 }
