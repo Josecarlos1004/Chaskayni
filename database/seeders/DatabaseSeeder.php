@@ -2,22 +2,27 @@
 
 namespace Database\Seeders;
 
-use App\Models\Usuario;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Comunidad;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Prepara los datos de demostración de la aplicación.
-     */
+    /** Agrega comunidades de referencia sin duplicar ni borrar datos existentes. */
     public function run(): void
     {
-        // Usuario::factory(10)->create();
+        $comunidadesDeDemostracion = [
+            'Chinchero',
+            'Maras',
+            'Ollantaytambo',
+            'Pisac',
+            'Urubamba',
+            'Ccorca',
+            'Poroy',
+            'Anta',
+        ];
 
-        Usuario::factory()->create([
-            'name' => 'Usuario de prueba',
-            'email' => 'usuario@ejemplo.test',
-        ]);
+        foreach ($comunidadesDeDemostracion as $nombre) {
+            Comunidad::firstOrCreate(['nombre' => $nombre]);
+        }
     }
 }
