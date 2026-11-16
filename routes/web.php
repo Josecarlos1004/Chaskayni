@@ -44,6 +44,7 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
     Route::delete('/productos/{producto}', [ProductosController::class, 'destroy'])->name('productos.eliminar');
     Route::get('/reportes/nuevo', [ReportesRiesgoController::class, 'create'])->name('riesgos.crear');
     Route::post('/reportes', [ReportesRiesgoController::class, 'store'])->name('riesgos.guardar');
+    /*Route::post('/reportes', [ReportesRiesgoController::class, 'store'])->name('guardar');*/
 
     Route::prefix('administracion')->name('administracion.')->group(function () {
         Route::get('/', [AdministracionController::class, 'panel'])->name('panel');
