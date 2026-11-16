@@ -11,7 +11,7 @@ class AlertasHeladasController extends Controller
     {
         return view('alertas.indice', [
             'alertas' => AlertaHelada::activas()
-                ->with(['comunidad', 'autor'])
+                ->with(['comunidad', 'autor', 'reporteOrigen'])
                 ->latest()
                 ->paginate(10),
         ]);

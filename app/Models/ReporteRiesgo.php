@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ReporteRiesgo extends Model
 {
@@ -19,5 +20,10 @@ class ReporteRiesgo extends Model
     public function comunidad(): BelongsTo
     {
         return $this->belongsTo(Comunidad::class, 'comunidad_id');
+    }
+
+    public function alerta(): HasOne
+    {
+        return $this->hasOne(AlertaHelada::class, 'reporte_riesgo_id');
     }
 }

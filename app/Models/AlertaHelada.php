@@ -21,6 +21,7 @@ class AlertaHelada extends Model
         'fecha_inicio',
         'fecha_fin',
         'cerrado_en',
+        'reporte_riesgo_id',
         'estado',
     ];
 
@@ -51,5 +52,10 @@ class AlertaHelada extends Model
     public function comunidad(): BelongsTo
     {
         return $this->belongsTo(Comunidad::class, 'comunidad_id');
+    }
+
+    public function reporteOrigen(): BelongsTo
+    {
+        return $this->belongsTo(ReporteRiesgo::class, 'reporte_riesgo_id');
     }
 }

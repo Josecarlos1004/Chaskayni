@@ -288,10 +288,36 @@ class AdministracionController extends Controller
     public function revisarReporte(Request $request, ReporteRiesgo $reporteRiesgo): RedirectResponse
     {
         $this->verificarAdministrador();
-        $datos = $request->validate(['estado' => ['required', 'in:revisado,descartado']]);
-        $reporteRiesgo->update($datos);
+        $datos = $request->validate(['estado' => ['required', 'in:publicado,descartado']]);
 
-        return back()->with('success', 'Se actualizó el estado del reporte.');
+        return DB::transaction(function () use ($reporteRiesgo, $datos): RedirectResponse {
+            // Bloquea el reporte para evitar que dos aprobaciones creen alertas duplicadas.
+            $reporte = ReporteRiesgo::query()->lockForUpdate()->findOrFail($reporteRiesgo->id);
+
+            if (! in_array($reporte->estado, ['pendiente', 'revisado'], true)) {
+                return back()->withErrors(['reporte' => 'Este reporte ya fue revisado.']);
+            }
+
+            if ($datos['estado'] === 'descartado') {
+                $reporte->update(['estado' => 'descartado']);
+
+                return back()->with('success', 'El reporte fue descartado.');
+            }
+
+            // La aprobación publica una alerta relacionada que conserva el origen del aviso.
+            $reporte->alerta()->firstOrCreate([], [
+                'creado_por' => Auth::id(),
+                'comunidad_id' => $reporte->comunidad_id,
+                'titulo' => $reporte->titulo,
+                'mensaje' => $reporte->descripcion,
+                'nivel' => 'precaucion',
+                'fecha_inicio' => now(),
+                'estado' => 'publicada',
+            ]);
+            $reporte->update(['estado' => 'publicado']);
+
+            return back()->with('success', 'El reporte fue aprobado y publicado como alerta comunitaria.');
+        });
     }
 
     /** Elimina un reporte individual después de que administración confirma la acción. */

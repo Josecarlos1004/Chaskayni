@@ -26,6 +26,9 @@
                         <span>{{ $alerta->comunidad?->nombre ?: 'Alerta general' }}</span>
                         <span>{{ $alerta->created_at->format('d/m/Y') }}</span>
                     </div>
+                    @if ($alerta->reporteOrigen?->latitud !== null && $alerta->reporteOrigen?->longitud !== null)
+                        <small>Ubicación reportada: {{ $alerta->reporteOrigen->latitud }}, {{ $alerta->reporteOrigen->longitud }}</small>
+                    @endif
                     @if ($alerta->fecha_fin)
                         <small>Vigente hasta {{ $alerta->fecha_fin->format('d/m/Y H:i') }}</small>
                     @endif
