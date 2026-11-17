@@ -4,7 +4,7 @@
 <section class="encabezado-pagina"><div>
     <span class="sobrelinea">Prevención comunitaria</span>
     <h1>Mapa de refugios y riesgos</h1>
-    <p>Consulta refugios activos y reportes que ya fueron revisados por administración.</p>
+    <p>Consulta refugios activos y reportes aprobados por administración.</p>
 </div>
 @auth
 <a class="boton boton-contorno" href="{{ route('riesgos.crear') }}">Reportar una situación</a>
@@ -13,10 +13,10 @@
 <section class="seccion seccion-superior">
     <div id="mapa-comunitario" class="mapa-comunitario" role="region" aria-label="Mapa de refugios y reportes revisados"></div>
     <p id="estado-mapa" class="texto-atenuado" aria-live="polite"></p>
-    <div class="leyenda-mapa"><span><i class="punto-refugio"></i> Refugio activo</span><span><i class="punto-reporte"></i> Reporte revisado</span></div>
+    <div class="leyenda-mapa"><span><i class="punto-refugio"></i> Refugio activo</span><span><i class="punto-reporte"></i> Reporte aprobado</span></div>
     <div class="cuadricula-mapa">
         <section class="panel"><h2>Refugios activos</h2>@forelse($refugios as $refugio)<article class="fila-mapa"><strong>{{ $refugio->nombre }}</strong><span>{{ $refugio->comunidad?->nombre ?? 'Comunidad no indicada' }}</span><small>{{ $refugio->direccion }} · Capacidad: {{ $refugio->capacidad }}</small></article>@empty<p class="texto-atenuado">No hay refugios activos con ubicación registrada.</p>@endforelse</section>
-        <section class="panel"><h2>Reportes revisados</h2>@forelse($reportes as $reporte)<article class="fila-mapa"><strong>{{ $reporte->titulo }}</strong><span>{{ $reporte->comunidad?->nombre ?? 'Comunidad no indicada' }}</span><small>{{ $reporte->descripcion }}</small></article>@empty<p class="texto-atenuado">Aún no hay reportes revisados con ubicación registrada.</p>@endforelse</section>
+        <section class="panel"><h2>Reportes aprobados</h2>@forelse($reportes as $reporte)<article class="fila-mapa"><strong>{{ $reporte->titulo }}</strong><span>{{ $reporte->comunidad?->nombre ?? 'Comunidad no indicada' }}</span><small>{{ $reporte->descripcion }}</small></article>@empty<p class="texto-atenuado">Aún no hay reportes aprobados con ubicación registrada.</p>@endforelse</section>
     </div>
 </section>
 <script>window.datosMapa = @json($datosMapa);</script>

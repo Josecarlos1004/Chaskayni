@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccesoController;
 use App\Http\Controllers\AdministracionController;
+use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\AlertasHeladasController;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\MapaComunitarioController;
@@ -17,6 +18,8 @@ Route::get('/', [InicioController::class, 'index'])->name('inicio');
 Route::get('/mercado', [MercadoController::class, 'index'])->name('mercado.indice');
 Route::get('/alertas', [AlertasHeladasController::class, 'index'])->name('alertas.indice');
 Route::get('/mapa-comunitario', [MapaComunitarioController::class, 'index'])->name('mapa.indice');
+Route::get('/contacto', [ContactoController::class, 'formulario'])->name('contacto.formulario');
+Route::post('/contacto', [ContactoController::class, 'guardar'])->middleware('throttle:3,1')->name('contacto.guardar');
 
 Route::middleware('guest')->group(function () {
     // Laravel espera la ruta llamada "login" para redirigir a quienes no han iniciado sesión.
@@ -62,6 +65,8 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
         Route::post('/alertas/temperatura', [AdministracionController::class, 'evaluarTemperatura'])->name('alertas.temperatura');
         Route::patch('/alertas/{alertaHelada}/cerrar', [AdministracionController::class, 'cerrarAlerta'])->name('alertas.cerrar');
         Route::delete('/alertas/{alertaHelada}', [AdministracionController::class, 'eliminarAlerta'])->name('alertas.eliminar');
+        Route::get('/consultas', [AdministracionController::class, 'listarConsultas'])->name('consultas.indice');
+        Route::patch('/consultas/{consulta}/leida', [AdministracionController::class, 'marcarConsultaLeida'])->name('consultas.leida');
         Route::get('/reportes', [AdministracionController::class, 'listarReportes'])->name('reportes.indice');
         Route::patch('/reportes/{reporteRiesgo}', [AdministracionController::class, 'revisarReporte'])->name('reportes.revisar');
         Route::delete('/reportes/{reporteRiesgo}', [AdministracionController::class, 'eliminarReporte'])->name('reportes.eliminar');

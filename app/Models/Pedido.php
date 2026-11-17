@@ -31,10 +31,48 @@ class Pedido extends Model
     public function claseEstado(): string
     {
         return match ($this->estado) {
-            'aceptado' => 'estado-pedido-aceptado',
+            'aceptado', 'preparando' => 'estado-pedido-aceptado',
+            'en_camino' => 'estado-pedido-en-camino',
             'rechazado' => 'estado-pedido-rechazado',
             'completado' => 'estado-pedido-completado',
             default => 'estado-pedido-pendiente',
         };
+    }
+
+    public function nombreEstado(): string
+    {
+        return match ($this->estado) {
+            'pendiente' => 'Pendiente de confirmación',
+            'aceptado' => 'Confirmado',
+            'preparando' => 'En preparación',
+            'en_camino' => 'En camino',
+            'completado' => 'Entregado',
+            'rechazado' => 'Rechazado',
+            default => ucfirst($this->estado),
+        };
+    }
+
+    /** Prepara las etapas para que el consumidor siga el avance de su pedido. */
+    public function pasosSeguimiento(): array
+    {
+        $nombres = [
+            'aceptado' => 'Confirmado',
+            'preparando' => 'En preparación',
+            'en_camino' => 'En camino',
+            'completado' => 'Entregado',
+        ];
+        $indiceActual = array_search($this->estado, array_keys($nombres), true);
+        $pasos = [];
+
+        foreach ($nombres as $estado => $nombre) {
+            $indice = count($pasos);
+            $pasos[] = [
+                'nombre' => $nombre,
+                'actual' => $indiceActual === $indice,
+                'completado' => $indiceActual !== false && $indice <= $indiceActual,
+            ];
+        }
+
+        return $pasos;
     }
 }

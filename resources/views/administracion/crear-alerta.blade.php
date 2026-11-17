@@ -37,6 +37,7 @@
         <p>Usa este formulario para avisos revisados que no dependen de una temperatura.</p>
         <form method="post" action="{{ route('administracion.alertas.guardar') }}">
             @csrf
+            <label>Tipo de aviso<select name="tipo" required><option value="clima" @selected(old('tipo', 'clima') === 'clima')>Clima</option><option value="refugio" @selected(old('tipo') === 'refugio')>Refugios</option></select></label>
             <label>Título<input name="titulo" value="{{ old('titulo') }}" maxlength="160" required></label>
             <label>Mensaje<textarea name="mensaje" rows="4" maxlength="3000" required>{{ old('mensaje') }}</textarea></label>
             <div class="fila-formulario">

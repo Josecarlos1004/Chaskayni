@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AlertaHelada;
 use App\Models\Comunidad;
+use App\Models\ConsultaContacto;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Refugio;
@@ -13,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -30,6 +32,7 @@ class AdministracionController extends Controller
 
         return view('administracion.panel', [
             'cantidadUsuarios' => Usuario::count(),
+            'cantidadCuentasPendientes' => Schema::hasColumn('users', 'aprobado_en') ? Usuario::whereNull('aprobado_en')->count() : 0,
             'cantidadProductos' => Producto::where('estado', 'disponible')->count(),
             'cantidadPedidosPendientes' => Pedido::where('estado', 'pendiente')->count(),
             'cantidadReportesPendientes' => ReporteRiesgo::where('estado', 'pendiente')->count(),
@@ -43,9 +46,32 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
 
+        $consultaUsuarios = Usuario::with('comunidad');
+        if (Schema::hasColumn('users', 'aprobado_en')) {
+            $consultaUsuarios->orderBy('aprobado_en');
+        }
+
         return view('administracion.usuarios', [
-            'usuarios' => Usuario::with('comunidad')->orderBy('name')->paginate(15),
+            'usuarios' => $consultaUsuarios->orderBy('name')->paginate(15),
         ]);
+    }
+
+    /** Muestra los mensajes recibidos para que administración pueda responderlos. */
+    public function listarConsultas(): View
+    {
+        $this->verificarAdministrador();
+
+        return view('administracion.consultas', [
+            'consultas' => ConsultaContacto::latest()->paginate(15),
+        ]);
+    }
+
+    public function marcarConsultaLeida(ConsultaContacto $consulta): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $consulta->update(['leido_en' => $consulta->leido_en ?? now()]);
+
+        return back()->with('success', 'La consulta quedó marcada como leída.');
     }
 
     /** Muestra todas las publicaciones, incluidas las ocultas, para administración. */
@@ -75,10 +101,11 @@ class AdministracionController extends Controller
         $datos = $request->validate([
             'rol' => ['required', 'in:productor,comprador,administrador'],
             'activo' => ['required', 'boolean'],
+            'aprobado' => ['required', 'boolean'],
         ]);
 
         $activo = (bool) $datos['activo'];
-        if ($usuario->is(Auth::user()) && ($datos['rol'] !== 'administrador' || ! $activo)) {
+        if ($usuario->is(Auth::user()) && ($datos['rol'] !== 'administrador' || ! $activo || ! (bool) $datos['aprobado'])) {
             return back()->withErrors(['cuenta' => 'No puedes quitarte el rol de administrador ni desactivar tu propia cuenta.']);
         }
 
@@ -99,7 +126,11 @@ class AdministracionController extends Controller
                 return back()->withErrors(['cuenta' => 'Debe quedar al menos una cuenta administradora activa.']);
             }
 
-            $usuario->update(['rol' => $datos['rol'], 'activo' => $activo]);
+            $usuario->update([
+                'rol' => $datos['rol'],
+                'activo' => $activo,
+                'aprobado_en' => (bool) $datos['aprobado'] ? ($usuario->aprobado_en ?? now()) : null,
+            ]);
 
             return back()->with('success', 'Se actualizaron los permisos de la cuenta.');
         });
@@ -197,6 +228,7 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
         $datos = $request->validate([
+            'tipo' => ['required', 'in:clima,refugio'],
             'titulo' => ['required', 'string', 'max:160'],
             'mensaje' => ['required', 'string', 'max:3000'],
             'nivel' => ['required', 'in:informacion,precaucion,urgente'],
@@ -242,6 +274,7 @@ class AdministracionController extends Controller
         AlertaHelada::create([
             'creado_por' => Auth::id(),
             'comunidad_id' => $datos['comunidad_id'],
+            'tipo' => 'clima',
             'titulo' => 'Riesgo '.$riesgo.' de helada',
             'mensaje' => 'Temperatura prevista: '.$temperatura.' °C. Revisa las medidas de protección frente a heladas recomendadas para tu comunidad.',
             'nivel' => $nivelAviso,
@@ -308,6 +341,7 @@ class AdministracionController extends Controller
             $reporte->alerta()->firstOrCreate([], [
                 'creado_por' => Auth::id(),
                 'comunidad_id' => $reporte->comunidad_id,
+                'tipo' => in_array($reporte->tipo, ['clima', 'refugio'], true) ? $reporte->tipo : 'clima',
                 'titulo' => $reporte->titulo,
                 'mensaje' => $reporte->descripcion,
                 'nivel' => 'precaucion',
@@ -338,7 +372,7 @@ class AdministracionController extends Controller
             $pedidoBloqueado = Pedido::query()->lockForUpdate()->findOrFail($pedido->id);
             $detalles = $pedidoBloqueado->detalles()->orderBy('id')->lockForUpdate()->get();
 
-            if (in_array($pedidoBloqueado->estado, ['pendiente', 'aceptado'], true)) {
+            if (in_array($pedidoBloqueado->estado, ['pendiente', 'aceptado', 'preparando', 'en_camino'], true)) {
                 foreach ($detalles as $detalle) {
                     $producto = Producto::query()->lockForUpdate()->find($detalle->producto_id);
                     if ($producto) {

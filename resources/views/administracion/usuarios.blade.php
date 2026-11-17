@@ -6,7 +6,7 @@
     <div class="panel">
         @forelse ($usuarios as $usuario)
             <article class="detalle-pedido">
-                <div class="encabezado-panel"><div><h2>{{ $usuario->name }}</h2><small>{{ $usuario->email }} · {{ $usuario->comunidad?->nombre ?: 'Sin comunidad asociada' }}</small></div><span class="etiqueta-estado">{{ $usuario->activo ? 'Activa' : 'Desactivada' }}</span></div>
+                <div class="encabezado-panel"><div><h2>{{ $usuario->name }}</h2><small>{{ $usuario->email }} · DNI: {{ $usuario->dni ?: 'No registrado' }} · Comunidad: {{ $usuario->comunidad?->nombre ?: 'Sin comunidad asociada' }} · Teléfono: @if($usuario->telefono)<a href="tel:{{ $usuario->telefono }}">{{ $usuario->telefono }}</a>@else No registrado @endif</small></div><span class="etiqueta-estado">{{ ! $usuario->aprobado_en ? 'Pendiente de aprobación' : ($usuario->activo ? 'Aprobada y activa' : 'Desactivada') }}</span></div>
                 <form class="formulario-en-linea" method="post" action="{{ route('administracion.usuarios.actualizar', $usuario) }}">
                     @csrf @method('patch')
                     <label>Rol
@@ -17,6 +17,7 @@
                         </select>
                     </label>
                     <label class="fila-casillas"><input type="hidden" name="activo" value="0"><input type="checkbox" name="activo" value="1" @checked($usuario->activo)> Cuenta activa</label>
+                    <label class="fila-casillas"><input type="hidden" name="aprobado" value="0"><input type="checkbox" name="aprobado" value="1" @checked($usuario->aprobado_en)> Aprobar cuenta (identidad revisada y usuario contactado)</label>
                     <button class="boton boton-pequeno" type="submit">Guardar cambios</button>
                 </form>
                 @if (! $usuario->is(auth()->user()))

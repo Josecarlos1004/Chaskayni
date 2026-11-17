@@ -42,7 +42,7 @@ class PedidosController extends Controller
     {
         $usuario = Auth::user();
         abort_unless($usuario->esProductor(), 403, 'Solo productores y administración pueden actualizar pedidos.');
-        $datos = $request->validate(['estado' => ['required', 'in:aceptado,rechazado,completado']]);
+        $datos = $request->validate(['estado' => ['required', 'in:aceptado,rechazado,preparando,en_camino,completado']]);
         DB::transaction(function () use ($pedido, $usuario, $datos): void {
             $pedidoBloqueado = Pedido::query()->lockForUpdate()->findOrFail($pedido->id);
             $detalles = DetallePedido::where('pedido_id', $pedidoBloqueado->id)->orderBy('id')->lockForUpdate()->get();
@@ -54,8 +54,13 @@ class PedidosController extends Controller
                 $productos[] = [$detalle, $producto];
             }
             $estadoNuevo = $datos['estado'];
-            $transicion = ($pedidoBloqueado->estado === 'pendiente' && in_array($estadoNuevo, ['aceptado', 'rechazado'], true))
-                || ($pedidoBloqueado->estado === 'aceptado' && $estadoNuevo === 'completado');
+            $transiciones = [
+                'pendiente' => ['aceptado', 'rechazado'],
+                'aceptado' => ['preparando'],
+                'preparando' => ['en_camino'],
+                'en_camino' => ['completado'],
+            ];
+            $transicion = in_array($estadoNuevo, $transiciones[$pedidoBloqueado->estado] ?? [], true);
             if (! $transicion) {
                 throw ValidationException::withMessages(['estado' => 'Ese cambio no es válido para el estado actual del pedido.']);
             }

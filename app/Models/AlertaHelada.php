@@ -13,6 +13,7 @@ class AlertaHelada extends Model
     protected $fillable = [
         'creado_por',
         'comunidad_id',
+        'tipo',
         'titulo',
         'mensaje',
         'nivel',

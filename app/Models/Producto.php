@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class Producto extends Model
 {
@@ -37,12 +36,23 @@ class Producto extends Model
             return null;
         }
 
+        if (str_starts_with($this->imagen_url, '/storage/productos/')) {
+            return $this->imagen_url;
+        }
+
         if (filter_var($this->imagen_url, FILTER_VALIDATE_URL)) {
+            $ruta = parse_url($this->imagen_url, PHP_URL_PATH);
+
+            // Convierte las URL absolutas guardadas por instalaciones locales en rutas compartibles.
+            if (is_string($ruta) && str_starts_with($ruta, '/storage/productos/')) {
+                return $ruta;
+            }
+
             return $this->imagen_url;
         }
 
         return str_starts_with($this->imagen_url, 'productos/')
-            ? Storage::disk('public')->url($this->imagen_url)
+            ? '/storage/'.ltrim($this->imagen_url, '/')
             : null;
     }
 

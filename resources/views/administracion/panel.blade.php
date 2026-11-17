@@ -8,6 +8,7 @@
 <section class="seccion seccion-superior">
     <div class="cuadricula-estadisticas">
         <article class="tarjeta-estadistica"><span>Cuentas registradas</span><strong>{{ $cantidadUsuarios }}</strong><small>Usuarios del sistema</small></article>
+        <article class="tarjeta-estadistica"><span>Cuentas por aprobar</span><strong>{{ $cantidadCuentasPendientes }}</strong><small>Revisa identidad y teléfono en Cuentas</small></article>
         <article class="tarjeta-estadistica"><span>Productos disponibles</span><strong>{{ $cantidadProductos }}</strong><small>Publicaciones visibles en el mercado</small></article>
         <article class="tarjeta-estadistica"><span>Pedidos pendientes</span><strong>{{ $cantidadPedidosPendientes }}</strong><small>Solicitudes por coordinar</small></article>
         <article class="tarjeta-estadistica"><span>Reportes pendientes</span><strong>{{ $cantidadReportesPendientes }}</strong><small>Aportes comunitarios por revisar</small></article>
@@ -25,6 +26,7 @@
                 <a class="boton boton-contorno" href="{{ route('administracion.alertas.crear') }}">Publicar alerta</a>
                 <a class="boton boton-contorno" href="{{ route('administracion.reportes.indice') }}">Revisar reportes</a>
                 <a class="boton boton-contorno" href="{{ route('administracion.refugios.indice') }}">Gestionar refugios</a>
+                <a class="boton boton-contorno" href="{{ route('administracion.consultas.indice') }}">Mensajes recibidos</a>
             </div>
         </article>
         <aside class="panel panel-resaltado"><span class="sobrelinea">Cuentas y permisos</span><h2>Acceso responsable</h2><p>Revisa el rol y el estado de cada cuenta. La aplicación conserva siempre al menos una cuenta administradora activa.</p><a class="boton boton-oscuro" href="{{ route('administracion.usuarios.indice') }}">Ver cuentas</a></aside>

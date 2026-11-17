@@ -12,13 +12,13 @@ class Usuario extends Authenticatable
 
     protected $table = 'users';
 
-    protected $fillable = ['name', 'email', 'password', 'rol', 'comunidad_id', 'activo'];
+    protected $fillable = ['name', 'email', 'password', 'rol', 'comunidad_id', 'activo', 'dni', 'telefono', 'aprobado_en'];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'dni', 'telefono'];
 
     protected function casts(): array
     {
-        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'activo' => 'boolean'];
+        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'activo' => 'boolean', 'aprobado_en' => 'datetime'];
     }
 
     public function comunidad()

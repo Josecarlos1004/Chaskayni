@@ -5,7 +5,8 @@
     <div>
         <span class="sobrelinea">Información comunitaria</span>
         <h1>Alertas y avisos</h1>
-        <p>Consulta avisos vigentes registrados por el equipo del proyecto.</p>
+        <p>Consulta avisos comunitarios aprobados por administración.</p>
+        @auth<a class="boton boton-pequeno" href="{{ route('riesgos.crear') }}">Enviar aviso para revisión</a>@endauth
     </div>
 </section>
 <section class="seccion seccion-superior">
@@ -14,6 +15,7 @@
             @foreach ($alertas as $alerta)
                 <article class="tarjeta-alerta">
                     <span class="nivel-alerta">{{ ucfirst($alerta->nivel) }}</span>
+                    <span class="etiqueta-estado">{{ $alerta->tipo === "refugio" ? "Refugios" : "Clima" }}</span>
                     @if ($alerta->nivel_riesgo)
                         <span class="etiqueta-estado">Riesgo {{ $alerta->nivel_riesgo }}</span>
                     @endif

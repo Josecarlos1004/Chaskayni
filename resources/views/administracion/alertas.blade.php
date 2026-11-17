@@ -8,7 +8,7 @@
 <section class="seccion seccion-superior">
     @forelse ($alertas as $alerta)
         <article class="tarjeta-alerta">
-            <span class="nivel-alerta">{{ ucfirst($alerta->nivel) }}</span>
+            <span class="nivel-alerta">{{ ucfirst($alerta->nivel) }}</span><span class="etiqueta-estado">{{ $alerta->tipo === "refugio" ? "Refugios" : "Clima" }}</span>
             <span class="etiqueta-estado">{{ ucfirst($alerta->estado) }}</span>
             <h2>{{ $alerta->titulo }}</h2>
             <p>{{ $alerta->mensaje }}</p>

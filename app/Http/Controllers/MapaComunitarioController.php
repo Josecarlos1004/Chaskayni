@@ -15,7 +15,7 @@ class MapaComunitarioController extends Controller
             ->orderBy('nombre')
             ->get();
         $reportes = ReporteRiesgo::with('comunidad')
-            ->where('estado', 'revisado')
+            ->whereIn('estado', ['revisado', 'publicado'])
             ->latest()
             ->get();
 

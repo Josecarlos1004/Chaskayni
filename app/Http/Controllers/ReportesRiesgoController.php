@@ -25,6 +25,7 @@ class ReportesRiesgoController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $datos = $request->validate([
+            'tipo' => ['required', 'in:clima,refugio'],
             'titulo' => ['required', 'string', 'max:160'],
             'descripcion' => ['required', 'string', 'max:3000'],
             'latitud' => ['nullable', 'numeric', 'between:-90,90'],
@@ -36,6 +37,7 @@ class ReportesRiesgoController extends Controller
             ...$datos,
             'reportante_id' => Auth::id(),
             'comunidad_id' => $datos['comunidad_id'] ?? (Auth::user()->comunidad?->activo ? Auth::user()->comunidad_id : null),
+            'estado' => 'pendiente',
         ]);
 
         return redirect()->route('panel')->with('success', 'Gracias. Tu reporte quedó pendiente de revisión.');

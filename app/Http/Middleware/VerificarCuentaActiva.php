@@ -12,14 +12,17 @@ class VerificarCuentaActiva
     /** Cierra las sesiones de cuentas que hayan sido desactivadas. */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && ! $request->user()->activo) {
+        $usuario = $request->user();
+        if ($usuario && (! $usuario->activo || ($usuario->rol !== 'administrador' && ! $usuario->aprobado_en))) {
+            $mensaje = ! $usuario->activo
+                ? 'Esta cuenta está desactivada. Contacta a administración.'
+                : 'Esta cuenta aún está pendiente de aprobación.';
+
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors([
-                'email' => 'Esta cuenta está desactivada. Contacta a administración.',
-            ]);
+            return redirect()->route('login')->withErrors(['email' => $mensaje]);
         }
 
         return $next($request);

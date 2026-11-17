@@ -30,10 +30,21 @@ class AccesoController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credenciales + ['activo' => true], $request->boolean('remember'))) {
+        $usuario = Usuario::where('email', $credenciales['email'])->first();
+
+        if (! $usuario || ! Hash::check($credenciales['password'], $usuario->password)) {
             return back()->withErrors(['email' => 'El correo o la contraseña no son correctos.'])->onlyInput('email');
         }
 
+        if (! $usuario->activo) {
+            return back()->withErrors(['email' => 'Esta cuenta está desactivada. Contacta a administración.'])->onlyInput('email');
+        }
+
+        if (! $usuario->aprobado_en && $usuario->rol !== 'administrador') {
+            return back()->withErrors(['email' => 'Tu cuenta está pendiente de aprobación. Te contactaremos al número registrado cuando sea revisada.'])->onlyInput('email');
+        }
+
+        Auth::login($usuario, $request->boolean('remember'));
         $request->session()->regenerate();
 
         return redirect()->intended(route('panel'));
@@ -44,23 +55,31 @@ class AccesoController extends Controller
         $datos = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:190', 'unique:users,email'],
+            'dni' => ['required', 'regex:/^[0-9]{8}$/', 'unique:users,dni'],
+            'telefono' => ['required', 'regex:/^9[0-9]{8}$/'],
             'password' => ['required', 'string', 'min:10', 'confirmed'],
             'rol' => ['required', 'in:productor,comprador'],
-            'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where('activo', true)],
+            'comunidad_id' => ['required', Rule::exists('comunidades', 'id')->where('activo', true)],
+        ], [
+            'dni.regex' => 'El DNI debe tener exactamente 8 dígitos.',
+            'dni.unique' => 'Ya existe una cuenta registrada con ese DNI.',
+            'telefono.regex' => 'Ingresa un celular peruano de 9 dígitos que empiece en 9.',
+            'comunidad_id.required' => 'Selecciona tu comunidad.',
         ]);
 
-        $usuario = Usuario::create([
+        Usuario::create([
             'name' => $datos['name'],
             'email' => $datos['email'],
+            'dni' => $datos['dni'],
+            'telefono' => $datos['telefono'],
             'password' => Hash::make($datos['password']),
             'rol' => $datos['rol'],
-            'comunidad_id' => $datos['comunidad_id'] ?? null,
+            'comunidad_id' => $datos['comunidad_id'],
+            'activo' => true,
+            'aprobado_en' => null,
         ]);
 
-        Auth::login($usuario);
-        $request->session()->regenerate();
-
-        return redirect()->route('panel')->with('success', 'Tu cuenta ya está lista.');
+        return redirect()->route('login')->with('success', 'Tu solicitud de cuenta fue registrada. Podrás ingresar cuando administración revise tus datos y apruebe la cuenta.');
     }
 
     public function salir(Request $request): RedirectResponse

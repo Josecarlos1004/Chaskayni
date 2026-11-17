@@ -5,10 +5,13 @@
     <a class="enlace-regreso" href="{{ route('panel') }}">← Volver a mi panel</a>
     <div class="tarjeta-formulario">
         <span class="sobrelinea">Participación comunitaria</span>
-        <h1>Reportar una situación de riesgo</h1>
-        <p>El reporte quedará pendiente de revisión y no aparecerá en el mapa público hasta que administración lo revise.</p>
+        <h1>Enviar aviso comunitario</h1>
+        <p>Productores y consumidores pueden enviar avisos de clima o refugios. El aviso quedará pendiente hasta la aprobación de administración.</p>
 <form method="post" action="{{ route('riesgos.guardar') }}">
     @csrf
+    <label>Tipo de aviso
+        <select name="tipo" required><option value="clima" @selected(old('tipo', 'clima') === 'clima')>Clima</option><option value="refugio" @selected(old('tipo') === 'refugio')>Refugios</option></select>
+    </label>
     <label>Título breve
         <input name="titulo" value="{{ old('titulo') }}" maxlength="160" required>
     </label>

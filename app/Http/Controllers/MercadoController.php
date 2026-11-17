@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comunidad;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,10 +23,13 @@ class MercadoController extends Controller
                 });
             })
             ->when($request->filled('categoria'), fn ($query) => $query->where('categoria', $request->query('categoria')))
+            ->when($request->filled('comunidad_id'), fn ($query) => $query->where('comunidad_id', (int) $request->query('comunidad_id')))
             ->when($request->boolean('cesta_salvada'), fn ($query) => $query->where('cesta_salvada', true))
             ->latest()
             ->paginate(12)
             ->withQueryString();
+
+        $comunidades = Comunidad::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']);
 
         $categorias = Producto::where('estado', 'disponible')
             ->whereNotNull('categoria')
@@ -33,6 +37,6 @@ class MercadoController extends Controller
             ->orderBy('categoria')
             ->pluck('categoria');
 
-        return view('mercado.indice', compact('productos', 'categorias'));
+        return view('mercado.indice', compact('productos', 'categorias', 'comunidades'));
     }
 }
