@@ -68,6 +68,7 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
         Route::get('/consultas', [AdministracionController::class, 'listarConsultas'])->name('consultas.indice');
         Route::patch('/consultas/{consulta}/leida', [AdministracionController::class, 'marcarConsultaLeida'])->name('consultas.leida');
         Route::get('/reportes', [AdministracionController::class, 'listarReportes'])->name('reportes.indice');
+        Route::get('/reportes/{reporteRiesgo}/evidencia', [AdministracionController::class, 'verEvidenciaReporte'])->name('reportes.evidencia');
         Route::patch('/reportes/{reporteRiesgo}', [AdministracionController::class, 'revisarReporte'])->name('reportes.revisar');
         Route::delete('/reportes/{reporteRiesgo}', [AdministracionController::class, 'eliminarReporte'])->name('reportes.eliminar');
         Route::delete('/pedidos/{pedido}', [AdministracionController::class, 'eliminarPedido'])->name('pedidos.eliminar');

@@ -7,7 +7,7 @@
         <span class="sobrelinea">Participación comunitaria</span>
         <h1>Enviar aviso comunitario</h1>
         <p>Productores y consumidores pueden enviar avisos de clima o refugios. El aviso quedará pendiente hasta la aprobación de administración.</p>
-<form method="post" action="{{ route('riesgos.guardar') }}">
+<form method="post" enctype="multipart/form-data" action="{{ route('riesgos.guardar') }}">
     @csrf
     <label>Tipo de aviso
         <select name="tipo" required><option value="clima" @selected(old('tipo', 'clima') === 'clima')>Clima</option><option value="refugio" @selected(old('tipo') === 'refugio')>Refugios</option></select>
@@ -17,6 +17,10 @@
     </label>
     <label>Descripción
         <textarea name="descripcion" rows="5" maxlength="3000" required>{{ old('descripcion') }}</textarea>
+    </label>
+    <label class="evidencia-campo">Fotografía de evidencia (opcional)
+        <input type="file" name="foto_evidencia" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="ayuda-evidencia">
+        <small id="ayuda-evidencia">JPG, PNG o WebP; máximo 5 MB. Solo administración verá la foto durante la revisión; no se publicará con la alerta.</small>
     </label>
 @if($comunidades->isNotEmpty())<label>Comunidad
         <select name="comunidad_id">

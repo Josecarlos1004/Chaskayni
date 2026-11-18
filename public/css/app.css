@@ -1,4 +1,4 @@
-:root{--tinta:#173b33;--verde:#1e7053;--verde-oscuro:#15533e;--lima:#d9ec9f;--crema:#fbf8ef;--arena:#f0e8d7;--atenuado:#56685f;--borde:#dce5db;--cian:#248e89;--naranja:#c96a42;--morado:#7558a6;--sombra:0 18px 50px rgba(23,59,51,.12)}
+:root{--tinta:#173b33;--verde:#176348;--verde-oscuro:#123f31;--lima:#d9ec9f;--crema:#fbf8ef;--arena:#f0e8d7;--atenuado:#56685f;--borde:#dce5db;--cian:#248e89;--naranja:#c96a42;--morado:#7558a6;--sombra:0 18px 50px rgba(23,59,51,.12)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#fff;color:var(--tinta);font:16px/1.6 "DM Sans",sans-serif}h1,h2,h3,p{margin-top:0}h1,h2,h3{font-family:Manrope,sans-serif;line-height:1.17;letter-spacing:-.035em}h1{font-size:clamp(2.4rem,5vw,4.45rem)}h2{font-size:clamp(1.8rem,3vw,2.65rem)}h3{font-size:1.25rem}a{color:inherit;text-decoration:none}button,input,textarea,select{font:inherit}
 .encabezado-sitio{height:82px;display:flex;align-items:center;justify-content:space-between;padding:0 max(5vw,24px);border-bottom:1px solid #eef0eb;background:rgba(255,255,255,.94);position:sticky;top:0;z-index:10;backdrop-filter:blur(12px)}.marca{display:flex;align-items:center;gap:11px;font:800 1.13rem Manrope,sans-serif;letter-spacing:-.05em}.marca small{display:block;color:var(--atenuado);font:500 .68rem "DM Sans",sans-serif;letter-spacing:0}.sello-marca{width:42px;height:42px;border-radius:14px;background:var(--verde);color:#fff;display:grid;place-items:center;font:800 .95rem Manrope;letter-spacing:-.06em}.enlaces-navegacion{display:flex;align-items:center;gap:26px;font-size:.92rem;font-weight:600}.enlaces-navegacion>a:not(.boton):hover,.enlace-texto:hover{color:var(--verde)}.boton-menu{display:none;border:0;background:none;font-size:1.5rem;color:var(--tinta)}.formulario-en-linea{display:inline;margin:0}.boton-navegacion{border:0;background:transparent;color:var(--tinta);font-weight:600;cursor:pointer}
 .boton{display:inline-flex;justify-content:center;align-items:center;gap:9px;border:1px solid var(--verde);border-radius:8px;background:var(--verde);padding:12px 18px;color:#fff;font-weight:700;font-size:.92rem;cursor:pointer;transition:.2s ease}.boton:hover{background:var(--verde-oscuro);border-color:var(--verde-oscuro);transform:translateY(-1px)}.boton-pequeno{padding:9px 14px;font-size:.85rem}.boton-claro,.boton-contorno{background:#fff;color:var(--verde)}.boton-claro{border-color:#fff}.boton-contorno{border-color:#c9d9cd}.boton-sutil{background:transparent;color:var(--atenuado);border-color:var(--borde)}.boton-oscuro{background:var(--tinta);border-color:var(--tinta)}.boton-ancho-completo{width:100%}
@@ -60,3 +60,154 @@
 .tarjeta-formulario input:focus,.tarjeta-formulario textarea:focus,.tarjeta-formulario select:focus{border-color:var(--cian)}
 
 @media(min-width:621px) and (max-width:1100px){.encabezado-sitio{height:76px;padding:0 24px}.boton-menu{display:block}.enlaces-navegacion{display:none}.navegacion-abierta .enlaces-navegacion{display:flex;position:absolute;top:76px;left:0;right:0;padding:18px 24px;background:#fff;border-bottom:1px solid var(--borde);flex-direction:column;align-items:stretch;gap:13px;box-shadow:var(--sombra)}}
+/* Portada aprobada: Mercado vivo, cosecha local y comunidad de Cusco. */
+.portada-mercado{grid-template-columns:1.05fr .95fr;min-height:470px;background:#143f31;color:#f9f5eb;padding-top:54px;padding-bottom:54px}
+.portada-mercado .sobrelinea{color:#e5c76c}
+.portada-mercado h1{max-width:640px;color:#fff}
+.portada-mercado h1 em{color:#e7c968}
+.portada-mercado .texto-portada>p{max-width:520px;color:#d8e5dc}
+.boton-portada-claro{background:#f9f5eb;border-color:#f9f5eb;color:#173b33;box-shadow:none}
+.boton-portada-claro:hover{background:#e8d9a7;border-color:#e8d9a7;color:#173b33}
+.enlace-portada{padding:10px 2px;color:#f4dfa1;font-weight:700}
+.etiquetas-portada{display:flex;flex-wrap:wrap;gap:9px;margin-top:25px}
+.etiquetas-portada span{padding:7px 12px;border:1px solid #ffffff30;border-radius:999px;background:#ffffff12;color:#f7f4e9;font-size:.76rem;font-weight:600}
+.ilustracion-mercado{height:365px;border-radius:18px 18px 6px 18px;background:#cfdfbd;box-shadow:0 22px 48px #0d2e2255}
+.ilustracion-mercado img{object-fit:cover}
+.sello-cosecha{position:absolute;right:17px;bottom:17px;display:flex;align-items:center;gap:10px;padding:12px 15px;border:1px solid #fff;border-radius:11px;background:#fffcf4;box-shadow:0 10px 25px #193a2c30;color:#173b33}
+.sello-cosecha>span:first-child{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#f7edcf;color:#8f6924;font-size:1.2rem}
+.sello-cosecha strong,.sello-cosecha small{display:block}
+.sello-cosecha strong{font-size:.78rem}
+.sello-cosecha small{color:#536b60;font-size:.68rem}
+.seccion-conecta .encabezado-seccion{margin-bottom:24px}
+.seccion-conecta .cuadricula-funciones{gap:14px}
+.seccion-conecta .tarjeta-funcion{display:flex;align-items:center;gap:13px;padding:19px 17px;border-color:transparent;background:#f7f8f2;transition:transform .2s,background .2s,box-shadow .2s}
+.seccion-conecta .tarjeta-funcion:hover{transform:translateY(-3px);background:#fff;box-shadow:var(--sombra)}
+.seccion-conecta .icono-funcion{flex:0 0 42px;width:42px;height:42px;margin:0;background:#e5efe1;color:#176348}
+.seccion-conecta .funcion-alertas .icono-funcion{background:#f7edcf;color:#8b6928}
+.seccion-conecta .funcion-mapa .icono-funcion{background:#f5e6dc;color:#a45538}
+.seccion-conecta .texto-funcion{flex:1}
+.seccion-conecta .texto-funcion h3{margin:0 0 4px;font-size:1rem}
+.seccion-conecta .texto-funcion p{margin:0;color:var(--atenuado);font-size:.78rem}
+.flecha-funcion{align-self:flex-start;color:var(--verde);font-weight:800}
+.franja-cestas{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 max(7vw,32px) 48px;padding:23px 28px;border-radius:14px;background:#f5e9c7}
+.franja-cestas .sobrelinea{margin-bottom:5px;color:#725b2b}
+.franja-cestas h2{margin:0 0 4px;font-size:clamp(1.25rem,2vw,1.7rem)}
+.franja-cestas p{margin:0;color:#5f6250;font-size:.87rem}
+.franja-cestas .boton{flex:0 0 auto}
+@media(max-width:850px){.portada-mercado{grid-template-columns:1fr;padding-top:42px;padding-bottom:36px}.ilustracion-mercado{height:330px;max-width:none}}
+@media(max-width:620px){.portada-mercado{padding:38px 22px 27px;gap:25px}.ilustracion-mercado{height:280px}.seccion-conecta{padding:42px 21px}.seccion-conecta .cuadricula-funciones{grid-template-columns:1fr}.franja-cestas{align-items:flex-start;flex-direction:column;margin:0 20px 32px;padding:20px}.franja-cestas .boton{width:100%}}
+/* Logotipo oficial de Chaskayni. */
+.sello-marca{background:transparent}
+.sello-marca img{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit}
+.marca-pie .sello-marca{background:transparent;color:inherit}
+/* Identidad visual común para mercado, cuenta y administración. */
+:root{--oro:#cba64b;--verde-claro:#e9f1e6;--fondo-pagina:#fcfbf7;--sombra-suave:0 10px 30px rgba(23,59,51,.07)}
+body{background:var(--fondo-pagina);-webkit-font-smoothing:antialiased}
+::selection{background:#dce9c2;color:var(--tinta)}
+.encabezado-sitio{box-shadow:0 4px 18px rgba(23,59,51,.035)}
+.marca{gap:12px}.marca small{line-height:1.25}.sello-marca{overflow:hidden}.sello-marca img{transition:transform .25s ease}.marca:hover .sello-marca img{transform:scale(1.06)}
+.enlaces-navegacion>a:not(.boton){padding:9px 0;transition:color .18s ease}
+.boton{border-radius:10px;box-shadow:0 5px 14px rgba(23,59,51,.12)}.boton:active{transform:translateY(0) scale(.98)}
+.boton-contorno:hover,.boton-claro:hover{background:var(--verde-claro);border-color:#b8cdb9;color:var(--verde-oscuro)}.boton-sutil:hover{background:#f5eee7;border-color:#ead8cb;color:#8e4e36}
+.encabezado-pagina{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(118deg,#f5f1e5 0%,#edf2e8 100%);border-bottom:1px solid #e8e9de}
+.encabezado-pagina::after{position:absolute;z-index:-1;content:"";width:230px;height:230px;right:5%;top:-120px;border:1px solid rgba(23,99,72,.12);border-radius:50%;box-shadow:0 0 0 24px rgba(23,99,72,.025),0 0 0 50px rgba(23,99,72,.02)}
+.encabezado-pagina h1{color:var(--verde-oscuro);letter-spacing:-.045em}.sobrelinea{color:#32745a}
+.barra-filtros{padding:16px;border:1px solid var(--borde);border-radius:14px;background:#fff;box-shadow:var(--sombra-suave)}
+.campo-busqueda,.campo-seleccion select,.barra-filtros select{min-height:46px;background:#fff;transition:border-color .18s,box-shadow .18s}.campo-busqueda:focus-within{border-color:#74a188;box-shadow:0 0 0 3px rgba(23,99,72,.1)}
+.filtro-cesta-salvada{padding:10px 12px;border-radius:9px;background:#faf5e7;color:#66552b}
+.cuadricula-productos{align-items:stretch;gap:22px}.tarjeta-producto{display:flex;flex-direction:column;border-radius:16px;box-shadow:var(--sombra-suave)}.imagen-producto{height:210px;background:linear-gradient(140deg,#e8efdf,#f3ead2)}
+.contenido-producto{display:flex;flex:1;flex-direction:column;padding:20px}.contenido-producto .formulario-pedido,.contenido-producto>.boton,.contenido-producto>.acciones-tarjeta{margin-top:auto}
+.etiqueta{border:1px solid #e8eadf;box-shadow:0 2px 8px rgba(23,59,51,.06)}.insignia-cesta-salvada{background:#f6e6b5;color:#624c17}.precio-producto{color:#176348}
+.tarjeta-alerta{position:relative;border-radius:15px;box-shadow:var(--sombra-suave);transition:transform .18s ease,box-shadow .18s ease}.tarjeta-alerta:hover{transform:translateY(-2px);box-shadow:0 15px 34px rgba(23,59,51,.1)}
+.nivel-alerta{margin:0 7px 8px 0}.tarjeta-alerta .etiqueta-estado{display:inline-flex;margin:0 5px 8px 0}.estado-vacio{border-color:#d8e3d6;background:linear-gradient(145deg,#fbf8ef,#f2f5ed)}
+.contenedor-acceso{max-width:1050px;gap:34px}.lateral-acceso{background:linear-gradient(145deg,#174a38,#123729);box-shadow:var(--sombra)}
+.lateral-acceso::after{content:"";position:absolute;right:-90px;top:-90px;width:250px;height:250px;border:1px solid #ffffff20;border-radius:50%;box-shadow:0 0 0 26px #ffffff08,0 0 0 55px #ffffff06}
+.tarjeta-acceso{align-self:center;padding:38px;border:1px solid var(--borde);border-radius:18px;background:#fff;box-shadow:var(--sombra-suave)}.tarjeta-acceso h2{color:var(--verde-oscuro)}
+.tarjeta-acceso input,.tarjeta-formulario input,.tarjeta-formulario textarea,.tarjeta-formulario select,.formulario-en-linea select{min-height:45px;border-color:#d5dfd5;border-radius:9px;transition:border-color .18s,box-shadow .18s}
+.tarjeta-formulario textarea{min-height:110px;resize:vertical}.tarjeta-acceso input:focus,.tarjeta-formulario input:focus,.tarjeta-formulario textarea:focus,.tarjeta-formulario select:focus,.formulario-en-linea select:focus{border-color:#5f9676;outline:0;box-shadow:0 0 0 3px rgba(23,99,72,.1)}input[type="checkbox"]{accent-color:var(--verde)}
+.pagina-formulario{max-width:880px}.tarjeta-formulario,.panel{border-radius:16px;box-shadow:var(--sombra-suave)}.tarjeta-formulario h1{color:var(--verde-oscuro);letter-spacing:-.045em}.fila-formulario{gap:18px}
+.campo-imagen{padding:15px;border:1px solid #e5e9df;border-radius:12px;background:#fafbf7}.previsualizacion-imagen{border-color:#d7e2d2;background:#f3f5ec}
+.cuadricula-estadisticas{gap:18px}.tarjeta-estadistica{position:relative;overflow:hidden;border:1px solid #e1e8dc;border-radius:15px;box-shadow:var(--sombra-suave)}
+.tarjeta-estadistica::after{position:absolute;content:"";width:75px;height:75px;right:-22px;top:-25px;border-radius:50%;background:#edf3e7}.tarjeta-estadistica strong{position:relative;z-index:1;color:var(--verde-oscuro)}
+.cuadricula-panel{gap:20px}.panel{padding:26px}.panel-resaltado{border-color:#dce7d6;background:linear-gradient(145deg,#edf4e8,#f8f7ed)}
+.detalle-pedido{padding:20px;border:1px solid #e6e9e0;border-radius:13px;background:#fff}.detalle-pedido:last-child{margin-bottom:0}.encabezado-panel{align-items:flex-start}.encabezado-panel h2{color:var(--verde-oscuro)}
+.fila-pedido{gap:16px}.fila-pedido strong:last-child{color:var(--verde-oscuro);white-space:nowrap}
+.etiqueta-estado{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:5px 11px;border:1px solid #e1e9db}
+.estado-pedido-pendiente{background:#fff3d8;color:#795a20;border-color:#f0e1b5}.estado-pedido-aceptado{background:#e8f1fb;color:#315f8c;border-color:#d2e2f2}.estado-pedido-en-camino{background:#e1f1ed;color:#17635a;border-color:#cde4da}.estado-pedido-rechazado{background:#fff0ed;color:#873b2d;border-color:#f0d5cf}.estado-pedido-completado{background:#eeeafa;color:#5b45a0;border-color:#ddd5f1}
+.acciones-tarjeta,.acciones-formulario{align-items:center;flex-wrap:wrap}.acciones-tarjeta form{display:inline-flex}.aviso{border:1px solid transparent;box-shadow:var(--sombra-suave)}.aviso-exito{border-color:#cfe4d2}.aviso-error,.aviso-pedido-error{border-color:#f0d2cc}
+.paginacion{overflow-x:auto;padding:8px 0}.paginacion nav{display:flex;justify-content:center}.mapa-comunitario,.mapa-selector{border:1px solid #d6e0d4;border-radius:16px;box-shadow:var(--sombra-suave)}
+.leyenda-mapa{padding:12px 15px;border:1px solid #e5e9e0;border-radius:10px;background:#fff}.fila-mapa{padding:17px;border:1px solid #e5e9e0;border-radius:12px;background:#fff}.fila-mapa+.fila-mapa{margin-top:10px}
+.seguimiento-pedido{padding:16px 12px;border:1px solid #e4e9df;border-radius:12px;background:#fbfcf8}.pie-sitio{gap:20px;background:#f5f2e9}.pie-sitio .marca{flex:0 0 auto}.enlace-regreso{padding:7px 0}
+.formulario-en-linea{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.formulario-en-linea label{display:inline-flex;align-items:center;gap:7px}.formulario-en-linea select{padding:9px 11px}
+@media(max-width:850px){.contenedor-acceso{gap:20px}.tarjeta-acceso{padding:28px}.cuadricula-estadisticas{grid-template-columns:repeat(2,minmax(0,1fr))}.cuadricula-productos{gap:17px}}
+@media(max-width:620px){body{font-size:15px}.encabezado-pagina{padding:34px 22px}.encabezado-pagina::after{right:-90px;top:-145px}.encabezado-pagina h1{font-size:2.15rem}.barra-filtros{padding:12px}.cuadricula-productos{gap:14px}.imagen-producto{height:195px}.contenido-producto{padding:16px}.acciones-tarjeta{align-items:stretch}.acciones-tarjeta>*{flex:1 1 100%}.acciones-tarjeta form .boton{width:100%}.contenedor-acceso{padding:0 16px}.lateral-acceso{border-radius:15px 15px 4px 4px}.tarjeta-acceso{padding:25px 20px;border-radius:4px 4px 15px 15px}.tarjeta-formulario,.panel{padding:21px 17px}.campo-imagen{padding:12px}.cuadricula-estadisticas{grid-template-columns:1fr}.tarjeta-estadistica{padding:18px}.detalle-pedido{padding:16px}.encabezado-panel{flex-wrap:wrap}.encabezado-panel>div{flex:1 1 100%}.fila-pedido{align-items:flex-start}.fila-pedido>div{flex:1 1 65%}.fila-pedido strong:last-child{margin-left:auto}.seguimiento-pedido{padding:12px 7px}.pie-sitio{padding:23px 20px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Contraste e interacción visible en todos los módulos. */
+:root{--tinta:#173b33;--verde:#1d704e;--verde-oscuro:#123d30;--lima:#e5d28c;--crema:#fbf8ef;--arena:#f0e8d7;--atenuado:#56685f;--borde:#dce5db;--cian:#248e89;--naranja:#b94f32;--morado:#7558a6;--oro:#d0a43f;--fondo-pagina:#fbfaf6;--sombra:0 18px 50px rgba(23,59,51,.12);--sombra-suave:0 10px 30px rgba(23,59,51,.07)}
+.boton{background:var(--verde);border-color:var(--verde);transition:background-color .18s,border-color .18s,box-shadow .18s,transform .18s}
+.boton:hover{background:#14573d;border-color:#14573d;box-shadow:0 8px 18px rgba(18,61,48,.2)}
+.boton-oscuro:hover{background:#092d23;border-color:#092d23}
+.boton-contorno{color:#185b41}.boton-contorno:hover{background:#e6efe7;color:#103e2f}
+.boton-sutil{color:#8b452e}.boton-sutil:hover{color:#71351f}
+.enlaces-navegacion>a:not(.boton):hover,.enlace-texto:hover,.enlace-lateral:hover,.enlace-regreso:hover{color:var(--naranja)}
+.enlaces-navegacion a:focus-visible,.pie-sitio a:focus-visible,.enlace-regreso:focus-visible{outline:3px solid var(--oro);outline-offset:4px;border-radius:4px}
+.tarjeta-funcion,.tarjeta-estadistica,.fila-mapa,.detalle-pedido{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.tarjeta-funcion:hover,.tarjeta-estadistica:hover,.fila-mapa:hover{transform:translateY(-2px);border-color:#bdd1bd;box-shadow:var(--sombra-suave)}
+.imagen-producto img{transition:transform .35s ease}.tarjeta-producto:hover .imagen-producto img{transform:scale(1.035)}
+.boton-menu{width:42px;height:42px;border:1px solid var(--borde);border-radius:10px;background:#f6f7f1;transition:background .18s,color .18s,transform .18s}
+.boton-menu:hover{background:var(--verde);color:#fff;transform:translateY(-1px)}
+.aviso{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:14px 16px}
+.aviso-cerrar{flex:0 0 30px;width:30px;height:30px;padding:0;border:0;border-radius:8px;background:transparent;color:inherit;font:700 1.4rem/1 "DM Sans",sans-serif;cursor:pointer;transition:background .18s,transform .18s}
+.aviso-cerrar:hover{background:#0000000d;transform:scale(1.08)}
+.aviso-cerrar:focus-visible{outline:3px solid currentColor;outline-offset:2px}
+.aviso-error ul{margin-bottom:0}
+input:invalid:not(:placeholder-shown),textarea:invalid:not(:placeholder-shown){border-color:#bd5a4a}
+.fila-casillas input:focus-visible{outline:3px solid var(--oro);outline-offset:3px}
+.campo-seleccion select:hover,.tarjeta-formulario input:hover,.tarjeta-formulario select:hover{border-color:#94b49d}
+.estado-vacio .boton{margin-top:8px}
+@media(max-width:620px){.aviso{margin:12px 15px}.aviso-cerrar{flex-basis:34px;width:34px;height:34px}.navegacion-abierta .enlaces-navegacion{box-shadow:0 18px 28px rgba(23,59,51,.14)}}
+@media(prefers-reduced-motion:reduce){.tarjeta-funcion:hover,.tarjeta-estadistica:hover,.fila-mapa:hover,.tarjeta-alerta:hover,.tarjeta-producto:hover .imagen-producto img{transform:none}}
+
+/* Paleta final de marca: bosque, cosecha, tierra y superficies cálidas. */
+:root{--marca-bosque:#123d30;--marca-hoja:#1d704e;--marca-salvia:#e8f0e5;--marca-crema:#fbf8ef;--marca-dorado:#d0a43f;--marca-terracota:#b94f32;--marca-tinta:#173b33;--marca-borde:#dce5db;--marca-superficie:#fffefa;--marca-texto-suave:#53675d;--marca-exito:#245c3a;--marca-exito-fondo:#e9f4e9;--marca-aviso:#76530a;--marca-aviso-fondo:#fff3d8;--marca-error:#873b2d;--marca-error-fondo:#fff0ed;--marca-info:#315f8c;--marca-info-fondo:#e8f1fb}
+body{background:#f7f6ef;color:var(--marca-tinta)}
+.encabezado-sitio{background:rgba(255,254,250,.97);border-bottom-color:#e4e7dc}
+.encabezado-pagina{background:linear-gradient(112deg,#e9f0e4 0%,#fbf8ef 76%);border-bottom-color:#dfe6d9}
+.encabezado-pagina::before{position:absolute;z-index:-1;content:"";inset:0 auto 0 0;width:6px;background:linear-gradient(var(--marca-hoja),var(--marca-dorado))}
+.encabezado-pagina h1,.encabezado-panel h2,.tarjeta-formulario h1{color:var(--marca-bosque)}
+.sobrelinea{color:#205f43}
+.tarjeta-funcion,.tarjeta-producto,.tarjeta-alerta,.tarjeta-estadistica,.panel,.tarjeta-formulario,.detalle-pedido{background:var(--marca-superficie);border-color:var(--marca-borde)}
+.portada-mercado{background:linear-gradient(120deg,#123d30 0%,#174b38 65%,#1b563e 100%)}
+.portada-mercado .sobrelinea,.enlace-portada{color:#f1d583}
+.boton,.boton-portada-claro{border-radius:11px}
+.franja-cestas{background:linear-gradient(105deg,#f1dfaa,#f7edcf);border:1px solid #ead9a7}
+.franja-cestas .sobrelinea{color:#624a16}
+.nivel-alerta{background:var(--marca-aviso-fondo);color:var(--marca-aviso);border:1px solid #f0dfb4}
+.estado-pedido-pendiente{background:var(--marca-aviso-fondo);color:var(--marca-aviso);border-color:#f0dfb4}
+.estado-pedido-aceptado{background:var(--marca-info-fondo);color:var(--marca-info);border-color:#d2e2f2}
+.estado-pedido-en-camino{background:#e1f1ed;color:#17635a;border-color:#cde4da}
+.estado-pedido-completado{background:var(--marca-exito-fondo);color:var(--marca-exito);border-color:#cfe4d2}
+.estado-pedido-rechazado{background:var(--marca-error-fondo);color:var(--marca-error);border-color:#f0d5cf}
+.aviso-exito{background:var(--marca-exito-fondo);color:var(--marca-exito);border-color:#cfe4d2}
+.aviso-error,.aviso-pedido-error{background:var(--marca-error-fondo);color:var(--marca-error);border-color:#f0d5cf}
+.tarjeta-alerta{border-top:3px solid var(--marca-dorado)}
+.panel-resaltado{background:linear-gradient(145deg,#edf3e8,#f8f1dc);border-color:#e8dfc1}
+.boton-sutil{color:#843b27;border-color:#e7c7b9}
+form[onsubmit*="Eliminar"] .boton,form[onsubmit*="eliminar"] .boton{background:#a94331;border-color:#a94331;color:#fff}
+form[onsubmit*="Eliminar"] .boton:hover,form[onsubmit*="eliminar"] .boton:hover{background:#863523;border-color:#863523}
+.pie-sitio{background:var(--marca-bosque);border-top-color:#315847;color:#f7f4e9}
+.pie-sitio p,.pie-sitio .marca small{color:#d8e4d8}
+.pie-sitio a:not(.marca){color:#f1d583}
+.pie-sitio a:focus-visible{outline-color:var(--marca-dorado)}
+.pie-sitio .marca-pie .sello-marca{background:transparent}
+.boton:focus-visible,button:focus-visible,a.boton:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--marca-dorado);outline-offset:3px}
+@media(max-width:620px){.encabezado-pagina::before{width:4px}.pie-sitio{background:var(--marca-bosque)}}
+.evidencia-campo{padding:16px;border:1px dashed #b8cbb7;border-radius:12px;background:#f7f8f1}
+.evidencia-campo input[type="file"]{padding:10px;background:#fff}
+.evidencia-campo input[type="file"]::file-selector-button{margin-right:12px;padding:8px 12px;border:0;border-radius:8px;background:var(--marca-salvia);color:var(--marca-bosque);font:700 .85rem "DM Sans",sans-serif;cursor:pointer}
+.evidencia-campo input[type="file"]::file-selector-button:hover{background:#d8e6d3}
+.evidencia-campo small{display:block;margin-top:5px;color:var(--marca-texto-suave);font-weight:400;line-height:1.5}
+.evidencia-reporte{display:grid;justify-items:start;gap:9px;margin:16px 0;padding:15px;border-left:4px solid var(--marca-dorado);border-radius:0 10px 10px 0;background:#f7f5ec}
+.evidencia-reporte .sobrelinea{margin:0;color:#624a16}
+.evidencia-reporte img{display:block;width:min(100%,420px);max-height:320px;object-fit:contain;object-position:left center;border:1px solid var(--marca-borde);border-radius:9px;background:#fff}

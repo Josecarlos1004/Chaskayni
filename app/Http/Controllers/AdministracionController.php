@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -318,6 +320,23 @@ class AdministracionController extends Controller
         ]);
     }
 
+    /** Muestra evidencia privada solo al administrador que revisa el reporte. */
+    public function verEvidenciaReporte(ReporteRiesgo $reporteRiesgo): StreamedResponse
+    {
+        $this->verificarAdministrador();
+        $rutaEvidencia = $reporteRiesgo->foto_evidencia;
+        abort_unless($rutaEvidencia && Storage::disk('local')->exists($rutaEvidencia), 404);
+
+        return Storage::disk('local')->response(
+            $rutaEvidencia,
+            'evidencia-reporte-'.$reporteRiesgo->id,
+            [
+                'Cache-Control' => 'private, no-store, max-age=0',
+                'X-Content-Type-Options' => 'nosniff',
+            ],
+            'inline',
+        );
+    }
     public function revisarReporte(Request $request, ReporteRiesgo $reporteRiesgo): RedirectResponse
     {
         $this->verificarAdministrador();
@@ -358,7 +377,11 @@ class AdministracionController extends Controller
     public function eliminarReporte(ReporteRiesgo $reporteRiesgo): RedirectResponse
     {
         $this->verificarAdministrador();
+        $rutaEvidencia = $reporteRiesgo->foto_evidencia;
         $reporteRiesgo->delete();
+        if ($rutaEvidencia) {
+            Storage::disk('local')->delete($rutaEvidencia);
+        }
 
         return back()->with('success', 'Se eliminó el reporte comunitario.');
     }

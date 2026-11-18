@@ -12,10 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Cloudflare Tunnel termina HTTPS antes de reenviar la solicitud a Laravel.
+        // Confía solo en proxies declarados; no aceptes cabeceras reenviadas de cualquier origen.
         $middleware->trustProxies(
-            at: '*',
-            headers: Request::HEADER_X_FORWARDED_HOST
+            at: env('TRUSTED_PROXIES', '127.0.0.1,::1'),
+            headers: Request::HEADER_X_FORWARDED_FOR
                 | Request::HEADER_X_FORWARDED_PORT
                 | Request::HEADER_X_FORWARDED_PROTO,
         );
