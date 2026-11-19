@@ -20,6 +20,7 @@ class CestaSalvadaTest extends TestCase
             'password' => 'test-password',
             'rol' => 'productor',
             'activo' => true,
+            'aprobado_en' => now(),
         ]);
         $comprador = Usuario::create([
             'name' => 'Comprador de prueba',
@@ -27,6 +28,7 @@ class CestaSalvadaTest extends TestCase
             'password' => 'test-password',
             'rol' => 'comprador',
             'activo' => true,
+            'aprobado_en' => now(),
         ]);
 
         $this->actingAs($productor)->post(route('productos.guardar'), [
@@ -60,6 +62,7 @@ class CestaSalvadaTest extends TestCase
             'password' => 'test-password',
             'rol' => 'productor',
             'activo' => true,
+            'aprobado_en' => now(),
         ]);
 
         Producto::create([

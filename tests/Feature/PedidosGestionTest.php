@@ -19,6 +19,10 @@ class PedidosGestionTest extends TestCase
         $this->actingAs($productor)->get(route('pedidos.recibidos'))->assertOk()->assertSee('Pedidos recibidos');
         $this->actingAs($productor)->patch(route('pedidos.estado', $pedido), ['estado' => 'aceptado'])->assertRedirect(route('pedidos.recibidos'));
         $this->assertSame('aceptado', $pedido->fresh()->estado);
+        $this->actingAs($productor)->patch(route('pedidos.estado', $pedido), ['estado' => 'preparando'])->assertRedirect(route('pedidos.recibidos'));
+        $this->assertSame('preparando', $pedido->fresh()->estado);
+        $this->actingAs($productor)->patch(route('pedidos.estado', $pedido), ['estado' => 'en_camino'])->assertRedirect(route('pedidos.recibidos'));
+        $this->assertSame('en_camino', $pedido->fresh()->estado);
         $this->actingAs($productor)->patch(route('pedidos.estado', $pedido), ['estado' => 'completado'])->assertRedirect(route('pedidos.recibidos'));
         $this->assertSame('completado', $pedido->fresh()->estado);
         $this->assertSame(3.0, (float) $producto->fresh()->cantidad);
@@ -27,7 +31,7 @@ class PedidosGestionTest extends TestCase
     public function test_rechazar_devuelve_stock_una_vez_y_bloquea_pedidos_ajenos(): void
     {
         [$productor, $pedido, $producto] = $this->crearPedido();
-        $otro = Usuario::create(['name' => 'Otro productor', 'email' => 'otro-pedido@example.test', 'password' => 'test-password', 'rol' => 'productor', 'activo' => true]);
+        $otro = Usuario::create(['name' => 'Otro productor', 'email' => 'otro-pedido@example.test', 'password' => 'test-password', 'rol' => 'productor', 'activo' => true, 'aprobado_en' => now()]);
 
         $this->actingAs($otro)->patch(route('pedidos.estado', $pedido), ['estado' => 'rechazado'])->assertForbidden();
         $this->actingAs($productor)->patch(route('pedidos.estado', $pedido), ['estado' => 'rechazado'])->assertRedirect(route('pedidos.recibidos'));
@@ -38,8 +42,8 @@ class PedidosGestionTest extends TestCase
 
     private function crearPedido(): array
     {
-        $productor = Usuario::create(['name' => 'Productor pedido', 'email' => 'productor-pedido@example.test', 'password' => 'test-password', 'rol' => 'productor', 'activo' => true]);
-        $comprador = Usuario::create(['name' => 'Comprador pedido', 'email' => 'comprador-pedido@example.test', 'password' => 'test-password', 'rol' => 'comprador', 'activo' => true]);
+        $productor = Usuario::create(['name' => 'Productor pedido', 'email' => 'productor-pedido@example.test', 'password' => 'test-password', 'rol' => 'productor', 'activo' => true, 'aprobado_en' => now()]);
+        $comprador = Usuario::create(['name' => 'Comprador pedido', 'email' => 'comprador-pedido@example.test', 'password' => 'test-password', 'rol' => 'comprador', 'activo' => true, 'aprobado_en' => now()]);
         $producto = Producto::create(['usuario_id' => $productor->id, 'nombre' => 'Papa nativa', 'cantidad' => 5, 'unidad' => 'kg', 'precio_unitario' => 4, 'estado' => 'disponible']);
         $this->actingAs($comprador)->post(route('pedidos.guardar', $producto), ['cantidad' => 2])->assertRedirect(route('pedidos.indice'));
 

@@ -92,6 +92,7 @@ class ProductosImagenTest extends TestCase
             'password' => 'clave-de-prueba',
             'rol' => 'productor',
             'activo' => true,
+            'aprobado_en' => now(),
         ]);
     }
 

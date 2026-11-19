@@ -123,6 +123,7 @@ class EliminacionesAdministrativasTest extends TestCase
             'password' => 'contrasena-segura-de-prueba',
             'rol' => $rol,
             'activo' => true,
+            'aprobado_en' => now(),
         ]);
     }
 }

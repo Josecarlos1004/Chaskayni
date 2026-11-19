@@ -83,6 +83,7 @@ class AdministracionCatalogosTest extends TestCase
             'password' => 'test-password',
             'rol' => 'comprador',
             'activo' => true,
+            'aprobado_en' => now(),
         ]);
         $comunidad = Comunidad::create([
             'nombre' => 'Comunidad protegida',
