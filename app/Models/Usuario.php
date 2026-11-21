@@ -36,6 +36,12 @@ class Usuario extends Authenticatable
         return $this->hasMany(Pedido::class, 'comprador_id');
     }
 
+    /** Cuenta las solicitudes de compra que el productor aún no ha respondido. */
+    public function pedidosPendientesRecibidos(): int
+    {
+        return Pedido::where('estado', 'pendiente')->deProductor($this->id)->count();
+    }
+
     public function esProductor(): bool
     {
         return in_array($this->rol, ['productor', 'administrador'], true);
