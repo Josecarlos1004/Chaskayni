@@ -211,3 +211,15 @@ form[onsubmit*="Eliminar"] .boton:hover,form[onsubmit*="eliminar"] .boton:hover{
 .evidencia-reporte{display:grid;justify-items:start;gap:9px;margin:16px 0;padding:15px;border-left:4px solid var(--marca-dorado);border-radius:0 10px 10px 0;background:#f7f5ec}
 .evidencia-reporte .sobrelinea{margin:0;color:#624a16}
 .evidencia-reporte img{display:block;width:min(100%,420px);max-height:320px;object-fit:contain;object-position:left center;border:1px solid var(--marca-borde);border-radius:9px;background:#fff}
+
+/* Panel y publicaciones del productor. */
+.cuadricula-estadisticas-cuatro{grid-template-columns:repeat(4,1fr)}
+.fila-publicacion{flex-wrap:wrap}.datos-publicacion{display:flex;align-items:center;gap:14px;flex:1;min-width:240px}.datos-publicacion small{display:block}
+.miniatura-producto{width:56px;height:56px;flex:0 0 56px;border-radius:10px;object-fit:cover;background:var(--arena)}.miniatura-vacia{display:grid;place-items:center;font-size:1.5rem}
+.estado-producto-disponible{background:#e3f1e5;color:#28593c}.estado-producto-agotado{background:#fff3d8;color:#795a20}.estado-producto-oculto{background:#eceeea;color:var(--atenuado)}
+.aviso-poco-stock{color:#9e6533!important;font-weight:700}
+@media(max-width:850px){.cuadricula-estadisticas-cuatro{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.cuadricula-estadisticas-cuatro{grid-template-columns:1fr}.fila-publicacion .acciones-tarjeta{width:100%;margin-top:4px}}
+.filtros-estado{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.contacto-comprador{margin:6px 0 0;color:var(--atenuado);font-size:.88rem}.contacto-comprador a{color:var(--verde);font-weight:700}
+.contador-nav{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:5px;border-radius:999px;background:var(--naranja);color:#fff;font-size:.72rem;font-weight:800}
