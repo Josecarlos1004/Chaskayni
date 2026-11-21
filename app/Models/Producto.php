@@ -56,6 +56,17 @@ class Producto extends Model
             : null;
     }
 
+    /** Devuelve el estado de la publicación con el texto que ve el productor. */
+    public function nombreEstado(): string
+    {
+        return match ($this->estado) {
+            'disponible' => 'Visible en el mercado',
+            'agotado' => 'Agotado',
+            'oculto' => 'Oculto',
+            default => ucfirst((string) $this->estado),
+        };
+    }
+
     public function vendedor(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
