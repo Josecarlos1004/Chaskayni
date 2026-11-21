@@ -40,6 +40,8 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
     Route::get('/pedidos-recibidos', [PedidosController::class, 'recibidos'])->name('pedidos.recibidos');
     Route::patch('/pedidos/{pedido}/estado', [PedidosController::class, 'actualizarEstado'])->name('pedidos.estado');
     Route::post('/productos/{producto}/pedir', [PedidosController::class, 'store'])->name('pedidos.guardar');
+    Route::get('/mis-productos', [ProductosController::class, 'misProductos'])->name('productos.mis');
+    Route::patch('/productos/{producto}/visibilidad', [ProductosController::class, 'cambiarVisibilidad'])->name('productos.visibilidad');
     Route::get('/productos/crear', [ProductosController::class, 'create'])->name('productos.crear');
     Route::post('/productos', [ProductosController::class, 'store'])->name('productos.guardar');
     Route::get('/productos/{producto}/editar', [ProductosController::class, 'edit'])->name('productos.editar');
