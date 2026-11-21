@@ -19,6 +19,35 @@ class ProductosController extends Controller
         abort_unless(Auth::user()->esProductor(), 403, 'Solo productores pueden administrar publicaciones.');
     }
 
+    /** Lista todas las publicaciones del productor, incluidas las agotadas u ocultas. */
+    public function misProductos(): View
+    {
+        $this->verificarProductor();
+
+        return view('productos.mis-productos', [
+            'productos' => Producto::with('comunidad')
+                ->where('usuario_id', Auth::id())
+                ->latest()
+                ->paginate(12),
+        ]);
+    }
+
+    /** Oculta o vuelve a mostrar una publicación sin perder su historial de pedidos. */
+    public function cambiarVisibilidad(Producto $producto): RedirectResponse
+    {
+        $this->verificarPropietario($producto);
+
+        if ($producto->estado === 'oculto') {
+            $producto->update(['estado' => (float) $producto->cantidad > 0 ? 'disponible' : 'agotado']);
+
+            return back()->with('success', 'La publicación volvió a mostrarse en el mercado.');
+        }
+
+        $producto->update(['estado' => 'oculto']);
+
+        return back()->with('success', 'La publicación quedó oculta del mercado.');
+    }
+
     public function create(): View
     {
         $this->verificarProductor();
@@ -67,6 +96,11 @@ class ProductosController extends Controller
         $this->verificarPropietario($producto);
         $datos = $this->validarDatos($request, $producto);
         unset($datos['imagen'], $datos['quitar_imagen']);
+
+        // Al reponer existencias, una publicación agotada vuelve a mostrarse.
+        if ($producto->estado === 'agotado' && (float) $datos['cantidad'] > 0) {
+            $datos['estado'] = 'disponible';
+        }
 
         $imagenAnterior = $producto->imagen_url;
         if ($request->hasFile('imagen')) {
