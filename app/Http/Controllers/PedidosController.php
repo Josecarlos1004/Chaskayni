@@ -25,16 +25,33 @@ class PedidosController extends Controller
     }
 
     /** Muestra las solicitudes de compra dirigidas a las publicaciones del productor. */
-    public function recibidos(): View
+    public function recibidos(Request $request): View
     {
         $usuario = Auth::user();
         abort_unless($usuario->esProductor(), 403, 'Solo productores y administración pueden ver esta sección.');
         $consulta = Pedido::with(['comprador', 'detalles.producto'])->latest();
         if (! $usuario->esAdministrador()) {
-            $consulta->whereHas('detalles.producto', fn ($productos) => $productos->where('usuario_id', $usuario->id));
+            $consulta->deProductor($usuario->id);
         }
 
-        return view('pedidos.recibidos', ['pedidos' => $consulta->paginate(15)]);
+        // Agrupa los estados intermedios en "en curso" para filtrar con menos opciones.
+        $grupos = [
+            'pendiente' => ['pendiente'],
+            'en_curso' => ['aceptado', 'preparando', 'en_camino'],
+            'completado' => ['completado'],
+            'rechazado' => ['rechazado'],
+        ];
+        $filtro = $request->query('estado');
+        if (is_string($filtro) && isset($grupos[$filtro])) {
+            $consulta->whereIn('estado', $grupos[$filtro]);
+        } else {
+            $filtro = null;
+        }
+
+        return view('pedidos.recibidos', [
+            'pedidos' => $consulta->paginate(15)->withQueryString(),
+            'filtro' => $filtro,
+        ]);
     }
 
     /** Valida el flujo, evita cambios ajenos y devuelve existencias al rechazar. */
