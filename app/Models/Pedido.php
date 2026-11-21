@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,6 +16,12 @@ class Pedido extends Model
     protected function casts(): array
     {
         return ['total' => 'decimal:2'];
+    }
+
+    /** Limita la consulta a los pedidos que incluyen productos de un productor. */
+    public function scopeDeProductor(Builder $consulta, int $usuarioId): Builder
+    {
+        return $consulta->whereHas('detalles.producto', fn ($productos) => $productos->where('usuario_id', $usuarioId));
     }
 
     public function comprador(): BelongsTo
