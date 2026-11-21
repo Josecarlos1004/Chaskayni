@@ -19,8 +19,9 @@
         @if (! auth()->check() || ! auth()->user()->esAdministrador())<a href="{{ route('contacto.formulario') }}">Contacto</a>@endif
         @auth
             @if (! auth()->user()->esAdministrador())<a href="{{ route('panel') }}">Mi panel</a>@endif
-            @if (! auth()->user()->esAdministrador())<a href="{{ route('pedidos.indice') }}">Mis pedidos</a>@endif
-            @if (auth()->user()->esProductor())<a href="{{ route('pedidos.recibidos') }}">Pedidos recibidos</a>@endif
+            @if (! auth()->user()->esProductor())<a href="{{ route('pedidos.indice') }}">Mis pedidos</a>@endif
+            @if (auth()->user()->esProductor() && ! auth()->user()->esAdministrador())<a href="{{ route('productos.mis') }}">Mis publicaciones</a>@endif
+            @if (auth()->user()->esProductor())<a href="{{ route('pedidos.recibidos') }}">Pedidos recibidos @if (($pendientes = auth()->user()->pedidosPendientesRecibidos()) > 0)<span class="contador-nav" aria-label="{{ $pendientes }} pendientes">{{ $pendientes }}</span>@endif</a>@endif
             @if (auth()->user()->esAdministrador())
                 <a href="{{ route('administracion.panel') }}">Administración</a>
                 <a href="{{ route('administracion.usuarios.indice') }}">Cuentas</a>
