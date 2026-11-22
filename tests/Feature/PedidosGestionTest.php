@@ -76,6 +76,7 @@ class PedidosGestionTest extends TestCase
         $this->assertDatabaseCount('pedidos', 0);
         $this->assertSame(5.0, (float) $producto->fresh()->cantidad);
     }
+
     private function crearPedido(): array
     {
         $productor = Usuario::create(['name' => 'Productor pedido', 'email' => 'productor-pedido@example.test', 'password' => 'test-password', 'rol' => 'productor', 'activo' => true, 'aprobado_en' => now()]);

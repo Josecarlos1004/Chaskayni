@@ -8,12 +8,12 @@ use App\Models\ReporteRiesgo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class ReportesRiesgoController extends Controller
@@ -70,6 +70,7 @@ class ReportesRiesgoController extends Controller
 
         return redirect()->route('panel')->with('success', 'Gracias. Tu reporte quedó pendiente de revisión.');
     }
+
     /** Muestra el detalle únicamente si administración aprobó el reporte. */
     public function detalle(ReporteRiesgo $reporteRiesgo): View
     {

@@ -1,6 +1,33 @@
-@extends('layouts.app')
-@section('titulo', 'Ingresar')
-@section('content')
-<section class="contenedor-acceso"><div class="lateral-acceso"><span class="sobrelinea">Bienvenido de vuelta</span><h1>Conectamos comunidad y cosecha.</h1><p>Ingresa para consultar tus pedidos, publicar cosechas o compartir información útil.</p><div class="simbolo-acceso">Ch</div></div><div class="tarjeta-acceso"><span class="sobrelinea">Tu cuenta</span><h2>Iniciar sesión</h2><form method="post" action="{{ route('acceso.guardar') }}">@csrf
-<label>Correo electrónico<input type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus></label><label>Contraseña<input type="password" name="password" autocomplete="current-password" required></label><label class="fila-casillas"><input type="checkbox" name="remember" value="1"> Mantener mi sesión</label><button class="boton boton-ancho-completo" type="submit">Ingresar</button></form><p class="pie-formulario">¿Aún no tienes cuenta? <a href="{{ route('register') }}">Regístrate</a></p></div></section>
+@extends ('layouts.app')
+@section ('titulo', 'Ingresar')
+@section ('content')
+    <section class="contenedor-acceso">
+        <div class="lateral-acceso">
+            <span class="sobrelinea">Bienvenido de vuelta</span>
+            <h1>Conectamos comunidad y cosecha.</h1>
+            <p>Ingresa para consultar tus pedidos, publicar cosechas o compartir información útil.</p>
+            <div class="simbolo-acceso">Ch</div>
+        </div>
+        <div class="tarjeta-acceso">
+            <span class="sobrelinea">Tu cuenta</span>
+            <h2>Iniciar sesión</h2>
+            <form method="post" action="{{ route('acceso.guardar') }}">
+                @csrf
+                <label
+                    >Correo electrónico<input
+                        type="email"
+                        name="email"
+                        value="{{ old('email') }}"
+                        autocomplete="email"
+                        required
+                        autofocus /></label
+                ><label
+                    >Contraseña<input type="password" name="password" autocomplete="current-password" required /></label
+                ><label class="fila-casillas"
+                    ><input type="checkbox" name="remember" value="1" /> Mantener mi sesión</label
+                ><button class="boton boton-ancho-completo" type="submit">Ingresar</button>
+            </form>
+            <p class="pie-formulario">¿Aún no tienes cuenta? <a href="{{ route('register') }}">Regístrate</a></p>
+        </div>
+    </section>
 @endsection

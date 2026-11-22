@@ -7,7 +7,9 @@
 
     const iniciarMapa = (elemento) => {
         if (!elemento || typeof L === 'undefined') return null;
-        const ubicaciones = [...refugios, ...reportes].filter((p) => Number.isFinite(Number(p.latitud)) && Number.isFinite(Number(p.longitud)));
+        const ubicaciones = [...refugios, ...reportes].filter(
+            (p) => Number.isFinite(Number(p.latitud)) && Number.isFinite(Number(p.longitud)),
+        );
         const centro = ubicaciones.length ? [Number(ubicaciones[0].latitud), Number(ubicaciones[0].longitud)] : centroCusco;
         const mapa = L.map(elemento).setView(centro, ubicaciones.length ? 12 : 11);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -22,7 +24,15 @@
         const limites = [];
         refugios.forEach((refugio) => {
             if (!Number.isFinite(Number(refugio.latitud)) || !Number.isFinite(Number(refugio.longitud))) return;
-            const marcador = L.circleMarker([refugio.latitud, refugio.longitud], { color: '#4f7a32', fillColor: '#4f7a32', fillOpacity: 0.85, radius: 9 }).addTo(mapaPublico);
+            const marcador = L.circleMarker(
+                [refugio.latitud, refugio.longitud],
+                {
+                    color: '#4f7a32',
+                    fillColor: '#4f7a32',
+                    fillOpacity: 0.85,
+                    radius: 9,
+                },
+            ).addTo(mapaPublico);
             const contenido = document.createElement('div');
             const titulo = document.createElement('strong');
             titulo.textContent = refugio.nombre;
@@ -34,7 +44,15 @@
         });
         reportes.forEach((reporte) => {
             if (!Number.isFinite(Number(reporte.latitud)) || !Number.isFinite(Number(reporte.longitud))) return;
-            const marcador = L.circleMarker([reporte.latitud, reporte.longitud], { color: '#b3362f', fillColor: '#b3362f', fillOpacity: 0.85, radius: 8 }).addTo(mapaPublico);
+            const marcador = L.circleMarker(
+                [reporte.latitud, reporte.longitud],
+                {
+                    color: '#b3362f',
+                    fillColor: '#b3362f',
+                    fillOpacity: 0.85,
+                    radius: 8,
+                },
+            ).addTo(mapaPublico);
             const contenido = document.createElement('div');
             const titulo = document.createElement('strong');
             titulo.textContent = reporte.titulo;

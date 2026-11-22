@@ -1,9 +1,69 @@
-@extends('layouts.app')
-@section('titulo', 'Mis pedidos')
-@section('content')
-<section class="encabezado-pagina"><div><span class="sobrelinea">Mercado comunitario</span><h1>Mis pedidos</h1><p>Consulta las solicitudes de compra que has enviado.</p></div><a class="boton boton-contorno" href="{{ route('mercado.indice') }}">Volver al mercado</a></section>
-<section class="seccion seccion-superior"><div class="panel">@forelse ($pedidos as $pedido)<article class="detalle-pedido"><div class="encabezado-panel"><div><h2>Pedido #{{ $pedido->id }}</h2><small>{{ $pedido->created_at->format('d/m/Y H:i') }}</small></div><span class="etiqueta-estado {{ $pedido->claseEstado() }}">{{ $pedido->nombreEstado() }}</span></div>
-@if ($pedido->estado === 'pendiente')<p class="aviso-pedido">El productor todavía debe confirmar este pedido.</p>@elseif ($pedido->estado === 'rechazado')<p class="aviso-pedido aviso-pedido-error">El pedido fue rechazado. Las existencias se devolvieron al mercado.</p>@else<ol class="seguimiento-pedido" aria-label="Seguimiento del pedido">@foreach ($pedido->pasosSeguimiento() as $paso)<li class="paso-seguimiento {{ $paso['completado'] ? 'paso-completado' : '' }} {{ $paso['actual'] ? 'paso-actual' : '' }}"><span aria-hidden="true">{{ $paso['completado'] ? '✓' : '○' }}</span><span>{{ $paso['nombre'] }}</span></li>@endforeach</ol>@endif
-@foreach ($pedido->detalles as $detalle)<div class="fila-pedido"><div><strong>{{ $detalle->producto?->nombre ?: 'Producto retirado' }}</strong><small>{{ number_format((float) $detalle->cantidad, 2) }} · {{ $detalle->producto?->unidad ?: 'unidad' }} · Productor/a: {{ $detalle->producto?->vendedor?->name ?: 'No disponible' }}</small></div><strong>S/ {{ number_format((float) $detalle->subtotal, 2) }}</strong></div>@endforeach
-<div class="total-pedido">Total <strong>S/ {{ number_format((float) $pedido->total, 2) }}</strong></div>@if ($pedido->notas)<p class="texto-atenuado">Nota: {{ $pedido->notas }}</p>@endif</article>@empty<div class="estado-vacio"><span>🧺</span><h3>Tus pedidos aparecerán aquí</h3><p>Busca productos locales en el mercado para empezar.</p><a class="boton" href="{{ route('mercado.indice') }}">Explorar productos</a></div>@endforelse</div><div class="paginacion">{{ $pedidos->links() }}</div></section>
+@extends ('layouts.app')
+@section ('titulo', 'Mis pedidos')
+@section ('content')
+    <section class="encabezado-pagina">
+        <div>
+            <span class="sobrelinea">Mercado comunitario</span>
+            <h1>Mis pedidos</h1>
+            <p>Consulta las solicitudes de compra que has enviado.</p>
+        </div>
+        <a class="boton boton-contorno" href="{{ route('mercado.indice') }}">Volver al mercado</a>
+    </section>
+    <section class="seccion seccion-superior">
+        <div class="panel">
+            @forelse ($pedidos as $pedido)
+                <article class="detalle-pedido">
+                    <div class="encabezado-panel">
+                        <div>
+                            <h2>Pedido #{{ $pedido->id }}</h2>
+                            <small>{{ $pedido->created_at->format('d/m/Y H:i') }}</small>
+                        </div>
+                        <span class="etiqueta-estado {{ $pedido->claseEstado() }}">{{ $pedido->nombreEstado() }}</span>
+                    </div>
+                    @if ($pedido->estado === 'pendiente')
+                        <p class="aviso-pedido">El productor todavía debe confirmar este pedido.</p>
+                    @elseif ($pedido->estado === 'rechazado')
+                        <p class="aviso-pedido aviso-pedido-error">El pedido fue rechazado. Las existencias se devolvieron al mercado.</p>
+                    @else
+                        <ol class="seguimiento-pedido" aria-label="Seguimiento del pedido">
+                            @foreach ($pedido->pasosSeguimiento() as $paso)
+                                <li
+                                    class="paso-seguimiento {{ $paso['completado'] ? 'paso-completado' : '' }} {{ $paso['actual'] ? 'paso-actual' : '' }}"
+                                >
+                                    <span aria-hidden="true">{{ $paso['completado'] ? '✓' : '○' }}</span
+                                    ><span>{{ $paso['nombre'] }}</span>
+                                </li>
+                            @endforeach
+                        </ol>
+                    @endif
+                    @foreach ($pedido->detalles as $detalle)
+                        <div class="fila-pedido">
+                            <div>
+                                <strong>{{ $detalle->producto?->nombre ?: 'Producto retirado' }}</strong
+                                ><small
+                                    >{{ number_format((float) $detalle->cantidad, 2) }} · {{ $detalle->producto?->unidad ?: 'unidad' }} ·
+                                    Productor/a: {{ $detalle->producto?->vendedor?->name ?: 'No disponible' }}</small
+                                >
+                            </div>
+                            <strong>S/ {{ number_format((float) $detalle->subtotal, 2) }}</strong>
+                        </div>
+                    @endforeach
+                    <div class="total-pedido">
+                        Total <strong>S/ {{ number_format((float) $pedido->total, 2) }}</strong>
+                    </div>
+                    @if ($pedido->notas)
+                        <p class="texto-atenuado">Nota: {{ $pedido->notas }}</p>
+                    @endif
+                </article>
+            @empty
+                <div class="estado-vacio">
+                    <span>🧺</span>
+                    <h3>Tus pedidos aparecerán aquí</h3>
+                    <p>Busca productos locales en el mercado para empezar.</p>
+                    <a class="boton" href="{{ route('mercado.indice') }}">Explorar productos</a>
+                </div>
+            @endforelse
+        </div>
+        <div class="paginacion">{{ $pedidos->links() }}</div>
+    </section>
 @endsection

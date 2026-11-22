@@ -31,6 +31,7 @@ class ProductosController extends Controller
             'inline',
         );
     }
+
     private function verificarProductor(): void
     {
         abort_unless(Auth::user()->esProductor(), 403, 'Solo productores pueden administrar publicaciones.');

@@ -1,16 +1,123 @@
-@extends('layouts.app')
-@section('titulo', 'Inicio')
-@section('content')
-<section class="portada portada-mercado"><div class="texto-portada"><span class="sobrelinea">Hecho en Cusco · Comunidad viva</span><h1>La cosecha de aquí, <em>más cerca de todos.</em></h1><p>Un espacio para descubrir productos locales, compartir avisos importantes y conectar comunidades.</p><div class="acciones-portada"><a class="boton boton-portada-claro" href="{{ route('mercado.indice') }}">Conocer el mercado <span aria-hidden="true">→</span></a><a class="enlace-portada" href="{{ route('alertas.indice') }}">Consultar alertas</a></div><div class="etiquetas-portada"><span>Productores locales</span><span>Compra comunitaria</span></div></div>
-<div class="ilustracion-portada ilustracion-mercado"><img src="{{ asset('images/portada-comunidad-cusco.jpeg') }}" alt="Ilustración de productores y familias andinas compartiendo cosechas en las terrazas de Cusco" fetchpriority="high"></div></section>
-<section class="seccion seccion-compacta seccion-conecta"><div class="encabezado-seccion"><div><span class="sobrelinea">Un solo lugar, varias formas de ayudar</span><h2>Conoce lo que pasa en tu comunidad</h2></div><p>Encuentra lo que necesitas para comprar localmente y mantenerte informado.</p></div><div class="cuadricula-funciones">
-<a class="tarjeta-funcion funcion-mercado" href="{{ route('mercado.indice') }}"><span class="icono-funcion">↗</span><div class="texto-funcion"><h3>Productos locales</h3><p>Cosechas publicadas directamente por productores.</p></div><span class="flecha-funcion" aria-hidden="true">↗</span></a>
-<a class="tarjeta-funcion funcion-alertas" href="{{ route('alertas.indice') }}"><span class="icono-funcion">⌁</span><div class="texto-funcion"><h3>Avisos revisados</h3><p>Información de clima, refugios y comunidad.</p></div><span class="flecha-funcion" aria-hidden="true">↗</span></a>
-<a class="tarjeta-funcion funcion-mapa" href="{{ route('mapa.indice') }}"><span class="icono-funcion">◎</span><div class="texto-funcion"><h3>Mapa comunitario</h3><p>Ubica comunidades y puntos de apoyo.</p></div><span class="flecha-funcion" aria-hidden="true">↗</span></a>
-</div></section>
-<section class="franja-cestas"><div><span class="sobrelinea">Menos desperdicio, más comunidad</span><h2>Cestas Salvadas con 30% de descuento</h2><p>Aprovecha productos disponibles y apoya el trabajo local.</p></div><a class="boton" href="{{ route('mercado.indice', ['cesta_salvada' => 1]) }}">Explorar cestas <span aria-hidden="true">→</span></a></section>
-@if ($alertas->isNotEmpty())<section class="seccion seccion-suave"><div class="encabezado-seccion"><div><span class="sobrelinea">Información comunitaria</span><h2>Alertas recientes</h2></div><a class="enlace-texto" href="{{ route('alertas.indice') }}">Ver todas →</a></div><div class="cuadricula-alertas">@foreach ($alertas as $alerta)<article class="tarjeta-alerta"><span class="nivel-alerta">{{ ucfirst($alerta->nivel) }}</span><h3>{{ $alerta->titulo }}</h3><p>{{ $alerta->mensaje }}</p><small>{{ $alerta->comunidad?->nombre ?: 'Alerta general' }} · {{ $alerta->created_at->format('d/m/Y') }}</small></article>@endforeach</div></section>@endif
-<section class="seccion"><div class="encabezado-seccion"><div><span class="sobrelinea">Mercado comunitario</span><h2>Publicaciones recientes</h2></div><a class="enlace-texto" href="{{ route('mercado.indice') }}">Ver el mercado →</a></div>
-@if ($productos->isNotEmpty())<div class="cuadricula-productos">@foreach ($productos as $producto) @include('components.tarjeta-producto', ['producto' => $producto]) @endforeach</div>@else<div class="estado-vacio"><span>🌾</span><h3>El mercado está listo para abrir</h3><p>Cuando un productor publique su primera cosecha, aparecerá aquí.</p><a class="boton boton-contorno" href="{{ route('register') }}">Crear una cuenta de productor</a></div>@endif
-</section>
+@extends ('layouts.app')
+@section ('titulo', 'Inicio')
+@section ('content')
+    <section class="portada portada-mercado">
+        <div class="texto-portada">
+            <span class="sobrelinea">Hecho en Cusco · Comunidad viva</span>
+            <h1>La cosecha de aquí, <em>más cerca de todos.</em></h1>
+            <p>Un espacio para descubrir productos locales, compartir avisos importantes y conectar comunidades.</p>
+            <div class="acciones-portada">
+                <a class="boton boton-portada-claro" href="{{ route('mercado.indice') }}">
+                    Conocer el mercado <span aria-hidden="true">→</span>
+                </a>
+                <a class="enlace-portada" href="{{ route('alertas.indice') }}">Consultar alertas</a>
+            </div>
+            <div class="etiquetas-portada">
+                <span>Productores locales</span>
+                <span>Compra comunitaria</span>
+            </div>
+        </div>
+        <div class="ilustracion-portada ilustracion-mercado">
+            <img
+                src="{{ asset('images/portada-comunidad-cusco.jpeg') }}"
+                alt="Ilustración de productores y familias andinas compartiendo cosechas en las terrazas de Cusco"
+                fetchpriority="high"
+            />
+        </div>
+    </section>
+
+    <section class="seccion seccion-compacta seccion-conecta">
+        <div class="encabezado-seccion">
+            <div>
+                <span class="sobrelinea">Un solo lugar, varias formas de ayudar</span>
+                <h2>Conoce lo que pasa en tu comunidad</h2>
+            </div>
+            <p>Encuentra lo que necesitas para comprar localmente y mantenerte informado.</p>
+        </div>
+        <div class="cuadricula-funciones">
+            <a class="tarjeta-funcion funcion-mercado" href="{{ route('mercado.indice') }}">
+                <span class="icono-funcion">↗</span>
+                <div class="texto-funcion">
+                    <h3>Productos locales</h3>
+                    <p>Cosechas publicadas directamente por productores.</p>
+                </div>
+                <span class="flecha-funcion" aria-hidden="true">↗</span>
+            </a>
+            <a class="tarjeta-funcion funcion-alertas" href="{{ route('alertas.indice') }}">
+                <span class="icono-funcion">⌁</span>
+                <div class="texto-funcion">
+                    <h3>Avisos revisados</h3>
+                    <p>Información de clima, refugios y comunidad.</p>
+                </div>
+                <span class="flecha-funcion" aria-hidden="true">↗</span>
+            </a>
+            <a class="tarjeta-funcion funcion-mapa" href="{{ route('mapa.indice') }}">
+                <span class="icono-funcion">◎</span>
+                <div class="texto-funcion">
+                    <h3>Mapa comunitario</h3>
+                    <p>Ubica comunidades y puntos de apoyo.</p>
+                </div>
+                <span class="flecha-funcion" aria-hidden="true">↗</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="franja-cestas">
+        <div>
+            <span class="sobrelinea">Menos desperdicio, más comunidad</span>
+            <h2>Cestas Salvadas con 30% de descuento</h2>
+            <p>Aprovecha productos disponibles y apoya el trabajo local.</p>
+        </div>
+        <a class="boton" href="{{ route('mercado.indice', ['cesta_salvada' => 1]) }}">
+            Explorar cestas <span aria-hidden="true">→</span>
+        </a>
+    </section>
+
+    @if ($alertas->isNotEmpty())
+        <section class="seccion seccion-suave">
+            <div class="encabezado-seccion">
+                <div>
+                    <span class="sobrelinea">Información comunitaria</span>
+                    <h2>Alertas recientes</h2>
+                </div>
+                <a class="enlace-texto" href="{{ route('alertas.indice') }}">Ver todas →</a>
+            </div>
+            <div class="cuadricula-alertas">
+                @foreach ($alertas as $alerta)
+                    <article class="tarjeta-alerta">
+                        <span class="nivel-alerta">{{ ucfirst($alerta->nivel) }}</span>
+                        <h3>{{ $alerta->titulo }}</h3>
+                        <p>{{ $alerta->mensaje }}</p>
+                        <small>
+                            {{ $alerta->comunidad?->nombre ?: 'Alerta general' }} · {{ $alerta->created_at->format('d/m/Y') }}
+                        </small>
+                    </article>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
+    <section class="seccion">
+        <div class="encabezado-seccion">
+            <div>
+                <span class="sobrelinea">Mercado comunitario</span>
+                <h2>Publicaciones recientes</h2>
+            </div>
+            <a class="enlace-texto" href="{{ route('mercado.indice') }}">Ver el mercado →</a>
+        </div>
+        @if ($productos->isNotEmpty())
+            <div class="cuadricula-productos">
+                @foreach ($productos as $producto)
+                    @include ('components.tarjeta-producto', ['producto' => $producto])
+                @endforeach
+            </div>
+        @else
+            <div class="estado-vacio">
+                <span>🌾</span>
+                <h3>El mercado está listo para abrir</h3>
+                <p>Cuando un productor publique su primera cosecha, aparecerá aquí.</p>
+                <a class="boton boton-contorno" href="{{ route('register') }}">Crear una cuenta de productor</a>
+            </div>
+        @endif
+    </section>
 @endsection

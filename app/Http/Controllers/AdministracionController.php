@@ -16,11 +16,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Throwable;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class AdministracionController extends Controller
 {
@@ -435,6 +435,7 @@ class AdministracionController extends Controller
             'inline',
         );
     }
+
     /** Reemplaza evidencia privada solo mientras el reporte siga en revisión. */
     public function actualizarEvidenciaReporte(Request $request, ReporteRiesgo $reporteRiesgo): RedirectResponse
     {
