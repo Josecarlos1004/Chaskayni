@@ -336,9 +336,9 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
         $rutaEvidencia = $reporteRiesgo->foto_evidencia;
-        abort_unless($rutaEvidencia && Storage::disk('local')->exists($rutaEvidencia), 404);
+        abort_unless($rutaEvidencia && Storage::disk('privado')->exists($rutaEvidencia), 404);
 
-        return Storage::disk('local')->response(
+        return Storage::disk('privado')->response(
             $rutaEvidencia,
             'evidencia-reporte-'.$reporteRiesgo->id,
             [
@@ -391,7 +391,7 @@ class AdministracionController extends Controller
         $rutaEvidencia = $reporteRiesgo->foto_evidencia;
         $reporteRiesgo->delete();
         if ($rutaEvidencia) {
-            Storage::disk('local')->delete($rutaEvidencia);
+            Storage::disk('privado')->delete($rutaEvidencia);
         }
 
         return back()->with('success', 'Se eliminó el reporte comunitario.');

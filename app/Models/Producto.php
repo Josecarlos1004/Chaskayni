@@ -29,30 +29,40 @@ class Producto extends Model
         return round($this->cesta_salvada ? $precio * 0.70 : $precio, 2);
     }
 
-    /** Devuelve la URL pública de la foto local o conserva una URL externa anterior. */
+    /** Devuelve una ruta del servidor para fotos guardadas o conserva las URL externas. */
     public function urlImagen(): ?string
     {
         if (! $this->imagen_url) {
             return null;
         }
 
-        if (str_starts_with($this->imagen_url, '/storage/productos/')) {
-            return $this->imagen_url;
+        if ($this->rutaImagenAlmacenada()) {
+            return route('productos.imagen', $this, false);
         }
 
-        if (filter_var($this->imagen_url, FILTER_VALIDATE_URL)) {
-            $ruta = parse_url($this->imagen_url, PHP_URL_PATH);
+        return filter_var($this->imagen_url, FILTER_VALIDATE_URL)
+            ? $this->imagen_url
+            : null;
+    }
 
-            // Convierte las URL absolutas guardadas por instalaciones locales en rutas compartibles.
-            if (is_string($ruta) && str_starts_with($ruta, '/storage/productos/')) {
-                return $ruta;
-            }
-
-            return $this->imagen_url;
+    /** Normaliza rutas locales antiguas y rutas guardadas en el almacenamiento persistente. */
+    public function rutaImagenAlmacenada(): ?string
+    {
+        $imagen = $this->imagen_url;
+        if (! $imagen) {
+            return null;
         }
 
-        return str_starts_with($this->imagen_url, 'productos/')
-            ? '/storage/'.ltrim($this->imagen_url, '/')
+        if (filter_var($imagen, FILTER_VALIDATE_URL)) {
+            $imagen = parse_url($imagen, PHP_URL_PATH) ?: '';
+        }
+
+        if (str_starts_with($imagen, '/storage/productos/')) {
+            return substr($imagen, strlen('/storage/'));
+        }
+
+        return str_starts_with($imagen, 'productos/')
+            ? ltrim($imagen, '/')
             : null;
     }
 

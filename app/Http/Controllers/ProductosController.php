@@ -11,9 +11,26 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductosController extends Controller
 {
+    /** Sirve las fotos del mercado aunque estén guardadas en un bucket privado. */
+    public function verImagenPublica(Producto $producto): StreamedResponse
+    {
+        $rutaImagen = $producto->rutaImagenAlmacenada();
+        abort_unless($rutaImagen && Storage::disk('public')->exists($rutaImagen), 404);
+
+        return Storage::disk('public')->response(
+            $rutaImagen,
+            'producto-'.$producto->id,
+            [
+                'Cache-Control' => 'public, max-age=3600',
+                'X-Content-Type-Options' => 'nosniff',
+            ],
+            'inline',
+        );
+    }
     private function verificarProductor(): void
     {
         abort_unless(Auth::user()->esProductor(), 403, 'Solo productores pueden administrar publicaciones.');

@@ -53,8 +53,8 @@ class ReportesRiesgoController extends Controller
                 ]);
 
                 if ($fotoEvidencia) {
-                    // El disco local usa storage/app/private y no expone esta imagen como archivo público.
-                    $rutaEvidencia = $fotoEvidencia->store('evidencias-reportes', 'local');
+                    // El disco privado no expone la evidencia y puede usar almacenamiento persistente S3.
+                    $rutaEvidencia = $fotoEvidencia->store('evidencias-reportes', 'privado');
                     if (! $rutaEvidencia) {
                         throw ValidationException::withMessages(['foto_evidencia' => 'No se pudo guardar la fotografía. Inténtalo nuevamente.']);
                     }
@@ -63,7 +63,7 @@ class ReportesRiesgoController extends Controller
             });
         } catch (Throwable $error) {
             if ($rutaEvidencia) {
-                Storage::disk('local')->delete($rutaEvidencia);
+                Storage::disk('privado')->delete($rutaEvidencia);
             }
             throw $error;
         }
@@ -84,9 +84,9 @@ class ReportesRiesgoController extends Controller
     {
         abort_unless($reporteRiesgo->estado === 'publicado', 404);
         $rutaFoto = $reporteRiesgo->foto_evidencia;
-        abort_unless($rutaFoto && Storage::disk('local')->exists($rutaFoto), 404);
+        abort_unless($rutaFoto && Storage::disk('privado')->exists($rutaFoto), 404);
 
-        return Storage::disk('local')->response(
+        return Storage::disk('privado')->response(
             $rutaFoto,
             'foto-incidente-'.$reporteRiesgo->id,
             [
