@@ -2,7 +2,7 @@
 <div class="imagen-producto">
 @if ($producto->urlImagen())<img src="{{ $producto->urlImagen() }}" alt="{{ $producto->nombre }}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.hidden=false"><div class="imagen-reemplazo" hidden>🌱<span>Producto local</span></div>
 @else<div class="imagen-reemplazo">🌱<span>Producto local</span></div>@endif
-<span class="etiqueta">{{ $producto->categoria ?: 'Cosecha local' }}</span>@if ($producto->cesta_salvada)<span class="insignia-cesta-salvada">Cesta Salvadas · 30% menos</span>@endif</div>
+<span class="etiqueta">{{ $producto->categoria ?: 'Cosecha local' }}</span>@if ($producto->cesta_salvada)<span class="insignia-cesta-salvada">Cesta salvada · 30% menos</span>@endif</div>
 <div class="contenido-producto"><div class="datos-producto">{{ $producto->comunidad?->nombre ?: 'Comunidad de Cusco' }} · {{ $producto->vendedor->name }}</div><h3>{{ $producto->nombre }}</h3><p class="descripcion-producto">{{ $producto->descripcion ?: 'Producto publicado directamente por un productor de la comunidad.' }}</p>
 @if ($producto->cesta_salvada)<div class="precio-producto precio-producto-oferta"><s>S/ {{ number_format((float) $producto->precio_unitario, 2) }}</s> S/ {{ number_format($producto->precioUnitarioAplicado(), 2) }} <small>/ {{ $producto->unidad }}</small></div><small class="leyenda-descuento">Descuento aplicado al pedir</small>@else<div class="precio-producto">S/ {{ number_format((float) $producto->precio_unitario, 2) }} <small>/ {{ $producto->unidad }}</small></div>@endif<div class="linea-existencias">{{ number_format((float) $producto->cantidad, 2) }} {{ $producto->unidad }} disponibles</div>
 @auth

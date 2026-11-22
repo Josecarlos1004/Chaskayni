@@ -59,12 +59,17 @@ class AccesoController extends Controller
             'telefono' => ['required', 'regex:/^9[0-9]{8}$/'],
             'password' => ['required', 'string', 'min:10', 'confirmed'],
             'rol' => ['required', 'in:productor,comprador'],
-            'comunidad_id' => ['required', Rule::exists('comunidades', 'id')->where('activo', true)],
+            'tipo_comunidad' => ['required', 'in:existente,propuesta'],
+            'comunidad_id' => ['exclude_unless:tipo_comunidad,existente', 'required', Rule::exists('comunidades', 'id')->where('activo', true)],
+            'comunidad_propuesta' => ['exclude_unless:tipo_comunidad,propuesta', 'required', 'string', 'min:2', 'max:120'],
+            'distrito_propuesto' => ['exclude_unless:tipo_comunidad,propuesta', 'nullable', 'string', 'max:120'],
         ], [
             'dni.regex' => 'El DNI debe tener exactamente 8 dígitos.',
             'dni.unique' => 'Ya existe una cuenta registrada con ese DNI.',
             'telefono.regex' => 'Ingresa un celular peruano de 9 dígitos que empiece en 9.',
-            'comunidad_id.required' => 'Selecciona tu comunidad.',
+            'comunidad_id.required' => 'Selecciona una comunidad de la lista.',
+            'comunidad_propuesta.required' => 'Escribe el nombre de tu comunidad.',
+            'comunidad_id.exists' => 'La comunidad seleccionada ya no está disponible. Elige otra.',
         ]);
 
         Usuario::create([
@@ -74,7 +79,9 @@ class AccesoController extends Controller
             'telefono' => $datos['telefono'],
             'password' => Hash::make($datos['password']),
             'rol' => $datos['rol'],
-            'comunidad_id' => $datos['comunidad_id'],
+            'comunidad_id' => $datos['comunidad_id'] ?? null,
+            'comunidad_propuesta' => $datos['comunidad_propuesta'] ?? null,
+            'distrito_propuesto' => $datos['distrito_propuesto'] ?? null,
             'activo' => true,
             'aprobado_en' => null,
         ]);

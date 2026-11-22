@@ -40,6 +40,42 @@ class PedidosGestionTest extends TestCase
         $this->assertSame(5.0, (float) $producto->fresh()->cantidad);
     }
 
+    public function test_solo_compradores_pueden_realizar_pedidos(): void
+    {
+        $administrador = Usuario::create([
+            'name' => 'Administración',
+            'email' => 'admin-compra@example.test',
+            'password' => 'test-password',
+            'rol' => 'administrador',
+            'activo' => true,
+        ]);
+        $productor = Usuario::create([
+            'name' => 'Productor de prueba',
+            'email' => 'productor-admin-compra@example.test',
+            'password' => 'test-password',
+            'rol' => 'productor',
+            'activo' => true,
+            'aprobado_en' => now(),
+        ]);
+        $producto = Producto::create([
+            'usuario_id' => $productor->id,
+            'nombre' => 'Papa para prueba de permisos',
+            'cantidad' => 5,
+            'unidad' => 'kg',
+            'precio_unitario' => 4,
+            'estado' => 'disponible',
+        ]);
+
+        $this->actingAs($administrador)
+            ->post(route('pedidos.guardar', $producto), ['cantidad' => 2])
+            ->assertForbidden();
+        $this->actingAs($productor)
+            ->post(route('pedidos.guardar', $producto), ['cantidad' => 2])
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('pedidos', 0);
+        $this->assertSame(5.0, (float) $producto->fresh()->cantidad);
+    }
     private function crearPedido(): array
     {
         $productor = Usuario::create(['name' => 'Productor pedido', 'email' => 'productor-pedido@example.test', 'password' => 'test-password', 'rol' => 'productor', 'activo' => true, 'aprobado_en' => now()]);

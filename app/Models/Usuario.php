@@ -12,9 +12,9 @@ class Usuario extends Authenticatable
 
     protected $table = 'users';
 
-    protected $fillable = ['name', 'email', 'password', 'rol', 'comunidad_id', 'activo', 'dni', 'telefono', 'aprobado_en'];
+    protected $fillable = ['name', 'email', 'password', 'rol', 'comunidad_id', 'comunidad_propuesta', 'distrito_propuesto', 'activo', 'dni', 'telefono', 'aprobado_en'];
 
-    protected $hidden = ['password', 'remember_token', 'dni', 'telefono'];
+    protected $hidden = ['password', 'remember_token', 'dni', 'telefono', 'comunidad_propuesta', 'distrito_propuesto'];
 
     protected function casts(): array
     {

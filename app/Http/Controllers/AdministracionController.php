@@ -55,6 +55,7 @@ class AdministracionController extends Controller
 
         return view('administracion.usuarios', [
             'usuarios' => $consultaUsuarios->orderBy('name')->paginate(15),
+            'comunidades' => Comunidad::orderBy('nombre')->get(['id', 'nombre', 'activo']),
         ]);
     }
 
@@ -104,9 +105,16 @@ class AdministracionController extends Controller
             'rol' => ['required', 'in:productor,comprador,administrador'],
             'activo' => ['required', 'boolean'],
             'aprobado' => ['required', 'boolean'],
+            'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')],
         ]);
 
         $activo = (bool) $datos['activo'];
+        $comunidadId = array_key_exists('comunidad_id', $datos) ? $datos['comunidad_id'] : $usuario->comunidad_id;
+        if ((bool) $datos['aprobado'] && $datos['rol'] !== 'administrador'
+            && (! $comunidadId || ! Comunidad::whereKey($comunidadId)->where('activo', true)->exists())) {
+            return back()->withErrors(['comunidad_id' => 'Asigna una comunidad activa antes de aprobar esta cuenta.'])->withInput();
+        }
+        $datos['comunidad_id'] = $comunidadId;
         if ($usuario->is(Auth::user()) && ($datos['rol'] !== 'administrador' || ! $activo || ! (bool) $datos['aprobado'])) {
             return back()->withErrors(['cuenta' => 'No puedes quitarte el rol de administrador ni desactivar tu propia cuenta.']);
         }
@@ -130,6 +138,9 @@ class AdministracionController extends Controller
 
             $usuario->update([
                 'rol' => $datos['rol'],
+                'comunidad_id' => $datos['comunidad_id'],
+                'comunidad_propuesta' => (bool) $datos['aprobado'] ? null : $usuario->comunidad_propuesta,
+                'distrito_propuesto' => (bool) $datos['aprobado'] ? null : $usuario->distrito_propuesto,
                 'activo' => $activo,
                 'aprobado_en' => (bool) $datos['aprobado'] ? ($usuario->aprobado_en ?? now()) : null,
             ]);

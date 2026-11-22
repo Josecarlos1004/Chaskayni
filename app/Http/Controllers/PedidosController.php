@@ -81,7 +81,7 @@ class PedidosController extends Controller
 
     public function store(Request $request, Producto $producto): RedirectResponse
     {
-        abort_if(Auth::user()->rol === 'productor', 403, 'Las cuentas de productor no pueden comprar.');
+        abort_unless(Auth::user()->rol === 'comprador', 403, 'Solo las cuentas de comprador pueden realizar pedidos.');
         $datos = $request->validate([
             'cantidad' => ['required', 'numeric', 'gt:0', 'max:99999999'],
             'notas' => ['nullable', 'string', 'max:1000'],
