@@ -36,8 +36,11 @@ class Producto extends Model
             return null;
         }
 
-        if ($this->rutaImagenAlmacenada()) {
-            return route('productos.imagen', $this, false);
+        $rutaAlmacenada = $this->rutaImagenAlmacenada();
+        if ($rutaAlmacenada) {
+            return config('filesystems.disks.public.driver') === 'local'
+                ? asset('storage/'.ltrim($rutaAlmacenada, '/'))
+                : route('productos.imagen', $this, false);
         }
 
         return filter_var($this->imagen_url, FILTER_VALIDATE_URL)
