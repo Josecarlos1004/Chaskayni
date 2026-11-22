@@ -6,7 +6,7 @@ use App\Models\Usuario;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-/*hola ejemplo de que guarda*/
+
 /**
  * @extends Factory<Usuario>
  */
