@@ -8,7 +8,7 @@
 <body>
 <header class="encabezado-sitio">
     <a class="marca" href="{{ route('inicio') }}"><span class="sello-marca"><img src="{{ asset('images/logo-chaskayni-marca.png') }}" alt=""></span>
-    <span>chaskayni<small>mercado y apoyo comunitario</small>
+    <span>Chaskayni<small>mercado y apoyo comunitario</small>
     </span></a>
     <button class="boton-menu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="navegacion-principal">☰</button>
     <nav id="navegacion-principal" class="enlaces-navegacion" aria-label="Navegación principal">
@@ -37,7 +37,7 @@
 @if ($errors->any())<div class="aviso aviso-error" role="alert"><div><strong>Revisa estos datos:</strong><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div><button class="aviso-cerrar" type="button" aria-label="Cerrar aviso" data-cerrar-aviso>×</button></div>@endif
 @yield('content')
 </main>
-<footer class="pie-sitio"><a class="marca marca-pie" href="{{ route('inicio') }}"><span class="sello-marca"><img src="{{ asset('images/logo-chaskayni-marca.png') }}" alt=""></span><span>chaskayni<small>Conectando comunidad y cosecha</small></span></a><p>Proyecto académico · Cusco, Perú @if (! auth()->check() || ! auth()->user()->esAdministrador())· <a href="{{ route('contacto.formulario') }}">Contacto</a>@endif</p></footer>
+<footer class="pie-sitio"><a class="marca marca-pie" href="{{ route('inicio') }}"><span class="sello-marca"><img src="{{ asset('images/logo-chaskayni-marca.png') }}" alt=""></span><span>Chaskayni<small>Conectando comunidad y cosecha</small></span></a><p>Proyecto académico · Cusco, Perú @if (! auth()->check() || ! auth()->user()->esAdministrador())· <a href="{{ route('contacto.formulario') }}">Contacto</a>@endif</p></footer>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const botonMenu = document.querySelector('.boton-menu');

@@ -98,7 +98,7 @@ button,input,textarea,select {
     align-items: center;
     gap: 11px;
     font: 800 1.13rem Manrope,sans-serif;
-    letter-spacing: -.05em;
+    letter-spacing: -.025em;
 }
 .marca small {
     display: block;
