@@ -24,5 +24,7 @@ class DatabaseSeeder extends Seeder
         foreach ($comunidadesDeDemostracion as $nombre) {
             Comunidad::firstOrCreate(['nombre' => $nombre]);
         }
+
+        $this->call(ProductosDemostracionSeeder::class);
     }
 }
