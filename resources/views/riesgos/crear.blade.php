@@ -20,7 +20,7 @@
     </label>
     <label class="evidencia-campo">Fotografía de evidencia (opcional)
         <input type="file" name="foto_evidencia" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="ayuda-evidencia">
-        <small id="ayuda-evidencia">JPG, PNG o WebP; máximo 5 MB. Solo administración verá la foto durante la revisión; no se publicará con la alerta.</small>
+        <small id="ayuda-evidencia">JPG, PNG o WebP; máximo 5 MB. Adjunta solo una foto del incidente, sin rostros ni datos personales. Administración la revisará y, si aprueba el reporte, se mostrará en su detalle público.</small>
     </label>
 @if($comunidades->isNotEmpty())<label>Comunidad
         <select name="comunidad_id">
@@ -41,7 +41,7 @@
             <input id="longitud" type="number" name="longitud" step="any" min="-180" max="180" value="{{ old('longitud') }}">
         </label>
     </div>
-    <div class="nota-privacidad">No incluyas datos personales de terceros. Comparte solo la información necesaria para ubicar y comprender el riesgo.</div>
+    <div class="nota-privacidad">No incluyas nombres, teléfonos, DNI ni otros datos personales en la descripción o la foto. Comparte solo la información necesaria para comprender el incidente.</div>
     <div class="acciones-formulario">
         <a class="boton boton-claro" href="{{ route('panel') }}">Cancelar</a>
         <button class="boton" type="submit">Enviar para revisión</button>

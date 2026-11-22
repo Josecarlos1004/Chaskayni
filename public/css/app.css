@@ -2525,3 +2525,102 @@ form[onsubmit*="Eliminar"] .boton:hover,form[onsubmit*="eliminar"] .boton:hover 
         flex-basis: 100%;
     }
 }
+
+/* Variantes de botón con fondo y texto contrastantes desde el primer momento. */
+.boton {
+    background: var(--marca-hoja);
+    border-color: var(--marca-hoja);
+    color: #fff;
+}
+.boton-oscuro {
+    background: var(--marca-bosque);
+    border-color: var(--marca-bosque);
+    color: #fff;
+}
+.boton-claro,.boton-contorno {
+    background: #fff;
+    border-color: #c9d9cd;
+    color: var(--marca-bosque);
+}
+.boton-claro {
+    border-color: #fff;
+}
+.boton-portada-claro {
+    background: #f9f5eb;
+    border-color: #f9f5eb;
+    color: var(--marca-bosque);
+}
+.boton-sutil {
+    background: #a94331;
+    border-color: #a94331;
+    color: #fff;
+}
+.boton-contorno:hover,.boton-claro:hover {
+    background: var(--marca-salvia);
+    border-color: #b8cdb9;
+    color: var(--marca-bosque);
+}
+.boton-sutil:hover {
+    background: #863523;
+    border-color: #863523;
+    color: #fff;
+}
+.boton-portada-claro:hover {
+    background: #e8d9a7;
+    border-color: #e8d9a7;
+    color: var(--marca-bosque);
+}
+form[onsubmit*="Eliminar"] .boton,form[onsubmit*="eliminar"] .boton {
+    background: #a94331;
+    border-color: #a94331;
+    color: #fff;
+}
+form[onsubmit*="Eliminar"] .boton:hover,form[onsubmit*="eliminar"] .boton:hover {
+    background: #863523;
+    border-color: #863523;
+    color: #fff;
+}
+
+/* Detalle público de reportes aprobados. */
+.detalle-reporte {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 42px);
+    border: 1px solid var(--marca-borde);
+    border-radius: 16px;
+    background: var(--marca-superficie);
+    box-shadow: var(--sombra-suave);
+}
+.detalle-reporte-datos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    color: var(--marca-texto-suave);
+    font-size: .9rem;
+}
+.detalle-reporte h2 {
+    font-size: 1.45rem;
+}
+.detalle-reporte-descripcion {
+    white-space: pre-line;
+    line-height: 1.8;
+}
+.foto-reporte-publico {
+    margin: 28px 0;
+}
+.foto-reporte-publico img {
+    display: block;
+    width: 100%;
+    max-height: 620px;
+    object-fit: contain;
+    border: 1px solid var(--marca-borde);
+    border-radius: 12px;
+    background: #f4f3ed;
+}
+.foto-reporte-publico figcaption {
+    margin-top: 8px;
+    color: var(--marca-texto-suave);
+    font-size: .85rem;
+}

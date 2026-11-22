@@ -7,8 +7,8 @@ use App\Models\Refugio;
 use App\Models\ReporteRiesgo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -69,5 +69,31 @@ class ReportesRiesgoController extends Controller
         }
 
         return redirect()->route('panel')->with('success', 'Gracias. Tu reporte quedó pendiente de revisión.');
+    }
+    /** Muestra el detalle únicamente si administración aprobó el reporte. */
+    public function detalle(ReporteRiesgo $reporteRiesgo): View
+    {
+        abort_unless($reporteRiesgo->estado === 'publicado', 404);
+        $reporteRiesgo->load(['comunidad', 'alerta']);
+
+        return view('riesgos.detalle', ['reporte' => $reporteRiesgo]);
+    }
+
+    /** Sirve la foto del incidente solo después de aprobar el reporte. */
+    public function verFotoPublica(ReporteRiesgo $reporteRiesgo): StreamedResponse
+    {
+        abort_unless($reporteRiesgo->estado === 'publicado', 404);
+        $rutaFoto = $reporteRiesgo->foto_evidencia;
+        abort_unless($rutaFoto && Storage::disk('local')->exists($rutaFoto), 404);
+
+        return Storage::disk('local')->response(
+            $rutaFoto,
+            'foto-incidente-'.$reporteRiesgo->id,
+            [
+                'Cache-Control' => 'public, max-age=300, must-revalidate',
+                'X-Content-Type-Options' => 'nosniff',
+            ],
+            'inline',
+        );
     }
 }

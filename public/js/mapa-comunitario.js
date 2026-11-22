@@ -40,7 +40,10 @@
             titulo.textContent = reporte.titulo;
             const descripcion = document.createElement('p');
             descripcion.textContent = reporte.descripcion || '';
-            contenido.append(titulo, descripcion);
+            const enlaceDetalle = document.createElement('a');
+            enlaceDetalle.href = reporte.url;
+            enlaceDetalle.textContent = 'Ver detalle y fotografía';
+            contenido.append(titulo, descripcion, enlaceDetalle);
             marcador.bindPopup(contenido);
             limites.push([reporte.latitud, reporte.longitud]);
         });

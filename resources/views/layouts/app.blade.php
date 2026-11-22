@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap"></noscript>
-<link rel="icon" type="image/png" href="{{ asset('images/logo-chaskayni-marca.png') }}"><link rel="stylesheet" href="{{ asset('css/app.css') }}"></head>
+<link rel="icon" type="image/png" href="{{ asset('images/logo-chaskayni-marca.png') }}"><link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}"></head>
 <body>
 <header class="encabezado-sitio">
     <a class="marca" href="{{ route('inicio') }}"><span class="sello-marca"><img src="{{ asset('images/logo-chaskayni-marca.png') }}" alt=""></span>

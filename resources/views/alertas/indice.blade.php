@@ -21,6 +21,9 @@
                     @endif
                     <h2>{{ $alerta->titulo }}</h2>
                     <p>{{ $alerta->mensaje }}</p>
+                    @if ($alerta->reporteOrigen?->estado === 'publicado')
+                        <a class="enlace-texto" href="{{ route('riesgos.detalle', $alerta->reporteOrigen) }}">Ver detalle y fotografía del incidente</a>
+                    @endif
                     @if (! is_null($alerta->temperatura_c))
                         <strong>Temperatura prevista: {{ number_format((float) $alerta->temperatura_c, 1) }} °C</strong>
                     @endif

@@ -15,7 +15,7 @@ class MapaComunitarioController extends Controller
             ->orderBy('nombre')
             ->get();
         $reportes = ReporteRiesgo::with('comunidad')
-            ->whereIn('estado', ['revisado', 'publicado'])
+            ->where('estado', 'publicado')
             ->latest()
             ->get();
 
@@ -38,6 +38,7 @@ class MapaComunitarioController extends Controller
                         'descripcion' => $reporte->descripcion,
                         'latitud' => $reporte->latitud,
                         'longitud' => $reporte->longitud,
+                        'url' => route('riesgos.detalle', $reporte),
                     ])->values(),
             ],
         ]);

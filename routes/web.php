@@ -78,3 +78,7 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
         Route::delete('/refugios/{refugio}', [AdministracionController::class, 'eliminarRefugio'])->name('refugios.eliminar');
     });
 });
+
+// Los reportes solo se consultan públicamente después de su aprobación.
+Route::get('/reportes/{reporteRiesgo}/foto', [ReportesRiesgoController::class, 'verFotoPublica'])->name('riesgos.foto');
+Route::get('/reportes/{reporteRiesgo}', [ReportesRiesgoController::class, 'detalle'])->name('riesgos.detalle');
