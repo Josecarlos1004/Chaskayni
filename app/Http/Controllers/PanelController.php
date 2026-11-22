@@ -20,6 +20,9 @@ class PanelController extends Controller
 
         return view('panel', [
             'cantidadPublicaciones' => $usuario->productos()->count(),
+            'productosOcultos' => $usuario->esProductor()
+                ? $usuario->productos()->with(['vendedor', 'comunidad'])->where('estado', 'oculto')->latest()->get()
+                : collect(),
             'cantidadPedidos' => $usuario->pedidos()->count(),
             'cantidadAlertas' => AlertaHelada::activas()->count(),
             'pedidosRecientes' => Pedido::with('detalles.producto')

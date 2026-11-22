@@ -46,6 +46,7 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
     Route::post('/productos', [ProductosController::class, 'store'])->name('productos.guardar');
     Route::get('/productos/{producto}/editar', [ProductosController::class, 'edit'])->name('productos.editar');
     Route::put('/productos/{producto}', [ProductosController::class, 'update'])->name('productos.actualizar');
+    Route::patch('/productos/{producto}/visibilidad', [ProductosController::class, 'actualizarVisibilidad'])->name('productos.visibilidad');
     Route::delete('/productos/{producto}', [ProductosController::class, 'destroy'])->name('productos.eliminar');
     Route::get('/reportes/nuevo', [ReportesRiesgoController::class, 'create'])->name('riesgos.crear');
     Route::post('/reportes', [ReportesRiesgoController::class, 'store'])->name('riesgos.guardar');
