@@ -153,7 +153,7 @@ class ProductosController extends Controller
     {
         $consulta = Comunidad::where('activo', true);
         if ($producto?->comunidad_id) {
-            $consulta->orWhereKey($producto->comunidad_id);
+            $consulta->orWhere('id', $producto->comunidad_id);
         }
 
         return $consulta->orderBy('nombre')->get();
