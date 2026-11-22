@@ -19,6 +19,9 @@
                     @if ($alerta->nivel_riesgo)
                         <span class="etiqueta-estado">Riesgo {{ $alerta->nivel_riesgo }}</span>
                     @endif
+                    @if ($alerta->foto)
+                        <img class="imagen-alerta" src="{{ route('alertas.foto', $alerta) }}" alt="Fotografía relacionada con la alerta">
+                    @endif
                     <h2>{{ $alerta->titulo }}</h2>
                     <p>{{ $alerta->mensaje }}</p>
                     @if ($alerta->reporteOrigen?->estado === 'publicado')

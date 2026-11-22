@@ -16,6 +16,7 @@ class AlertaHelada extends Model
         'tipo',
         'titulo',
         'mensaje',
+        'foto',
         'nivel',
         'temperatura_c',
         'nivel_riesgo',

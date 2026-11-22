@@ -2624,3 +2624,25 @@ form[onsubmit*="Eliminar"] .boton:hover,form[onsubmit*="eliminar"] .boton:hover 
     color: var(--marca-texto-suave);
     font-size: .85rem;
 }
+
+/* Fotos de alertas: tamaño adaptable y proporción uniforme en sus tarjetas. */
+.imagen-alerta {
+    display: block;
+    width: min(100%, 520px);
+    max-height: 320px;
+    margin: 14px 0;
+    object-fit: cover;
+    border: 1px solid var(--marca-borde);
+    border-radius: 12px;
+    background: #fff;
+}
+.formulario-evidencia {
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+    margin: 16px 0;
+    padding: 16px;
+    border: 1px solid var(--marca-borde);
+    border-radius: 12px;
+    background: #f7f5ec;
+}

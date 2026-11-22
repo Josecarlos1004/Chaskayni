@@ -26,6 +26,8 @@
                 <img src="{{ route('riesgos.foto', $reporte) }}" alt="Fotografía del incidente reportado" loading="lazy">
                 <figcaption>Fotografía del incidente aprobada para compartir con la comunidad.</figcaption>
             </figure>
+        @else
+            <p class="nota-privacidad">Este reporte fue aprobado sin una fotografía de evidencia.</p>
         @endif
         @if ($reporte->alerta?->estado === 'publicada')
             <p class="nota-comunidad">Este reporte también dio origen a una alerta comunitaria.</p>

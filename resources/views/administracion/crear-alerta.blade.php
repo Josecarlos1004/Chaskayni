@@ -35,7 +35,7 @@
         <span class="sobrelinea">Aviso verificado</span>
         <h2>Publicar alerta manual</h2>
         <p>Usa este formulario para avisos revisados que no dependen de una temperatura.</p>
-        <form method="post" action="{{ route('administracion.alertas.guardar') }}">
+        <form method="post" action="{{ route('administracion.alertas.guardar') }}" enctype="multipart/form-data">
             @csrf
             <label>Tipo de aviso<select name="tipo" required><option value="clima" @selected(old('tipo', 'clima') === 'clima')>Clima</option><option value="refugio" @selected(old('tipo') === 'refugio')>Refugios</option></select></label>
             <label>Título<input name="titulo" value="{{ old('titulo') }}" maxlength="160" required></label>
@@ -48,6 +48,10 @@
                 <label>Inicio de vigencia (opcional)<input type="datetime-local" name="fecha_inicio" value="{{ old('fecha_inicio') }}"></label>
                 <label>Fin de vigencia (opcional)<input type="datetime-local" name="fecha_fin" value="{{ old('fecha_fin') }}"></label>
             </div>
+            <label>Fotografía del aviso (opcional)
+                <input type="file" name="foto" accept="image/jpeg,image/png,image/webp">
+            </label>
+            <small>JPG, PNG o WebP; máximo 5 MB. La fotografía será visible junto a la alerta mientras esté publicada.</small>
             <div class="acciones-formulario">
                 <a class="boton boton-claro" href="{{ route('administracion.comunidades.indice') }}">Volver</a>
                 <button class="boton" type="submit">Publicar alerta manual</button>

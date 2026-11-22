@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Throwable;
 use Illuminate\View\View;
 
 class AdministracionController extends Controller
@@ -93,7 +95,7 @@ class AdministracionController extends Controller
         $this->verificarAdministrador();
 
         return view('administracion.alertas', [
-            'alertas' => AlertaHelada::with(['comunidad', 'autor'])->latest()->paginate(15),
+            'alertas' => AlertaHelada::with(['comunidad', 'autor', 'reporteOrigen'])->latest()->paginate(15),
         ]);
     }
 
@@ -237,6 +239,73 @@ class AdministracionController extends Controller
         ]);
     }
 
+    /** Muestra una foto de alerta solo dentro del panel administrativo. */
+    public function verFotoAlerta(AlertaHelada $alertaHelada): StreamedResponse
+    {
+        $this->verificarAdministrador();
+        abort_unless($alertaHelada->foto && Storage::disk('public')->exists($alertaHelada->foto), 404);
+
+        return Storage::disk('public')->response($alertaHelada->foto, 'foto-alerta-'.$alertaHelada->id, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Content-Type-Options' => 'nosniff',
+        ], 'inline');
+    }
+
+    /** Solo las alertas manuales se editan aquí; los reportes se administran desde su revisión. */
+    public function editarAlerta(AlertaHelada $alertaHelada): View
+    {
+        $this->verificarAdministrador();
+        abort_if($alertaHelada->reporte_riesgo_id, 404);
+
+        return view('administracion.editar-alerta', [
+            'alerta' => $alertaHelada,
+            'comunidades' => Comunidad::where('activo', true)->orWhereKey($alertaHelada->comunidad_id)->orderBy('nombre')->get(),
+        ]);
+    }
+
+    public function actualizarAlerta(Request $request, AlertaHelada $alertaHelada): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        abort_if($alertaHelada->reporte_riesgo_id, 404);
+        $datos = $request->validate([
+            'tipo' => ['required', 'in:clima,refugio'],
+            'titulo' => ['required', 'string', 'max:160'],
+            'mensaje' => ['required', 'string', 'max:3000'],
+            'nivel' => ['required', 'in:informacion,precaucion,urgente'],
+            'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where(fn ($consulta) => $consulta->where('activo', true)->orWhere('id', $alertaHelada->comunidad_id))],
+            'fecha_inicio' => ['nullable', 'date'],
+            'fecha_fin' => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'quitar_foto' => ['nullable', 'boolean'],
+        ]);
+        $foto = $datos['foto'] ?? null;
+        $quitarFoto = (bool) ($datos['quitar_foto'] ?? false);
+        unset($datos['foto'], $datos['quitar_foto']);
+        $rutaNueva = null;
+        $rutaAnterior = $alertaHelada->foto;
+
+        try {
+            if ($foto) {
+                $rutaNueva = $foto->store('alertas', 'public');
+                if (! $rutaNueva) {
+                    throw ValidationException::withMessages(['foto' => 'No se pudo guardar la fotografía. Inténtalo nuevamente.']);
+                }
+            }
+            $datos['foto'] = $rutaNueva ?: ($quitarFoto ? null : $rutaAnterior);
+            $alertaHelada->update($datos);
+        } catch (Throwable $error) {
+            if ($rutaNueva) {
+                Storage::disk('public')->delete($rutaNueva);
+            }
+            throw $error;
+        }
+        if ($rutaAnterior && $rutaAnterior !== $alertaHelada->foto) {
+            Storage::disk('public')->delete($rutaAnterior);
+        }
+
+        return redirect()->route('administracion.alertas.indice')->with('success', 'Se actualizaron los datos de la alerta.');
+    }
+
     public function guardarAlerta(Request $request): RedirectResponse
     {
         $this->verificarAdministrador();
@@ -248,12 +317,26 @@ class AdministracionController extends Controller
             'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where('activo', true)],
             'fecha_inicio' => ['nullable', 'date'],
             'fecha_fin' => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
-        AlertaHelada::create([
-            ...$datos,
-            'creado_por' => Auth::id(),
-            'estado' => 'publicada',
-        ]);
+        $foto = $datos['foto'] ?? null;
+        unset($datos['foto']);
+        $rutaFoto = null;
+
+        try {
+            if ($foto) {
+                $rutaFoto = $foto->store('alertas', 'public');
+                if (! $rutaFoto) {
+                    throw ValidationException::withMessages(['foto' => 'No se pudo guardar la fotografía. Inténtalo nuevamente.']);
+                }
+            }
+            AlertaHelada::create([...$datos, 'foto' => $rutaFoto, 'creado_por' => Auth::id(), 'estado' => 'publicada']);
+        } catch (Throwable $error) {
+            if ($rutaFoto) {
+                Storage::disk('public')->delete($rutaFoto);
+            }
+            throw $error;
+        }
 
         return redirect()->route('alertas.indice')->with('success', 'La alerta fue publicada por administración.');
     }
@@ -317,7 +400,11 @@ class AdministracionController extends Controller
     public function eliminarAlerta(AlertaHelada $alertaHelada): RedirectResponse
     {
         $this->verificarAdministrador();
+        $rutaFoto = $alertaHelada->foto;
         $alertaHelada->delete();
+        if ($rutaFoto) {
+            Storage::disk('public')->delete($rutaFoto);
+        }
 
         return back()->with('success', 'Se eliminó la alerta.');
     }
@@ -348,6 +435,38 @@ class AdministracionController extends Controller
             'inline',
         );
     }
+    /** Reemplaza evidencia privada solo mientras el reporte siga en revisión. */
+    public function actualizarEvidenciaReporte(Request $request, ReporteRiesgo $reporteRiesgo): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $datos = $request->validate(['foto_evidencia' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120']]);
+        $rutaNueva = $datos['foto_evidencia']->store('evidencias-reportes', 'privado');
+        if (! $rutaNueva) {
+            throw ValidationException::withMessages(['foto_evidencia' => 'No se pudo guardar la fotografía. Inténtalo nuevamente.']);
+        }
+
+        try {
+            $rutaAnterior = DB::transaction(function () use ($reporteRiesgo, $rutaNueva): ?string {
+                $reporte = ReporteRiesgo::query()->lockForUpdate()->findOrFail($reporteRiesgo->id);
+                if (! in_array($reporte->estado, ['pendiente', 'revisado', 'publicado'], true)) {
+                    throw ValidationException::withMessages(['reporte' => 'Solo se puede cambiar la evidencia de reportes pendientes, en revisión o publicados.']);
+                }
+                $anterior = $reporte->foto_evidencia;
+                $reporte->update(['foto_evidencia' => $rutaNueva]);
+
+                return $anterior;
+            });
+        } catch (Throwable $error) {
+            Storage::disk('privado')->delete($rutaNueva);
+            throw $error;
+        }
+        if ($rutaAnterior && $rutaAnterior !== $rutaNueva) {
+            Storage::disk('privado')->delete($rutaAnterior);
+        }
+
+        return back()->with('success', 'Se reemplazó la evidencia privada del reporte.');
+    }
+
     public function revisarReporte(Request $request, ReporteRiesgo $reporteRiesgo): RedirectResponse
     {
         $this->verificarAdministrador();
@@ -357,7 +476,7 @@ class AdministracionController extends Controller
             // Bloquea el reporte para evitar que dos aprobaciones creen alertas duplicadas.
             $reporte = ReporteRiesgo::query()->lockForUpdate()->findOrFail($reporteRiesgo->id);
 
-            if (! in_array($reporte->estado, ['pendiente', 'revisado'], true)) {
+            if (! in_array($reporte->estado, ['pendiente', 'revisado', 'publicado'], true)) {
                 return back()->withErrors(['reporte' => 'Este reporte ya fue revisado.']);
             }
 
