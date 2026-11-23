@@ -36,7 +36,7 @@ class AlertasDemostracionSeeder extends Seeder
                 default => 'informacion',
             };
 
-            $titulo = 'Riesgo '.$riesgo.' de helada (demostración)';
+            $titulo = 'Riesgo '.$riesgo.' de helada ';
 
             $alerta = AlertaHelada::firstOrCreate(
                 ['comunidad_id' => $comunidad->id, 'titulo' => $titulo],
