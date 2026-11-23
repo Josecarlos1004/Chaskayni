@@ -9,13 +9,7 @@ use Illuminate\Database\Seeder;
 
 class ProductosDemostracionSeeder extends Seeder
 {
-    /**
-     * Publica 9 productos de ejemplo (3 cestas salvadas y 6 normales).
-     *
-     * - No crea cuentas ni contraseñas: usa un productor o administrador que ya exista.
-     * - Si defines PRODUCTOR_EMAIL en el .env, usa a ese usuario; si no, el primero activo.
-     * - No duplica: si el producto ya existe para ese productor, lo deja como está.
-     */
+    
     public function run(): void
     {
         $productor = $this->buscarProductor();
