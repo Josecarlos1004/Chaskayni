@@ -11,6 +11,7 @@ use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\ReportesRiesgoController;
+use App\Http\Controllers\RestablecerContrasenaController;
 use App\Http\Middleware\VerificarCuentaActiva;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,16 @@ Route::middleware('guest')->group(function () {
     Route::post('/crear-cuenta', [AccesoController::class, 'registrar'])
         ->middleware('throttle:6,1')
         ->name('registro.guardar');
+    Route::get('/recuperar-contrasena', [RestablecerContrasenaController::class, 'formularioSolicitud'])
+        ->name('password.request');
+    Route::post('/recuperar-contrasena', [RestablecerContrasenaController::class, 'enviarEnlace'])
+        ->middleware('throttle:3,1')
+        ->name('password.email');
+    Route::get('/restablecer-contrasena/{token}', [RestablecerContrasenaController::class, 'formularioRestablecimiento'])
+        ->name('password.reset');
+    Route::post('/restablecer-contrasena', [RestablecerContrasenaController::class, 'restablecer'])
+        ->middleware('throttle:3,1')
+        ->name('password.update');
 });
 
 Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {

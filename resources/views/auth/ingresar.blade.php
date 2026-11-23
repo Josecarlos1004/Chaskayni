@@ -27,6 +27,7 @@
                     ><input type="checkbox" name="remember" value="1" /> Mantener mi sesión</label
                 ><button class="boton boton-ancho-completo" type="submit">Ingresar</button>
             </form>
+            <p class="pie-formulario"><a href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a></p>
             <p class="pie-formulario">¿Aún no tienes cuenta? <a href="{{ route('register') }}">Regístrate</a></p>
         </div>
     </section>
