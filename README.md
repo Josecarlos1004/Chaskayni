@@ -131,3 +131,9 @@ Desde el panel /administracion se accede a cuentas, publicaciones, pedidos, aler
 - No guardes contraseñas, claves ni credenciales reales en el repositorio.
 - No uses migrate:fresh ni borres tablas en la base principal.
 - Para compartir el proyecto, comparte el código y las instrucciones; cada integrante configura su propio .env.
+
+## Verificación, seguridad y entrega
+
+La guía `docs/guia-validacion-y-evidencias.md` contiene una matriz para revisar los recorridos, registrar pruebas de seguridad, medir consultas y completar las evidencias del informe. Los resultados deben completarse con mediciones reales; la suite usa una base MySQL separada y puede reconstruir sus tablas.
+
+En despliegues con Docker, el inicio crea el enlace de almacenamiento público. Para conservar imágenes entre despliegues, monta un volumen persistente en `/var/www/html/storage/app` o configura un almacenamiento S3 compatible para los discos público y privado.
