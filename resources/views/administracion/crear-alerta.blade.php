@@ -4,57 +4,40 @@
     <section class="pagina-formulario">
         <a class="enlace-regreso" href="{{ route('administracion.comunidades.indice') }}">← Administración</a>
 
-        <div class="tarjeta-formulario">
+        <div id="seccion-clima" class="tarjeta-formulario">
             <span class="sobrelinea">Alerta por temperatura</span>
             <h1>Evaluar riesgo de helada</h1>
             <p>Ingresa la temperatura prevista para la madrugada. El pronóstico cercano es orientativo. Puedes usar su mínima de las próximas 24 horas o ingresar la temperatura manualmente.</p>
+            <nav class="acciones-formulario" aria-label="Secciones de publicación">
+                <a class="boton boton-claro" href="#seccion-clima">Clima y heladas</a>
+                <a class="boton boton-claro" href="#seccion-otras-emergencias">Otras emergencias y refugios</a>
+            </nav>
             <details class="registro-comunidad-rapida">
                 <summary>¿Falta una comunidad? Registrar una nueva</summary>
-                <form method="post" action="{{ route('administracion.comunidades.rapida') }}" data-registro-comunidad data-formulario-comunidad>
+                <form method="post" action="{{ route('administracion.comunidades.rapida') }}" data-registro-comunidad data-formulario-comunidad data-url-datos-ubicacion="{{ route('administracion.comunidades.ubicacion') }}">
                     @csrf
-                    <div class="fila-formulario">
-                        <label>Nombre de la comunidad
-                            <input name="nombre" maxlength="120" required />
-                        </label>
-                        <label>Distrito (opcional)
-                            <input name="distrito" maxlength="120" />
-                        </label>
-                    </div>
-                    <div class="fila-formulario">
-                        <label>Provincia
-                            <input name="provincia" value="Cusco" maxlength="120" required />
-                        </label>
-                        <label>Altitud en metros sobre el nivel del mar (opcional)
-                            <input type="number" name="altitud_msnm" min="0" max="8000" step="1" />
-                        </label>
-                    </div>
-                    <div class="campo-ubicacion-comunidad">
-                        <span class="etiqueta-campo">Ubicación para el pronóstico</span>
-                        <p class="texto-atenuado">Selecciona el punto exacto. Sin coordenadas, el clima se deberá ingresar manualmente.</p>
-                        <div class="mapa-selector-comunidad" data-mapa-comunidad role="region" aria-label="Selecciona la ubicación de la comunidad"></div>
-                        <p class="estado-mapa-comunidad" data-estado-mapa-comunidad role="status" aria-live="polite">Haz clic en el mapa para seleccionar la ubicación.</p>
-                        <div class="fila-formulario fila-coordenadas-comunidad">
-                            <label>Latitud
-                                <input type="number" name="latitud" step="any" min="-90" max="90" />
-                            </label>
-                            <label>Longitud
-                                <input type="number" name="longitud" step="any" min="-180" max="180" />
-                            </label>
-                        </div>
-                    </div>
-                    <button class="boton boton-pequeno" type="submit">Registrar y seleccionar comunidad</button>
+                    @include ('administracion.partials.campos-comunidad', [
+                        'nombre' => old('nombre'),
+                        'distrito' => old('distrito'),
+                        'provincia' => old('provincia', 'Cusco'),
+                        'altitud' => old('altitud_msnm'),
+                        'latitud' => old('latitud'),
+                        'longitud' => old('longitud'),
+                    ])                    <button class="boton boton-pequeno" type="submit">Registrar y seleccionar comunidad</button>
                     <p class="estado-registro-comunidad" data-registro-estado role="status" aria-live="polite" hidden></p>
                 </form>
             </details>
             <form method="post" action="{{ route('administracion.alertas.temperatura') }}">
                 @csrf
-                <div class="fila-formulario fila-clima-comunidad">
+                <div class="flujo-clima-comunidad">
                     <label>Comunidad
                         <select name="comunidad_id" data-seleccionar-comunidad required>
                             <option value="">Selecciona una comunidad</option>
                             @foreach ($comunidades as $comunidad)
                                 <option
                                     value="{{ $comunidad->id }}"
+                                    data-latitud="{{ $comunidad->latitud }}"
+                                    data-longitud="{{ $comunidad->longitud }}"
                                     @selected ((string) old('comunidad_id', session('comunidadCreadaId')) === (string) $comunidad->id)
                                 >
                                     {{ $comunidad->nombre }}{{ $comunidad->altitud_msnm ? ' · '.$comunidad->altitud_msnm.' m s. n. m.' : '' }}
@@ -62,6 +45,27 @@
                             @endforeach
                         </select>
                     </label>
+                    <section
+                        class="ubicacion-clima-alerta"
+                        aria-labelledby="titulo-ubicacion-clima"
+                        data-ubicacion-clima
+                        data-url-guardar="{{ route('administracion.comunidades.coordenadas', ['comunidad' => '__ID__']) }}"
+                    >
+                        <div class="encabezado-ubicacion-clima">
+                            <div>
+                                <span class="sobrelinea">Ubicación para el pronóstico</span>
+                                <h2 id="titulo-ubicacion-clima">Punto de la comunidad</h2>
+                                <p data-coordenadas-seleccionadas>Selecciona una comunidad para ver sus coordenadas.</p>
+                            </div>
+                            <button class="boton boton-pequeno" type="button" data-usar-gps disabled>Usar ubicación GPS</button>
+                        </div>
+                        <p class="estado-ubicacion-clima" data-estado-ubicacion role="status" aria-live="polite">El pronóstico utilizará la ubicación guardada de la comunidad.</p>
+                        <div class="mapa-selector-comunidad mapa-pronostico-comunidad" data-mapa-pronostico role="region" aria-label="Mapa de ubicación de la comunidad"></div>
+                        <div class="acciones-ubicacion-clima">
+                            <small>Si estás en la comunidad, usa GPS; si no, marca su punto en el mapa. La ubicación requiere permiso del navegador.</small>
+                            <button class="boton boton-claro boton-pequeno" type="button" data-guardar-ubicacion hidden>Guardar punto seleccionado</button>
+                        </div>
+                    </section>
                     <section
                         class="panel-clima-comunidad"
                         data-panel-clima
@@ -106,17 +110,15 @@
                                 <p>Humedad <strong data-humedad></strong></p>
                                 <p>Viento <strong data-viento></strong></p>
                             </div>
-                            <button class="boton boton-clima-minima" type="button" data-usar-temperatura>
-                                Usar mínima de 24 h para evaluar
-                            </button>
+                            <p class="temperatura-autocompletada" data-temperatura-autocompletada role="status" aria-live="polite">La temperatura prevista se completará automáticamente con la mínima del pronóstico.</p>
                         </div>
                         <small class="atribucion-clima-comunidad">
-                            Pronóstico calculado para las coordenadas registradas; es orientativo y debe verificarse antes de publicar.
+                            Pronóstico basado en las coordenadas guardadas; se actualizará automáticamente y es una estimación meteorológica.
                             Datos meteorológicos: <a href="https://open-meteo.com/en/license" target="_blank" rel="noopener">Open-Meteo (CC BY 4.0)</a>.
                         </small>
                     </section>
                 </div>
-                <label>Temperatura prevista (°C)
+                <label>Temperatura prevista (°C, completada automáticamente)
                     <input
                         type="number"
                         name="temperatura_c"
@@ -144,7 +146,7 @@
             </form>
         </div>
 
-        <div class="tarjeta-formulario formulario-alerta-manual">
+        <div id="seccion-otras-emergencias" class="tarjeta-formulario formulario-alerta-manual">
             <span class="sobrelinea">Aviso verificado</span>
             <h2>Publicar alerta manual</h2>
             <p>Usa este formulario para avisos revisados que no dependen de una temperatura.</p>
@@ -158,7 +160,7 @@
                         <option value="otro" @selected (old('tipo') === 'otro')>Otra emergencia</option>
                     </select>
                 </label>
-                <div data-campo-tipo-emergencia @if (old('tipo', 'clima') !== 'otro') hidden @endif>
+                <div data-campo-tipo-emergencia @if (old('tipo', 'refugio') !== 'otro') hidden @endif>
                     <label
                         >¿Qué tipo de emergencia?
                         <input name="tipo_personalizado" value="{{ old('tipo_personalizado') }}" maxlength="100" />
@@ -208,7 +210,7 @@
                 >
                 <div class="acciones-formulario">
                     <a class="boton boton-claro" href="{{ route('administracion.comunidades.indice') }}">Volver</a>
-                    <button class="boton" type="submit">Publicar alerta manual</button>
+                    <button class="boton" type="submit">Publicar aviso</button>
                 </div>
             </form>
         </div>

@@ -3514,3 +3514,113 @@ body {
         padding: 12px;
     }
 }
+
+
+/* La selección va encima del pronóstico para evitar comprimir la tarjeta. */
+.fila-clima-comunidad {
+    grid-template-columns: minmax(0, 1fr);
+}
+.fila-clima-comunidad > label,
+.fila-clima-comunidad > .panel-clima-comunidad {
+    width: 100%;
+    min-width: 0;
+}
+.panel-clima-comunidad {
+    box-sizing: border-box;
+}
+.encabezado-clima-comunidad > div {
+    min-width: 0;
+}
+.ubicacion-clima-comunidad {
+    overflow-wrap: anywhere;
+}
+.atribucion-clima-comunidad {
+    display: block;
+    overflow-wrap: anywhere;
+}
+/* Distribución propia del selector y pronóstico, independiente de otras grillas. */
+.flujo-clima-comunidad {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 18px;
+    width: 100%;
+}
+.flujo-clima-comunidad > label,
+.flujo-clima-comunidad > .panel-clima-comunidad {
+    width: 100%;
+    min-width: 0;
+}
+.flujo-clima-comunidad .panel-clima-comunidad {
+    box-sizing: border-box;
+}
+.flujo-clima-comunidad .encabezado-clima-comunidad > div {
+    min-width: 0;
+}
+.flujo-clima-comunidad .ubicacion-clima-comunidad,
+.flujo-clima-comunidad .atribucion-clima-comunidad {
+    overflow-wrap: anywhere;
+}
+.pronostico-horas {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.pronostico-hora {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Mapa y GPS del pronóstico de alertas. */
+.ubicacion-clima-alerta {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    background: #f8f8f2;
+}
+.encabezado-ubicacion-clima,
+.acciones-ubicacion-clima {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+}
+.encabezado-ubicacion-clima h2 {
+    margin: 3px 0;
+    color: var(--verde-oscuro);
+    font-size: 1.2rem;
+}
+.encabezado-ubicacion-clima p,
+.estado-ubicacion-clima,
+.acciones-ubicacion-clima small,
+.temperatura-autocompletada {
+    margin: 0;
+    color: var(--atenuado);
+    font-size: .88rem;
+    overflow-wrap: anywhere;
+}
+.estado-ubicacion-clima.es-error {
+    color: var(--marca-error, #a83e2d);
+}
+.mapa-pronostico-comunidad {
+    height: 300px;
+}
+.acciones-ubicacion-clima small {
+    flex: 1 1 280px;
+}
+.temperatura-autocompletada {
+    padding: 10px 12px;
+    border-left: 3px solid var(--verde);
+    border-radius: 0 8px 8px 0;
+    background: #eef4e8;
+}
+@media (max-width: 620px) {
+    .mapa-pronostico-comunidad {
+        height: 230px;
+    }
+    .ubicacion-clima-alerta {
+        padding: 12px;
+    }
+}

@@ -13,48 +13,16 @@
         <div class="tarjeta-formulario">
             <span class="sobrelinea">Nueva comunidad</span>
             <h2>Registrar comunidad</h2>
-            <form method="post" action="{{ route('administracion.comunidades.guardar') }}" data-formulario-comunidad>
+            <form method="post" action="{{ route('administracion.comunidades.guardar') }}" data-formulario-comunidad data-url-datos-ubicacion="{{ route('administracion.comunidades.ubicacion') }}">
                 @csrf
-                <label>Nombre<input name="nombre" value="{{ old('nombre') }}" maxlength="120" required /></label>
-                <div class="fila-formulario">
-                    <label
-                        >Distrito (opcional)<input
-                            name="distrito"
-                            value="{{ old('distrito') }}"
-                            maxlength="120" /></label
-                    ><label
-                        >Provincia<input
-                            name="provincia"
-                            value="{{ old('provincia', 'Cusco') }}"
-                            maxlength="120"
-                            required
-                    /></label>
-                </div>
-                                <div class="campo-ubicacion-comunidad">
-                    <span class="etiqueta-campo">Ubicación para el pronóstico</span>
-                    <p class="texto-atenuado">Marca en el mapa el punto de la comunidad. El pronóstico usará estas coordenadas.</p>
-                    <div class="mapa-selector-comunidad" data-mapa-comunidad role="region" aria-label="Selecciona la ubicación de la comunidad"></div>
-                    <p class="estado-mapa-comunidad" data-estado-mapa-comunidad role="status" aria-live="polite">Haz clic en el mapa para seleccionar la ubicación.</p>
-                    <div class="fila-formulario fila-coordenadas-comunidad">
-                        <label>Latitud
-                            <input type="number" name="latitud" step="any" min="-90" max="90" value="{{ old('latitud') }}" />
-                        </label>
-                        <label>Longitud
-                            <input type="number" name="longitud" step="any" min="-180" max="180" value="{{ old('longitud') }}" />
-                        </label>
-                    </div>
-                </div>
-                <label
-                    >Altitud (m s. n. m., opcional)<input
-                        type="number"
-                        name="altitud_msnm"
-                        min="0"
-                        max="8000"
-                        step="1"
-                        value="{{ old('altitud_msnm') }}"
-                /></label>
-                <small>Ingresa una altitud confirmada. Si no la conoces, déjala vacía.</small>
-                <label
+                @include ('administracion.partials.campos-comunidad', [
+                    'nombre' => old('nombre'),
+                    'distrito' => old('distrito'),
+                    'provincia' => old('provincia', 'Cusco'),
+                    'altitud' => old('altitud_msnm'),
+                    'latitud' => old('latitud'),
+                    'longitud' => old('longitud'),
+                ])                <label
                     >Descripción<textarea
                         name="descripcion"
                         rows="3"
@@ -84,49 +52,17 @@
                     </div>
                     <details>
                         <summary>Editar o activar comunidad</summary>
-                        <form method="post" action="{{ route('administracion.comunidades.actualizar', $comunidad) }}" data-formulario-comunidad>
+                        <form method="post" action="{{ route('administracion.comunidades.actualizar', $comunidad) }}" data-formulario-comunidad data-url-datos-ubicacion="{{ route('administracion.comunidades.ubicacion') }}">
                             @csrf
                             @method ('put')
-                            <label
-                                >Nombre<input name="nombre" value="{{ $comunidad->nombre }}" maxlength="120" required
-                            /></label>
-                            <div class="fila-formulario">
-                                <label
-                                    >Distrito<input
-                                        name="distrito"
-                                        value="{{ $comunidad->distrito }}"
-                                        maxlength="120" /></label
-                                ><label
-                                    >Provincia<input
-                                        name="provincia"
-                                        value="{{ $comunidad->provincia }}"
-                                        maxlength="120"
-                                        required
-                                /></label>
-                            </div>
-                                                        <div class="campo-ubicacion-comunidad">
-                                <span class="etiqueta-campo">Ubicación para el pronóstico</span>
-                                <p class="texto-atenuado">Marca en el mapa el punto de la comunidad. El pronóstico usará estas coordenadas.</p>
-                                <div class="mapa-selector-comunidad" data-mapa-comunidad role="region" aria-label="Selecciona la ubicación de la comunidad"></div>
-                                <p class="estado-mapa-comunidad" data-estado-mapa-comunidad role="status" aria-live="polite">Haz clic en el mapa para seleccionar la ubicación.</p>
-                                <div class="fila-formulario fila-coordenadas-comunidad">
-                                    <label>Latitud
-                                        <input type="number" name="latitud" step="any" min="-90" max="90" value="{{ $comunidad->latitud }}" />
-                                    </label>
-                                    <label>Longitud
-                                        <input type="number" name="longitud" step="any" min="-180" max="180" value="{{ $comunidad->longitud }}" />
-                                    </label>
-                                </div>
-                            </div>
-                            <label
-                                >Altitud (m s. n. m.)<input
-                                    type="number"
-                                    name="altitud_msnm"
-                                    min="0"
-                                    max="8000"
-                                    value="{{ $comunidad->altitud_msnm }}"
-                            /></label>
-                            <label
+                            @include ('administracion.partials.campos-comunidad', [
+                                'nombre' => $comunidad->nombre,
+                                'distrito' => $comunidad->distrito,
+                                'provincia' => $comunidad->provincia,
+                                'altitud' => $comunidad->altitud_msnm,
+                                'latitud' => $comunidad->latitud,
+                                'longitud' => $comunidad->longitud,
+                            ])                            <label
                                 >Descripción<textarea
                                     name="descripcion"
                                     rows="2"

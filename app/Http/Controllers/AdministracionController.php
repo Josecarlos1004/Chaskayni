@@ -14,6 +14,8 @@ use App\Services\ClimaComunidad;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -343,9 +345,83 @@ class AdministracionController extends Controller
             'id' => $comunidad->id,
             'nombre' => $comunidad->nombre,
             'altitud_msnm' => $comunidad->altitud_msnm,
+            'latitud' => $comunidad->latitud,
+            'longitud' => $comunidad->longitud,
         ], 201);
     }
 
+    /** Completa distrito, provincia y altitud a partir del punto elegido. */
+    public function datosUbicacionComunidad(Request $request): JsonResponse
+    {
+        $this->verificarAdministrador();
+        $coordenadas = $request->validate([
+            'latitud' => ['required', 'numeric', 'between:-90,90'],
+            'longitud' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        $latitud = number_format((float) $coordenadas['latitud'], 5, '.', '');
+        $longitud = number_format((float) $coordenadas['longitud'], 5, '.', '');
+        $claveCache = 'datos-comunidad:'.sha1($latitud.','.$longitud);
+
+        $datos = Cache::remember($claveCache, now()->addHours(6), function () use ($latitud, $longitud): array {
+            $propiedades = [];
+            try {
+                $respuestaLugar = Http::acceptJson()
+                    ->withHeaders(['User-Agent' => config('app.name').' (registro de comunidades)', 'Accept-Language' => 'es'])
+                    ->timeout(5)
+                    ->get(config('services.photon.url'), ['lat' => $latitud, 'lon' => $longitud, 'lang' => 'es', 'countrycode' => 'PE']);
+
+                if ($respuestaLugar->successful()) {
+                    $propiedades = $respuestaLugar->json('features.0.properties', []);
+                }
+            } catch (Throwable) {
+                // La altitud todavía puede obtenerse aunque falle la búsqueda del nombre.
+            }
+
+            $altitud = null;
+            try {
+                $respuestaAltitud = Http::acceptJson()
+                    ->timeout(5)
+                    ->get('https://api.open-meteo.com/v1/elevation', [
+                        'latitude' => $latitud,
+                        'longitude' => $longitud,
+                    ]);
+                $valorAltitud = $respuestaAltitud->json('elevation.0');
+                if ($respuestaAltitud->successful() && is_numeric($valorAltitud)) {
+                    $altitud = (int) round((float) $valorAltitud);
+                }
+            } catch (Throwable) {
+                // Se dejan vacíos los datos que el proveedor no pudo determinar.
+            }
+
+            return [
+                'distrito' => $propiedades['district'] ?? $propiedades['locality'] ?? null,
+                'provincia' => $propiedades['county'] ?? $propiedades['city'] ?? null,
+                'altitud_msnm' => $altitud,
+            ];
+        });
+
+        return response()->json($datos);
+    }
+    /** Actualiza las coordenadas elegidas en el mapa o recibidas del GPS del dispositivo. */
+    public function actualizarCoordenadasComunidad(Request $request, Comunidad $comunidad): JsonResponse
+    {
+        $this->verificarAdministrador();
+        abort_unless($comunidad->activo, 404);
+
+        $datos = $request->validate([
+            'latitud' => ['required', 'numeric', 'between:-90,90'],
+            'longitud' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        $comunidad->update($datos);
+
+        return response()->json([
+            'mensaje' => 'Se actualizaron las coordenadas de la comunidad.',
+            'latitud' => (float) $comunidad->latitud,
+            'longitud' => (float) $comunidad->longitud,
+        ]);
+    }
     /** Consulta el pronóstico con las coordenadas registradas de la comunidad. */
     public function climaComunidad(Comunidad $comunidad, ClimaComunidad $consultaClima): JsonResponse
     {
@@ -443,7 +519,7 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
         $datos = $request->validate([
-            'tipo' => ['required', 'in:clima,refugio,otro'],
+            'tipo' => ['required', 'in:refugio,otro'],
             'tipo_personalizado' => ['exclude_unless:tipo,otro', 'required', 'string', 'min:3', 'max:100'],
             'titulo' => ['required', 'string', 'max:160'],
             'mensaje' => ['required', 'string', 'max:3000'],

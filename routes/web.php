@@ -78,8 +78,10 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
         Route::patch('/usuarios/{usuario}', [AdministracionController::class, 'actualizarUsuario'])->name('usuarios.actualizar');
         Route::delete('/usuarios/{usuario}', [AdministracionController::class, 'eliminarUsuario'])->name('usuarios.eliminar');
         Route::get('/comunidades', [AdministracionController::class, 'listarComunidades'])->name('comunidades.indice');
+        Route::get('/comunidades/datos-ubicacion', [AdministracionController::class, 'datosUbicacionComunidad'])->middleware('throttle:20,1')->name('comunidades.ubicacion');
         Route::post('/comunidades/rapida', [AdministracionController::class, 'guardarComunidadRapida'])->middleware('throttle:10,1')->name('comunidades.rapida');
         Route::get('/comunidades/{comunidad}/clima', [AdministracionController::class, 'climaComunidad'])->middleware('throttle:20,1')->name('comunidades.clima');
+        Route::put('/comunidades/{comunidad}/coordenadas', [AdministracionController::class, 'actualizarCoordenadasComunidad'])->middleware('throttle:20,1')->name('comunidades.coordenadas');
         Route::post('/comunidades', [AdministracionController::class, 'guardarComunidad'])->name('comunidades.guardar');
         Route::put('/comunidades/{comunidad}', [AdministracionController::class, 'actualizarComunidad'])->name('comunidades.actualizar');
         Route::delete('/comunidades/{comunidad}', [AdministracionController::class, 'eliminarComunidad'])->name('comunidades.eliminar');
