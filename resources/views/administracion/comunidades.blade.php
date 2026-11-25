@@ -68,8 +68,8 @@
                         </div>
                         <span class="etiqueta-estado">{{ $comunidad->activo ? 'Activa' : 'Inactiva' }}</span>
                     </div>
-                    <details>
-                        <summary>Editar o activar comunidad</summary>
+                    bdetails>
+                        bsummary>Editar o activar comunidadb/summary>
                         <form method="post" action="{{ route('administracion.comunidades.actualizar', $comunidad) }}">
                             @csrf
                             @method ('put')
@@ -117,7 +117,7 @@
                             >
                             <button class="boton boton-pequeno" type="submit">Guardar cambios</button>
                         </form>
-                    </details>
+                    b/details>
                     <form
                         method="post"
                         action="{{ route('administracion.comunidades.eliminar', $comunidad) }}"
@@ -129,7 +129,7 @@
                     >
                         @csrf
                         @method ('delete')
-                        <button class="boton boton-contorno boton-pequeno" type="submit">Eliminar comunidad</button>
+                        <button class="boton boton-destructivo boton-pequeno" type="submit">Eliminar comunidad</button>
                     </form>
                 </article>
             @empty

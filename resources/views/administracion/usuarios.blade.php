@@ -46,7 +46,8 @@
                         >
                     </div>
                     <form
-                        class="formulario-en-linea formulario-cuenta"
+                        id="formulario-cuenta-{{ $usuario->id }}"
+                        class="formulario-cuenta"
                         method="post"
                         action="{{ route('administracion.usuarios.actualizar', $usuario) }}"
                     >
@@ -97,10 +98,12 @@
                             />
                             Aprobar cuenta (identidad y comunidad verificadas)</label
                         >
-                        <button class="boton boton-pequeno" type="submit">Guardar cambios</button>
+
                     </form>
-                    @if (! $usuario->is(auth()->user()))
-                        <form
+                    <div class="acciones-cuenta">
+                        <button class="boton boton-pequeno" type="submit" form="formulario-cuenta-{{ $usuario->id }}">Guardar cambios</button>
+                        @if (! $usuario->is(auth()->user()))
+                        <form class="formulario-eliminar-cuenta"
                             method="post"
                             action="{{ route('administracion.usuarios.eliminar', $usuario) }}"
                             onsubmit="
@@ -111,9 +114,10 @@
                         >
                             @csrf
                             @method ('delete')
-                            <button class="boton boton-contorno boton-pequeno" type="submit">Eliminar cuenta</button>
+                            <button class="boton boton-destructivo boton-pequeno" type="submit">Eliminar cuenta</button>
                         </form>
                     @endif
+                    </div>
                 </article>
             @empty
                 <div class="estado-vacio">

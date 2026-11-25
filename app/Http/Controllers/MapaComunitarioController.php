@@ -35,6 +35,7 @@ class MapaComunitarioController extends Controller
                     ->filter(fn ($reporte) => $reporte->latitud !== null && $reporte->longitud !== null)
                     ->map(fn ($reporte) => [
                         'titulo' => $reporte->titulo,
+                        'tipo' => $reporte->tipo === 'otro' ? ($reporte->tipo_personalizado ?: 'Otra emergencia') : ($reporte->tipo === 'refugio' ? 'Refugios' : 'Clima'),
                         'descripcion' => $reporte->descripcion,
                         'latitud' => $reporte->latitud,
                         'longitud' => $reporte->longitud,

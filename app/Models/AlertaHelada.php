@@ -14,6 +14,7 @@ class AlertaHelada extends Model
         'creado_por',
         'comunidad_id',
         'tipo',
+        'tipo_personalizado',
         'titulo',
         'mensaje',
         'foto',

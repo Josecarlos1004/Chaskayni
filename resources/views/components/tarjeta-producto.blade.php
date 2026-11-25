@@ -62,13 +62,13 @@
                         >
                             @csrf
                             @method ('delete')
-                            <button class="boton boton-sutil boton-pequeno" type="submit">Eliminar publicación</button>
+                            <button class="boton boton-destructivo boton-pequeno" type="submit">Eliminar publicación</button>
                         </form>
                     @else
                         <form action="{{ route('productos.visibilidad', $producto) }}" method="post">
                             @csrf
                             @method ('patch')
-                            <button class="boton boton-sutil boton-pequeno" type="submit">
+                            <button class="boton boton-contorno boton-pequeno" type="submit">
                                 {{ $producto->estado === 'oculto' ? 'Volver a mostrar' : 'Ocultar publicación' }}
                             </button>
                         </form>

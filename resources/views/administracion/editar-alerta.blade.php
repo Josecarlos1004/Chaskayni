@@ -17,11 +17,18 @@
                 @method ('put')
                 <label
                     >Tipo de aviso
-                    <select name="tipo" required>
+                    <select name="tipo" data-tipo-emergencia required>
                         <option value="clima" @selected (old('tipo', $alerta->tipo) === 'clima')>Clima</option>
                         <option value="refugio" @selected (old('tipo', $alerta->tipo) === 'refugio')>Refugios</option>
+                        <option value="otro" @selected (old('tipo', $alerta->tipo) === 'otro')>Otra emergencia</option>
                     </select>
                 </label>
+                <div data-campo-tipo-emergencia @if (old('tipo', $alerta->tipo) !== 'otro') hidden @endif>
+                    <label
+                        >¿Qué tipo de emergencia?
+                        <input name="tipo_personalizado" value="{{ old('tipo_personalizado', $alerta->tipo_personalizado) }}" maxlength="100" />
+                    </label>
+                </div>
                 <label
                     >Título
                     <input name="titulo" value="{{ old('titulo', $alerta->titulo) }}" maxlength="160" required />
@@ -108,4 +115,4 @@
             </form>
         </div>
     </section>
-@endsection
+    <script src="{{ asset('js/tipo-emergencia.js') }}?v={{ filemtime(public_path('js/tipo-emergencia.js')) }}" defer></script>

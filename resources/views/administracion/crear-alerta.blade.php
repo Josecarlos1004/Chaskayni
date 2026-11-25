@@ -51,11 +51,19 @@
             <form method="post" action="{{ route('administracion.alertas.guardar') }}" enctype="multipart/form-data">
                 @csrf
                 <label
-                    >Tipo de aviso<select name="tipo" required>
+                    >Tipo de aviso
+                    <select name="tipo" data-tipo-emergencia required>
                         <option value="clima" @selected (old('tipo', 'clima') === 'clima')>Clima</option>
                         <option value="refugio" @selected (old('tipo') === 'refugio')>Refugios</option>
-                    </select></label
-                >
+                        <option value="otro" @selected (old('tipo') === 'otro')>Otra emergencia</option>
+                    </select>
+                </label>
+                <div data-campo-tipo-emergencia @if (old('tipo', 'clima') !== 'otro') hidden @endif>
+                    <label
+                        >¿Qué tipo de emergencia?
+                        <input name="tipo_personalizado" value="{{ old('tipo_personalizado') }}" maxlength="100" />
+                    </label>
+                </div>
                 <label>Título<input name="titulo" value="{{ old('titulo') }}" maxlength="160" required /></label>
                 <label
                     >Mensaje<textarea name="mensaje" rows="4" maxlength="3000" required>{{ old('mensaje') }}</textarea>
@@ -105,4 +113,4 @@
             </form>
         </div>
     </section>
-@endsection
+    <script src="{{ asset('js/tipo-emergencia.js') }}?v={{ filemtime(public_path('js/tipo-emergencia.js')) }}" defer></script>

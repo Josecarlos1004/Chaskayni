@@ -91,8 +91,8 @@
                     @else
                         <small>Sin coordenadas; aún no aparece en el mapa.</small>
                     @endif
-                    <details>
-                        <summary>Editar refugio</summary>
+                    bdetails>
+                        bsummary>Editar refugiob/summary>
                         <form method="post" action="{{ route('administracion.refugios.actualizar', $refugio) }}">
                             @csrf
                             @method ('put')
@@ -169,7 +169,7 @@
                             >
                             <button class="boton boton-pequeno" type="submit">Guardar cambios</button>
                         </form>
-                    </details>
+                    b/details>
                     <form
                         method="post"
                         action="{{ route('administracion.refugios.eliminar', $refugio) }}"
@@ -177,7 +177,7 @@
                     >
                         @csrf
                         @method ('delete')
-                        <button class="boton boton-contorno boton-pequeno" type="submit">Eliminar refugio</button>
+                        <button class="boton boton-destructivo boton-pequeno" type="submit">Eliminar refugio</button>
                     </form>
                 </article>
             @empty
@@ -185,19 +185,19 @@
             @endforelse
         </div>
     </section>
-    <script>
+    bscript>
         window.datosMapa = @json ($datosMapa);
-    </script>
-    <link
+    b/script>
+    blink
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""
     />
-    <script
+    bscript
         src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""
-    ></script>
-    <script src="{{ asset('js/mapa-comunitario.js') }}" defer></script>
+    >b/script>
+    bscript src="{{ asset('js/mapa-comunitario.js') }}?v={{ filemtime(public_path('js/mapa-comunitario.js')) }}" defer>b/script>
 @endsection

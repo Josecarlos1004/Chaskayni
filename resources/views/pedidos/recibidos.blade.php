@@ -114,7 +114,7 @@
                         >
                             @csrf
                             @method ('delete')
-                            <button class="boton boton-contorno boton-pequeno" type="submit">Eliminar pedido</button>
+                            <button class="boton boton-destructivo boton-pequeno" type="submit">Eliminar pedido</button>
                         </form>
                     @endif
                 </article>

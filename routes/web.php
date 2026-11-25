@@ -21,6 +21,9 @@ Route::get('/productos/{producto}/imagen', [ProductosController::class, 'verImag
 Route::get('/alertas', [AlertasHeladasController::class, 'index'])->name('alertas.indice');
 Route::get('/alertas/{alertaHelada}/foto', [AlertasHeladasController::class, 'verFotoPublica'])->name('alertas.foto');
 Route::get('/mapa-comunitario', [MapaComunitarioController::class, 'index'])->name('mapa.indice');
+Route::view('/privacidad', 'privacidad')->name('privacidad');
+Route::view('/acerca-de', 'acerca')->name('acerca');
+Route::view('/seguridad', 'seguridad')->name('seguridad');
 Route::get('/contacto', [ContactoController::class, 'formulario'])->name('contacto.formulario');
 Route::post('/contacto', [ContactoController::class, 'guardar'])->middleware('throttle:3,1')->name('contacto.guardar');
 
@@ -61,10 +64,14 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
     Route::delete('/productos/{producto}', [ProductosController::class, 'destroy'])->name('productos.eliminar');
     Route::get('/reportes/nuevo', [ReportesRiesgoController::class, 'create'])->name('riesgos.crear');
     Route::post('/reportes', [ReportesRiesgoController::class, 'store'])->name('riesgos.guardar');
+    Route::get('/reportes/ubicacion', [ReportesRiesgoController::class, 'buscarUbicacion'])
+        ->middleware('throttle:30,1')
+        ->name('riesgos.ubicacion');
     /* Route::post('/reportes', [ReportesRiesgoController::class, 'store'])->name('guardar'); */
 
     Route::prefix('administracion')->name('administracion.')->group(function () {
         Route::get('/', [AdministracionController::class, 'panel'])->name('panel');
+        Route::get('/estadisticas', [AdministracionController::class, 'estadisticas'])->name('estadisticas');
         Route::get('/productos', [AdministracionController::class, 'listarProductos'])->name('productos.indice');
         Route::get('/alertas', [AdministracionController::class, 'listarAlertas'])->name('alertas.indice');
         Route::get('/usuarios', [AdministracionController::class, 'listarUsuarios'])->name('usuarios.indice');
@@ -85,6 +92,8 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
         Route::get('/consultas', [AdministracionController::class, 'listarConsultas'])->name('consultas.indice');
         Route::patch('/consultas/{consulta}/leida', [AdministracionController::class, 'marcarConsultaLeida'])->name('consultas.leida');
         Route::get('/reportes', [AdministracionController::class, 'listarReportes'])->name('reportes.indice');
+        Route::get('/reportes/{reporteRiesgo}/editar', [AdministracionController::class, 'editarReporte'])->name('reportes.editar');
+        Route::put('/reportes/{reporteRiesgo}', [AdministracionController::class, 'actualizarReporte'])->name('reportes.actualizar');
         Route::get('/reportes/{reporteRiesgo}/evidencia', [AdministracionController::class, 'verEvidenciaReporte'])->name('reportes.evidencia');
         Route::patch('/reportes/{reporteRiesgo}/evidencia', [AdministracionController::class, 'actualizarEvidenciaReporte'])->name('reportes.evidencia.actualizar');
         Route::patch('/reportes/{reporteRiesgo}', [AdministracionController::class, 'revisarReporte'])->name('reportes.revisar');

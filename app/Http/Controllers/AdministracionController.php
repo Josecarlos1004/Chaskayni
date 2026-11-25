@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
@@ -34,15 +35,42 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
 
-        return view('administracion.panel', [
-            'cantidadUsuarios' => Usuario::count(),
-            'cantidadCuentasPendientes' => Schema::hasColumn('users', 'aprobado_en') ? Usuario::whereNull('aprobado_en')->count() : 0,
-            'cantidadProductos' => Producto::where('estado', 'disponible')->count(),
-            'cantidadPedidosPendientes' => Pedido::where('estado', 'pendiente')->count(),
-            'cantidadReportesPendientes' => ReporteRiesgo::where('estado', 'pendiente')->count(),
-            'cantidadAlertasActivas' => AlertaHelada::activas()->count(),
-            'cantidadRefugiosActivos' => Refugio::where('activo', true)->count(),
-        ]);
+        return view('administracion.panel', $this->datosEstadisticos());
+    }
+
+    /** Entrega datos recientes al panel para actualizar el gráfico sin recargar. */
+    public function estadisticas(): JsonResponse
+    {
+        $this->verificarAdministrador();
+
+        return response()->json($this->datosEstadisticos());
+    }
+
+    /** Resume los indicadores actuales que utiliza el gráfico del panel. */
+    private function datosEstadisticos(): array
+    {
+        $indicadores = [
+            'usuarios' => Usuario::count(),
+            'cuentas_pendientes' => Schema::hasColumn('users', 'aprobado_en') ? Usuario::whereNull('aprobado_en')->count() : 0,
+            'productos' => Producto::where('estado', 'disponible')->count(),
+            'pedidos_pendientes' => Pedido::where('estado', 'pendiente')->count(),
+            'reportes_pendientes' => ReporteRiesgo::where('estado', 'pendiente')->count(),
+            'alertas_activas' => AlertaHelada::activas()->count(),
+            'refugios_activos' => Refugio::where('activo', true)->count(),
+        ];
+
+        return [
+            'indicadores' => $indicadores,
+            'grafico' => [
+                'series' => [
+                    'usuarios' => $indicadores['usuarios'],
+                    'productos' => $indicadores['productos'],
+                    'pedidos' => $indicadores['pedidos_pendientes'],
+                    'reportes' => $indicadores['reportes_pendientes'],
+                ],
+            ],
+            'actualizado_en' => now()->format('H:i:s'),
+        ];
     }
 
     /** Lista cuentas para que administración pueda revisar roles y accesos. */
@@ -96,7 +124,53 @@ class AdministracionController extends Controller
 
         return view('administracion.alertas', [
             'alertas' => AlertaHelada::with(['comunidad', 'autor', 'reporteOrigen'])->latest()->paginate(15),
+            'reportesPendientes' => ReporteRiesgo::where('estado', 'pendiente')->count(),
         ]);
+    }
+
+    /** Abre la edición de un reporte antes de que se apruebe y se publique como alerta. */
+    public function editarReporte(ReporteRiesgo $reporteRiesgo): View
+    {
+        $this->verificarAdministrador();
+        abort_unless(in_array($reporteRiesgo->estado, ['pendiente', 'revisado'], true), 404);
+
+        return view('administracion.editar-reporte', [
+            'reporte' => $reporteRiesgo,
+            'comunidades' => Comunidad::where('activo', true)
+                ->orWhere('id', $reporteRiesgo->comunidad_id)
+                ->orderBy('nombre')
+                ->get(),
+        ]);
+    }
+
+    /** Actualiza el contenido de un reporte mientras todavía está en revisión. */
+    public function actualizarReporte(Request $request, ReporteRiesgo $reporteRiesgo): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $datos = $request->validate([
+            'tipo' => ['required', 'in:clima,refugio,otro'],
+            'tipo_personalizado' => ['exclude_unless:tipo,otro', 'required', 'string', 'min:3', 'max:100'],
+            'titulo' => ['required', 'string', 'max:160'],
+            'descripcion' => ['required', 'string', 'max:3000'],
+            'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')
+                ->where(fn ($consulta) => $consulta->where('activo', true)->orWhere('id', $reporteRiesgo->comunidad_id))],
+            'latitud' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'numeric', 'between:-180,180'],
+            'ubicacion_detallada' => ['nullable', 'string', 'max:500'],
+            'prioridad' => ['required', 'in:alta,media,baja'],
+        ]);
+        $datos['tipo_personalizado'] = $datos['tipo'] === 'otro' ? ($datos['tipo_personalizado'] ?? null) : null;
+
+        DB::transaction(function () use ($reporteRiesgo, $datos): void {
+            $reporte = ReporteRiesgo::query()->lockForUpdate()->findOrFail($reporteRiesgo->id);
+            if (! in_array($reporte->estado, ['pendiente', 'revisado'], true)) {
+                throw ValidationException::withMessages(['reporte' => 'Solo se pueden editar reportes que siguen en revisión.']);
+            }
+            $reporte->update($datos);
+        });
+
+        return redirect()->route('administracion.reportes.indice')
+            ->with('success', 'Se actualizaron los datos del reporte. Ya puedes revisarlo y aprobarlo.');
     }
 
     /** Actualiza rol y acceso sin permitir que se desactive al último administrador. */
@@ -259,7 +333,7 @@ class AdministracionController extends Controller
 
         return view('administracion.editar-alerta', [
             'alerta' => $alertaHelada,
-            'comunidades' => Comunidad::where('activo', true)->orWhereKey($alertaHelada->comunidad_id)->orderBy('nombre')->get(),
+            'comunidades' => Comunidad::where('activo', true)->orWhereKey($alertaHelada->comunidad_id)->orWhere('id', $reporteRiesgo->comunidad_id)->get(),
         ]);
     }
 
@@ -268,7 +342,8 @@ class AdministracionController extends Controller
         $this->verificarAdministrador();
         abort_if($alertaHelada->reporte_riesgo_id, 404);
         $datos = $request->validate([
-            'tipo' => ['required', 'in:clima,refugio'],
+            'tipo' => ['required', 'in:clima,refugio,otro'],
+            'tipo_personalizado' => ['exclude_unless:tipo,otro', 'required', 'string', 'min:3', 'max:100'],
             'titulo' => ['required', 'string', 'max:160'],
             'mensaje' => ['required', 'string', 'max:3000'],
             'nivel' => ['required', 'in:informacion,precaucion,urgente'],
@@ -278,6 +353,7 @@ class AdministracionController extends Controller
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'quitar_foto' => ['nullable', 'boolean'],
         ]);
+        $datos['tipo_personalizado'] = $datos['tipo'] === 'otro' ? ($datos['tipo_personalizado'] ?? null) : null;
         $foto = $datos['foto'] ?? null;
         $quitarFoto = (bool) ($datos['quitar_foto'] ?? false);
         unset($datos['foto'], $datos['quitar_foto']);
@@ -310,7 +386,8 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
         $datos = $request->validate([
-            'tipo' => ['required', 'in:clima,refugio'],
+            'tipo' => ['required', 'in:clima,refugio,otro'],
+            'tipo_personalizado' => ['exclude_unless:tipo,otro', 'required', 'string', 'min:3', 'max:100'],
             'titulo' => ['required', 'string', 'max:160'],
             'mensaje' => ['required', 'string', 'max:3000'],
             'nivel' => ['required', 'in:informacion,precaucion,urgente'],
@@ -319,6 +396,7 @@ class AdministracionController extends Controller
             'fecha_fin' => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
+        $datos['tipo_personalizado'] = $datos['tipo'] === 'otro' ? ($datos['tipo_personalizado'] ?? null) : null;
         $foto = $datos['foto'] ?? null;
         unset($datos['foto']);
         $rutaFoto = null;
@@ -414,7 +492,12 @@ class AdministracionController extends Controller
         $this->verificarAdministrador();
 
         return view('administracion.reportes', [
-            'reportes' => ReporteRiesgo::with(['reportante', 'comunidad'])->latest()->paginate(15),
+            'reportes' => ReporteRiesgo::with(['reportante', 'comunidad'])
+                ->orderByRaw("CASE estado WHEN 'pendiente' THEN 0 WHEN 'revisado' THEN 1 WHEN 'publicado' THEN 2 ELSE 3 END")
+                ->orderByRaw("CASE prioridad WHEN 'alta' THEN 0 WHEN 'media' THEN 1 WHEN 'baja' THEN 2 ELSE 3 END")
+                ->oldest('created_at')
+                ->paginate(15),
+            'reportesPendientes' => ReporteRiesgo::where('estado', 'pendiente')->count(),
         ]);
     }
 
@@ -491,7 +574,8 @@ class AdministracionController extends Controller
             $reporte->alerta()->firstOrCreate([], [
                 'creado_por' => Auth::id(),
                 'comunidad_id' => $reporte->comunidad_id,
-                'tipo' => in_array($reporte->tipo, ['clima', 'refugio'], true) ? $reporte->tipo : 'clima',
+                'tipo' => in_array($reporte->tipo, ['clima', 'refugio', 'otro'], true) ? $reporte->tipo : 'clima',
+                'tipo_personalizado' => $reporte->tipo === 'otro' ? $reporte->tipo_personalizado : null,
                 'titulo' => $reporte->titulo,
                 'mensaje' => $reporte->descripcion,
                 'nivel' => 'precaucion',

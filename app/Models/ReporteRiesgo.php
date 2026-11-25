@@ -10,7 +10,7 @@ class ReporteRiesgo extends Model
 {
     protected $table = 'reportes_riesgo';
 
-    protected $fillable = ['reportante_id', 'comunidad_id', 'tipo', 'titulo', 'descripcion', 'foto_evidencia', 'latitud', 'longitud', 'estado'];
+    protected $fillable = ['reportante_id', 'comunidad_id', 'tipo', 'tipo_personalizado', 'titulo', 'descripcion', 'foto_evidencia', 'latitud', 'longitud', 'ubicacion_detallada', 'prioridad', 'estado'];
 
     public function reportante(): BelongsTo
     {
