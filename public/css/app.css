@@ -3220,3 +3220,297 @@ body {
         text-align: left;
     }
 }
+
+/* Registro rápido de comunidades y tarjeta meteorológica */
+.registro-comunidad-rapida {
+    margin: 18px 0;
+    padding: 14px 17px;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    background: var(--crema);
+}
+.registro-comunidad-rapida summary {
+    color: var(--verde);
+    font-weight: 700;
+    cursor: pointer;
+}
+.registro-comunidad-rapida form {
+    margin-top: 16px;
+}
+.estado-registro-comunidad {
+    margin: 0;
+    color: var(--verde);
+}
+.estado-registro-comunidad.es-error {
+    color: #a83e2d;
+}
+.panel-clima-comunidad {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    min-width: 0;
+    overflow: hidden;
+    padding: clamp(17px, 2vw, 24px);
+    border: 1px solid rgba(255, 255, 255, .24);
+    border-radius: 18px;
+    background: linear-gradient(145deg, #397db0 0%, #1d5f91 43%, #123c70 100%);
+    box-shadow: 0 16px 36px rgba(12, 48, 88, .2);
+    color: #fff;
+}
+.panel-clima-comunidad::before {
+    position: absolute;
+    z-index: -1;
+    top: -100px;
+    right: -65px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(206, 231, 245, .24), rgba(206, 231, 245, 0) 70%);
+    content: "";
+}
+.panel-clima-comunidad > * {
+    position: relative;
+}
+.encabezado-clima-comunidad {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.encabezado-clima-comunidad .sobrelinea {
+    color: #d9ebf8;
+}
+.encabezado-clima-comunidad h2 {
+    margin: 3px 0 2px;
+    color: #fff;
+    font-size: 1.25rem;
+}
+.encabezado-clima-comunidad .boton-claro {
+    border-color: rgba(255, 255, 255, .55);
+    background: rgba(255, 255, 255, .96);
+    color: #123c70;
+}
+.ubicacion-clima-comunidad,
+.estado-clima-comunidad {
+    margin: 0;
+    color: #e0edf7;
+    font-size: .82rem;
+}
+.estado-clima-comunidad.es-error {
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: rgba(71, 21, 28, .4);
+    color: #fff;
+}
+.datos-clima-comunidad {
+    display: grid;
+    gap: 15px;
+}
+.clima-actual {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 130px;
+    padding: 4px 4px 8px;
+}
+.temperatura-clima-actual {
+    display: block;
+    color: #fff;
+    font: 600 clamp(3.8rem, 8vw, 5.6rem)/.95 Manrope, sans-serif;
+    letter-spacing: -.08em;
+}
+.descripcion-clima-actual {
+    margin: 8px 0 10px;
+    color: #f4f8fb;
+    font-size: 1.12rem;
+    font-weight: 700;
+}
+.maximos-clima-actual {
+    margin: 0;
+    color: #e0edf7;
+    font-size: .9rem;
+}
+.maximos-clima-actual strong {
+    color: #fff;
+}
+.icono-clima-actual {
+    display: grid;
+    width: 90px;
+    height: 90px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 50%;
+    background: rgba(214, 235, 249, .15);
+    box-shadow: inset 0 0 30px rgba(255, 255, 255, .08);
+    font-size: 3.8rem;
+}
+.franja-pronostico-horas {
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 14px;
+    background: rgba(5, 31, 67, .36);
+}
+.encabezado-pronostico-horas {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, .24);
+}
+.encabezado-pronostico-horas h3 {
+    margin: 0;
+    color: #fff;
+    font-size: .95rem;
+}
+.encabezado-pronostico-horas > span {
+    color: #d9e9f5;
+    font-size: .76rem;
+}
+.encabezado-pronostico-horas strong {
+    color: #fff;
+}
+.pronostico-horas {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(58px, 1fr));
+    gap: 7px;
+    overflow-x: auto;
+    padding-top: 11px;
+    scrollbar-color: rgba(255, 255, 255, .35) transparent;
+    scrollbar-width: thin;
+}
+.pronostico-hora {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    min-width: 58px;
+    padding: 8px 3px;
+    border-radius: 9px;
+    color: #e2edf7;
+    text-align: center;
+}
+.pronostico-hora-tiempo,
+.pronostico-hora small {
+    color: #d7e6f2;
+    font-size: .7rem;
+}
+.pronostico-hora-icono {
+    min-height: 27px;
+    font-size: 1.35rem;
+}
+.pronostico-hora strong {
+    color: #fff;
+    font-size: .95rem;
+}
+.detalles-clima-actual {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+.detalles-clima-actual p {
+    display: grid;
+    gap: 3px;
+    margin: 0;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, .15);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .09);
+    color: #dceaf5;
+    font-size: .75rem;
+}
+.detalles-clima-actual strong {
+    color: #fff;
+    font-size: .92rem;
+}
+.boton-clima-minima {
+    justify-self: start;
+    border: 0;
+    background: #fff8e8;
+    color: #173b33;
+    font-weight: 700;
+}
+.boton-clima-minima:hover {
+    background: #f0dfb3;
+    color: #173b33;
+}
+.atribucion-clima-comunidad {
+    color: #d9e8f4;
+    font-size: .7rem;
+    line-height: 1.5;
+}
+.atribucion-clima-comunidad a {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.fila-clima-comunidad {
+    align-items: start;
+}
+.fila-clima-comunidad > label {
+    min-width: 0;
+}
+@media (max-width: 700px) {
+    .detalles-clima-actual {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .clima-actual {
+        min-height: 110px;
+    }
+    .icono-clima-actual {
+        width: 70px;
+        height: 70px;
+        font-size: 2.8rem;
+    }
+}
+
+/* Campos de ubicación para asignar coordenadas verificables a cada comunidad. */
+.campo-ubicacion-comunidad {
+    display: grid;
+    gap: 10px;
+    margin: 18px 0;
+    padding: 16px;
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    background: #f8f8f2;
+}
+.etiqueta-campo {
+    color: var(--marca-tinta);
+    font-weight: 700;
+}
+.campo-ubicacion-comunidad > .texto-atenuado,
+.estado-mapa-comunidad {
+    margin: 0;
+    font-size: .85rem;
+}
+.mapa-selector-comunidad {
+    z-index: 0;
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    background: #e8eee5;
+}
+.fila-coordenadas-comunidad {
+    margin-top: 0;
+}
+.fila-coordenadas-comunidad label {
+    min-width: 0;
+}
+.estado-mapa-comunidad {
+    color: var(--verde);
+}
+@media (max-width: 620px) {
+    .mapa-selector-comunidad {
+        height: 210px;
+    }
+    .campo-ubicacion-comunidad {
+        padding: 12px;
+    }
+}

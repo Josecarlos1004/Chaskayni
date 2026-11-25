@@ -13,7 +13,7 @@
         <div class="tarjeta-formulario">
             <span class="sobrelinea">Nueva comunidad</span>
             <h2>Registrar comunidad</h2>
-            <form method="post" action="{{ route('administracion.comunidades.guardar') }}">
+            <form method="post" action="{{ route('administracion.comunidades.guardar') }}" data-formulario-comunidad>
                 @csrf
                 <label>Nombre<input name="nombre" value="{{ old('nombre') }}" maxlength="120" required /></label>
                 <div class="fila-formulario">
@@ -29,6 +29,20 @@
                             maxlength="120"
                             required
                     /></label>
+                </div>
+                                <div class="campo-ubicacion-comunidad">
+                    <span class="etiqueta-campo">Ubicación para el pronóstico</span>
+                    <p class="texto-atenuado">Marca en el mapa el punto de la comunidad. El pronóstico usará estas coordenadas.</p>
+                    <div class="mapa-selector-comunidad" data-mapa-comunidad role="region" aria-label="Selecciona la ubicación de la comunidad"></div>
+                    <p class="estado-mapa-comunidad" data-estado-mapa-comunidad role="status" aria-live="polite">Haz clic en el mapa para seleccionar la ubicación.</p>
+                    <div class="fila-formulario fila-coordenadas-comunidad">
+                        <label>Latitud
+                            <input type="number" name="latitud" step="any" min="-90" max="90" value="{{ old('latitud') }}" />
+                        </label>
+                        <label>Longitud
+                            <input type="number" name="longitud" step="any" min="-180" max="180" value="{{ old('longitud') }}" />
+                        </label>
+                    </div>
                 </div>
                 <label
                     >Altitud (m s. n. m., opcional)<input
@@ -68,9 +82,9 @@
                         </div>
                         <span class="etiqueta-estado">{{ $comunidad->activo ? 'Activa' : 'Inactiva' }}</span>
                     </div>
-                    bdetails>
-                        bsummary>Editar o activar comunidadb/summary>
-                        <form method="post" action="{{ route('administracion.comunidades.actualizar', $comunidad) }}">
+                    <details>
+                        <summary>Editar o activar comunidad</summary>
+                        <form method="post" action="{{ route('administracion.comunidades.actualizar', $comunidad) }}" data-formulario-comunidad>
                             @csrf
                             @method ('put')
                             <label
@@ -89,6 +103,20 @@
                                         maxlength="120"
                                         required
                                 /></label>
+                            </div>
+                                                        <div class="campo-ubicacion-comunidad">
+                                <span class="etiqueta-campo">Ubicación para el pronóstico</span>
+                                <p class="texto-atenuado">Marca en el mapa el punto de la comunidad. El pronóstico usará estas coordenadas.</p>
+                                <div class="mapa-selector-comunidad" data-mapa-comunidad role="region" aria-label="Selecciona la ubicación de la comunidad"></div>
+                                <p class="estado-mapa-comunidad" data-estado-mapa-comunidad role="status" aria-live="polite">Haz clic en el mapa para seleccionar la ubicación.</p>
+                                <div class="fila-formulario fila-coordenadas-comunidad">
+                                    <label>Latitud
+                                        <input type="number" name="latitud" step="any" min="-90" max="90" value="{{ $comunidad->latitud }}" />
+                                    </label>
+                                    <label>Longitud
+                                        <input type="number" name="longitud" step="any" min="-180" max="180" value="{{ $comunidad->longitud }}" />
+                                    </label>
+                                </div>
                             </div>
                             <label
                                 >Altitud (m s. n. m.)<input
@@ -117,7 +145,7 @@
                             >
                             <button class="boton boton-pequeno" type="submit">Guardar cambios</button>
                         </form>
-                    b/details>
+                    </details>
                     <form
                         method="post"
                         action="{{ route('administracion.comunidades.eliminar', $comunidad) }}"
@@ -139,4 +167,7 @@
             @endforelse
         </div>
     </section>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="{{ asset('js/mapa-comunidades-admin.js') }}?v={{ filemtime(public_path('js/mapa-comunidades-admin.js')) }}" defer></script>
 @endsection

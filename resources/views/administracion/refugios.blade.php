@@ -91,8 +91,8 @@
                     @else
                         <small>Sin coordenadas; aún no aparece en el mapa.</small>
                     @endif
-                    bdetails>
-                        bsummary>Editar refugiob/summary>
+                    <details>
+                        <summary>Editar refugio</summary>
                         <form method="post" action="{{ route('administracion.refugios.actualizar', $refugio) }}">
                             @csrf
                             @method ('put')
@@ -169,7 +169,7 @@
                             >
                             <button class="boton boton-pequeno" type="submit">Guardar cambios</button>
                         </form>
-                    b/details>
+                    </details>
                     <form
                         method="post"
                         action="{{ route('administracion.refugios.eliminar', $refugio) }}"

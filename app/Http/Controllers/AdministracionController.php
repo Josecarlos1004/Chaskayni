@@ -10,6 +10,7 @@ use App\Models\Producto;
 use App\Models\Refugio;
 use App\Models\ReporteRiesgo;
 use App\Models\Usuario;
+use App\Services\ClimaComunidad;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -270,6 +271,8 @@ class AdministracionController extends Controller
             'distrito' => ['nullable', 'string', 'max:120'],
             'provincia' => ['required', 'string', 'max:120'],
             'altitud_msnm' => ['nullable', 'integer', 'between:0,8000'],
+            'latitud' => ['nullable', 'required_with:longitud', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'required_with:latitud', 'numeric', 'between:-180,180'],
             'descripcion' => ['nullable', 'string', 'max:2000'],
         ]);
 
@@ -287,6 +290,8 @@ class AdministracionController extends Controller
             'distrito' => ['nullable', 'string', 'max:120'],
             'provincia' => ['required', 'string', 'max:120'],
             'altitud_msnm' => ['nullable', 'integer', 'between:0,8000'],
+            'latitud' => ['nullable', 'required_with:longitud', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'required_with:latitud', 'numeric', 'between:-180,180'],
             'descripcion' => ['nullable', 'string', 'max:2000'],
             'activo' => ['required', 'boolean'],
         ]);
@@ -311,6 +316,55 @@ class AdministracionController extends Controller
         return view('administracion.crear-alerta', [
             'comunidades' => Comunidad::where('activo', true)->orderBy('nombre')->get(),
         ]);
+    }
+
+    /** Registra una comunidad activa desde el formulario de alertas. */
+    public function guardarComunidadRapida(Request $request): JsonResponse
+    {
+        $this->verificarAdministrador();
+        $datos = $request->validate([
+            'nombre' => ['required', 'string', 'max:120', 'unique:comunidades,nombre'],
+            'distrito' => ['nullable', 'string', 'max:120'],
+            'provincia' => ['required', 'string', 'max:120'],
+            'altitud_msnm' => ['nullable', 'integer', 'between:0,8000'],
+            'latitud' => ['nullable', 'required_with:longitud', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'required_with:latitud', 'numeric', 'between:-180,180'],
+        ]);
+
+        $comunidad = Comunidad::create([...$datos, 'activo' => true]);
+
+        if (! $request->expectsJson()) {
+            return redirect()->route('administracion.alertas.crear')
+                ->with('success', 'La comunidad se registró. Ya puedes seleccionarla para la alerta.')
+                ->with('comunidadCreadaId', $comunidad->id);
+        }
+
+        return response()->json([
+            'id' => $comunidad->id,
+            'nombre' => $comunidad->nombre,
+            'altitud_msnm' => $comunidad->altitud_msnm,
+        ], 201);
+    }
+
+    /** Consulta el pronóstico con las coordenadas registradas de la comunidad. */
+    public function climaComunidad(Comunidad $comunidad, ClimaComunidad $consultaClima): JsonResponse
+    {
+        $this->verificarAdministrador();
+        abort_unless($comunidad->activo, 404);
+
+        if ($comunidad->latitud === null || $comunidad->longitud === null) {
+            return response()->json([
+                'mensaje' => 'Esta comunidad aún no tiene coordenadas. Selecciónalas en el mapa de comunidades o ingresa la temperatura manualmente.',
+            ], 422);
+        }
+
+        try {
+            return response()->json($consultaClima->consultar($comunidad));
+        } catch (Throwable) {
+            return response()->json([
+                'mensaje' => 'No se pudo obtener el clima de esta comunidad. Puedes ingresar la temperatura manualmente.',
+            ], 503);
+        }
     }
 
     /** Muestra una foto de alerta solo dentro del panel administrativo. */
