@@ -333,7 +333,10 @@ class AdministracionController extends Controller
 
         return view('administracion.editar-alerta', [
             'alerta' => $alertaHelada,
-            'comunidades' => Comunidad::where('activo', true)->orWhereKey($alertaHelada->comunidad_id)->orWhere('id', $reporteRiesgo->comunidad_id)->get(),
+            'comunidades' => Comunidad::where('activo', true)
+    ->orWhere('id', $alertaHelada->comunidad_id)
+    ->orderBy('nombre')
+    ->get(),
         ]);
     }
 
@@ -425,6 +428,7 @@ class AdministracionController extends Controller
         $datos = $request->validate([
             'comunidad_id' => ['required', Rule::exists('comunidades', 'id')->where('activo', true)],
             'temperatura_c' => ['required', 'numeric', 'between:-80,60'],
+            'indicaciones' => ['nullable', 'string', 'max:1000'],
         ]);
         $temperatura = round((float) $datos['temperatura_c'], 2);
 
@@ -450,7 +454,7 @@ class AdministracionController extends Controller
             'comunidad_id' => $datos['comunidad_id'],
             'tipo' => 'clima',
             'titulo' => 'Riesgo '.$riesgo.' de helada',
-            'mensaje' => 'Temperatura prevista: '.$temperatura.' °C. Revisa las medidas de protección frente a heladas recomendadas para tu comunidad.',
+            'mensaje' => 'Temperatura prevista: '.$temperatura.' °C. Revisa las medidas de protección frente a heladas recomendadas para tu comunidad.'.(! empty($datos['indicaciones']) ? "\n\n".$datos['indicaciones'] : ''),
             'nivel' => $nivelAviso,
             'temperatura_c' => $temperatura,
             'nivel_riesgo' => $riesgo,

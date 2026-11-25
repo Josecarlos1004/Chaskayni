@@ -36,6 +36,15 @@
                         required
                     />
                 </label>
+                <label>Indicaciones adicionales (opcional)
+                    <textarea
+                        name="indicaciones"
+                        rows="4"
+                        maxlength="1000"
+                        placeholder="Añade recomendaciones o detalles útiles para esta comunidad."
+                    >{{ old("indicaciones") }}</textarea>
+                </label>
+                <small>El riesgo se calcula automáticamente; las indicaciones son opcionales (máximo 1000 caracteres).</small>
                 <small>Menos de 0 °C: riesgo bajo. Desde −2 °C: medio. Desde −5 °C: alto.</small>
                 <div class="acciones-formulario">
                     <a class="boton boton-claro" href="{{ route('alertas.indice') }}">Cancelar</a>
