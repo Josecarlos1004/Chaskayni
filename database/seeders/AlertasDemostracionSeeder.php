@@ -11,6 +11,12 @@ class AlertasDemostracionSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command?->warn('Las alertas de demostración están deshabilitadas en producción.');
+
+            return;
+        }
+
         $autor = Usuario::where('name', 'like', '%alejandro%')->where('activo', true)->orderBy('id')->first();
 
         if (! $autor) {

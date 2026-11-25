@@ -12,6 +12,12 @@ class ProductosDemostracionSeeder extends Seeder
     
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command?->warn('Los productos de demostración están deshabilitados en producción.');
+
+            return;
+        }
+
         $productor = $this->buscarProductor();
 
         if (! $productor) {

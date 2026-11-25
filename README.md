@@ -134,6 +134,6 @@ Desde el panel /administracion se accede a cuentas, publicaciones, pedidos, aler
 
 ## Verificación, seguridad y entrega
 
-La guía `docs/guia-validacion-y-evidencias.md` contiene una matriz para revisar los recorridos, registrar pruebas de seguridad, medir consultas y completar las evidencias del informe. Los resultados deben completarse con mediciones reales; la suite usa una base MySQL separada y puede reconstruir sus tablas.
+La [guía de despliegue en Railway](docs/guia-despliegue-railway.md) explica el uso del Dockerfile, las variables y la persistencia de archivos. La guía `docs/guia-validacion-y-evidencias.md` contiene una matriz para revisar los recorridos, registrar pruebas de seguridad, medir consultas y completar las evidencias del informe. Los resultados deben completarse con mediciones reales; la suite usa una base MySQL separada y puede reconstruir sus tablas.
 
 En despliegues con Docker, el inicio crea el enlace de almacenamiento público. Para conservar imágenes entre despliegues, monta un volumen persistente en `/var/www/html/storage/app` o configura un almacenamiento S3 compatible para los discos público y privado.
