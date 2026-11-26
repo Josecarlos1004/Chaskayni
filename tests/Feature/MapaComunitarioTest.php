@@ -23,7 +23,7 @@ class MapaComunitarioTest extends TestCase
         ]);
         ReporteRiesgo::create([
             'reportante_id' => $usuario->id, 'comunidad_id' => $comunidad->id, 'titulo' => 'Reporte revisado visible',
-            'descripcion' => 'Descripción verificada', 'latitud' => -13.52, 'longitud' => -71.95, 'estado' => 'revisado',
+            'descripcion' => 'Descripción verificada', 'latitud' => -13.52, 'longitud' => -71.95, 'estado' => 'publicado',
         ]);
         ReporteRiesgo::create([
             'reportante_id' => $usuario->id, 'comunidad_id' => $comunidad->id, 'titulo' => 'Reporte pendiente privado',

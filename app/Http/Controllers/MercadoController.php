@@ -11,7 +11,7 @@ class MercadoController extends Controller
 {
     public function index(Request $request): View
     {
-        $productos = Producto::with(['vendedor', 'comunidad'])
+        $productos = Producto::with(['vendedor', 'comunidad', 'imagenes'])
             ->where('estado', 'disponible')
             ->where('cantidad', '>', 0)
             ->when($request->filled('q'), function ($query) use ($request) {

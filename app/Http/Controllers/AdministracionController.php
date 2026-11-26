@@ -116,7 +116,7 @@ class AdministracionController extends Controller
         $this->verificarAdministrador();
 
         return view('administracion.productos', [
-            'productos' => Producto::with(['vendedor', 'comunidad'])->latest()->paginate(12),
+            'productos' => Producto::with(['vendedor', 'comunidad', 'imagenes'])->latest()->paginate(12),
         ]);
     }
 

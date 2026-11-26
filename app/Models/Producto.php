@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Producto extends Model
 {
+    /** Cantidad máxima de fotos adicionales, además de la foto principal. */
+    public const MAX_IMAGENES_ADICIONALES = 4;
+
     protected $table = 'productos';
 
     protected $fillable = ['usuario_id', 'comunidad_id', 'nombre', 'categoria', 'descripcion', 'cantidad', 'unidad', 'precio_unitario', 'imagen_url', 'cesta_salvada', 'estado'];
@@ -67,6 +70,26 @@ class Producto extends Model
         return str_starts_with($imagen, 'productos/')
             ? ltrim($imagen, '/')
             : null;
+    }
+
+    /** Fotos adicionales del producto, en el orden en que se subieron. */
+    public function imagenes(): HasMany
+    {
+        return $this->hasMany(ProductoImagen::class, 'producto_id')->orderBy('orden')->orderBy('id');
+    }
+
+    /** Lista de URL para la galería: primero la foto principal y luego las adicionales. */
+    public function galeria(): array
+    {
+        $urls = [];
+        if ($principal = $this->urlImagen()) {
+            $urls[] = $principal;
+        }
+        foreach ($this->imagenes as $imagen) {
+            $urls[] = $imagen->url();
+        }
+
+        return $urls;
     }
 
     public function vendedor(): BelongsTo

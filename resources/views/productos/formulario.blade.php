@@ -142,6 +142,44 @@
                         la imagen actual</label
                     >
                 @endif
+                @php ($maxAdicionales = \App\Models\Producto::MAX_IMAGENES_ADICIONALES)
+                <div class="campo-imagen">
+                    <label for="imagenes"
+                        >Fotos adicionales (opcional)<input
+                            id="imagenes"
+                            type="file"
+                            name="imagenes[]"
+                            multiple
+                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                            aria-describedby="ayuda-imagenes"
+                            data-maximo="{{ $maxAdicionales }}"
+                        /><small id="ayuda-imagenes"
+                            >Hasta {{ $maxAdicionales }} fotos más. JPG, PNG o WebP, máximo 5 MB cada una. Puedes elegir varias a la vez.</small
+                        ></label
+                    >
+                    <div id="galeria-previa" class="galeria-previa" aria-live="polite"></div>
+                </div>
+                @if ($producto->exists && $producto->imagenes->isNotEmpty())
+                    <fieldset class="imagenes-actuales">
+                        <legend>Fotos adicionales actuales</legend>
+                        <div class="galeria-previa">
+                            @foreach ($producto->imagenes as $imagenAdicional)
+                                <label class="miniatura-quitar">
+                                    <img src="{{ $imagenAdicional->url() }}" alt="Foto adicional {{ $loop->iteration }} de {{ $producto->nombre }}" loading="lazy" />
+                                    <span
+                                        ><input
+                                            type="checkbox"
+                                            name="quitar_imagenes[]"
+                                            value="{{ $imagenAdicional->id }}"
+                                            @checked (in_array((string) $imagenAdicional->id, array_map('strval', (array) old('quitar_imagenes', [])), true))
+                                        />
+                                        Quitar</span
+                                    >
+                                </label>
+                            @endforeach
+                        </div>
+                    </fieldset>
+                @endif
                 <div class="acciones-formulario">
                     <a class="boton boton-claro" href="{{ route('mercado.indice') }}">Cancelar</a
                     ><button class="boton" type="submit">
@@ -183,6 +221,37 @@
 
             entradaUrl.addEventListener('input', () => {
                 if (!entradaArchivo.files?.length && entradaUrl.value) mostrarVistaPrevia(entradaUrl.value);
+            });
+        })();
+
+        (() => {
+            const entrada = document.getElementById('imagenes');
+            const galeria = document.getElementById('galeria-previa');
+            if (!entrada || !galeria) return;
+
+            const maximo = Number(entrada.dataset.maximo) || 4;
+            let urlsTemporales = [];
+
+            entrada.addEventListener('change', () => {
+                urlsTemporales.forEach((url) => URL.revokeObjectURL(url));
+                urlsTemporales = [];
+                galeria.replaceChildren();
+
+                let archivos = Array.from(entrada.files || []);
+                if (archivos.length > maximo) {
+                    alert('Solo puedes subir hasta ' + maximo + ' fotos adicionales por vez.');
+                    entrada.value = '';
+                    return;
+                }
+
+                archivos.forEach((archivo, indice) => {
+                    const url = URL.createObjectURL(archivo);
+                    urlsTemporales.push(url);
+                    const imagen = document.createElement('img');
+                    imagen.src = url;
+                    imagen.alt = 'Vista previa de la foto adicional ' + (indice + 1);
+                    galeria.appendChild(imagen);
+                });
             });
         })();
     </script>

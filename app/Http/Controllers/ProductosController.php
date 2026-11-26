@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Comunidad;
 use App\Models\Producto;
+use App\Models\ProductoImagen;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Throwable;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductosController extends Controller
@@ -24,6 +27,22 @@ class ProductosController extends Controller
         return Storage::disk('public')->response(
             $rutaImagen,
             'producto-'.$producto->id,
+            [
+                'Cache-Control' => 'public, max-age=3600',
+                'X-Content-Type-Options' => 'nosniff',
+            ],
+            'inline',
+        );
+    }
+
+    /** Sirve las fotos adicionales del mercado, también cuando están en un bucket privado. */
+    public function verImagenAdicional(ProductoImagen $imagen): StreamedResponse
+    {
+        abort_unless(Storage::disk('public')->exists($imagen->ruta), 404);
+
+        return Storage::disk('public')->response(
+            $imagen->ruta,
+            'producto-'.$imagen->producto_id.'-'.$imagen->id,
             [
                 'Cache-Control' => 'public, max-age=3600',
                 'X-Content-Type-Options' => 'nosniff',
@@ -51,21 +70,37 @@ class ProductosController extends Controller
     {
         $this->verificarProductor();
         $datos = $this->validarDatos($request);
-        unset($datos['imagen'], $datos['quitar_imagen']);
+        unset($datos['imagen'], $datos['quitar_imagen'], $datos['imagenes'], $datos['quitar_imagenes']);
 
-        if ($request->hasFile('imagen')) {
-            $rutaImagen = $request->file('imagen')->store('productos', 'public');
-            if (! $rutaImagen) {
-                throw ValidationException::withMessages(['imagen' => 'No se pudo guardar la imagen. Inténtalo nuevamente.']);
+        $rutasNuevas = [];
+        try {
+            if ($request->hasFile('imagen')) {
+                $rutaImagen = $request->file('imagen')->store('productos', 'public');
+                if (! $rutaImagen) {
+                    throw ValidationException::withMessages(['imagen' => 'No se pudo guardar la imagen. Inténtalo nuevamente.']);
+                }
+                $datos['imagen_url'] = $rutaImagen;
+                $rutasNuevas[] = $rutaImagen;
             }
-            $datos['imagen_url'] = $rutaImagen;
-        }
-        $datos['usuario_id'] = Auth::id();
-        $datos['comunidad_id'] = $datos['comunidad_id']
-            ?? (Auth::user()->comunidad?->activo ? Auth::user()->comunidad_id : null);
-        $datos['estado'] = 'disponible';
+            $rutasAdicionales = $this->guardarArchivosAdicionales($request);
+            $rutasNuevas = array_merge($rutasNuevas, $rutasAdicionales);
 
-        Producto::create($datos);
+            $datos['usuario_id'] = Auth::id();
+            $datos['comunidad_id'] = $datos['comunidad_id']
+                ?? (Auth::user()->comunidad?->activo ? Auth::user()->comunidad_id : null);
+            $datos['estado'] = 'disponible';
+
+            DB::transaction(function () use ($datos, $rutasAdicionales): void {
+                $producto = Producto::create($datos);
+                $this->registrarImagenesAdicionales($producto, $rutasAdicionales);
+            });
+        } catch (Throwable $error) {
+            // Si algo falla, no dejamos archivos huérfanos en el almacenamiento.
+            foreach ($rutasNuevas as $ruta) {
+                $this->eliminarImagenAlmacenada($ruta);
+            }
+            throw $error;
+        }
 
         return redirect()->route('mercado.indice')->with('success', 'Publicaste un producto en el mercado.');
     }
@@ -84,26 +119,50 @@ class ProductosController extends Controller
     {
         $this->verificarPropietario($producto);
         $datos = $this->validarDatos($request, $producto);
-        unset($datos['imagen'], $datos['quitar_imagen']);
+        unset($datos['imagen'], $datos['quitar_imagen'], $datos['imagenes'], $datos['quitar_imagenes']);
+
+        // Solo se pueden quitar fotos adicionales que pertenecen a este producto.
+        $imagenesAQuitar = $producto->imagenes()
+            ->whereIn('id', array_map('intval', (array) $request->input('quitar_imagenes', [])))
+            ->get();
+        $this->verificarLimiteImagenes($request, $producto, $imagenesAQuitar->count());
 
         $imagenAnterior = $producto->imagen_url;
-        if ($request->hasFile('imagen')) {
-            $rutaImagen = $request->file('imagen')->store('productos', 'public');
-            if (! $rutaImagen) {
-                throw ValidationException::withMessages(['imagen' => 'No se pudo guardar la imagen. Inténtalo nuevamente.']);
+        $rutasNuevas = [];
+        try {
+            if ($request->hasFile('imagen')) {
+                $rutaImagen = $request->file('imagen')->store('productos', 'public');
+                if (! $rutaImagen) {
+                    throw ValidationException::withMessages(['imagen' => 'No se pudo guardar la imagen. Inténtalo nuevamente.']);
+                }
+                $datos['imagen_url'] = $rutaImagen;
+                $rutasNuevas[] = $rutaImagen;
+            } elseif ($request->boolean('quitar_imagen')) {
+                $datos['imagen_url'] = null;
+            } elseif (! $request->filled('imagen_url')) {
+                // Un campo URL vacío conserva la foto actual al editar.
+                unset($datos['imagen_url']);
             }
-            $datos['imagen_url'] = $rutaImagen;
-        } elseif ($request->boolean('quitar_imagen')) {
-            $datos['imagen_url'] = null;
-        } elseif (! $request->filled('imagen_url')) {
-            // Un campo URL vacío conserva la foto actual al editar.
-            unset($datos['imagen_url']);
-        }
+            $rutasAdicionales = $this->guardarArchivosAdicionales($request);
+            $rutasNuevas = array_merge($rutasNuevas, $rutasAdicionales);
 
-        $producto->update($datos);
+            DB::transaction(function () use ($producto, $datos, $imagenesAQuitar, $rutasAdicionales): void {
+                $producto->update($datos);
+                ProductoImagen::whereIn('id', $imagenesAQuitar->pluck('id'))->delete();
+                $this->registrarImagenesAdicionales($producto, $rutasAdicionales);
+            });
+        } catch (Throwable $error) {
+            foreach ($rutasNuevas as $ruta) {
+                $this->eliminarImagenAlmacenada($ruta);
+            }
+            throw $error;
+        }
 
         if ($imagenAnterior !== $producto->imagen_url) {
             $this->eliminarImagenAlmacenada($imagenAnterior);
+        }
+        foreach ($imagenesAQuitar as $imagen) {
+            $this->eliminarImagenAlmacenada($imagen->ruta);
         }
 
         return redirect()->route('mercado.indice')->with('success', 'La publicación se actualizó.');
@@ -136,8 +195,12 @@ class ProductosController extends Controller
         }
 
         $imagen = $producto->imagen_url;
+        $rutasAdicionales = $producto->imagenes()->pluck('ruta');
         $producto->delete();
         $this->eliminarImagenAlmacenada($imagen);
+        foreach ($rutasAdicionales as $ruta) {
+            $this->eliminarImagenAlmacenada($ruta);
+        }
 
         return back()->with('success', 'Se eliminó la publicación.');
     }
@@ -181,9 +244,53 @@ class ProductosController extends Controller
             'imagen_url' => ['nullable', 'url:http,https', 'max:2048'],
             'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'quitar_imagen' => ['nullable', 'boolean'],
+            'imagenes' => ['nullable', 'array', 'max:'.Producto::MAX_IMAGENES_ADICIONALES],
+            'imagenes.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'quitar_imagenes' => ['nullable', 'array'],
+            'quitar_imagenes.*' => ['integer'],
             'cesta_salvada' => ['required', 'boolean'],
             'comunidad_id' => ['nullable', $this->reglaComunidad($request, $producto)],
         ]);
+    }
+
+    /** Evita superar el máximo de fotos adicionales al sumar las nuevas a las que ya existen. */
+    private function verificarLimiteImagenes(Request $request, Producto $producto, int $cantidadAQuitar): void
+    {
+        $nuevas = count($request->file('imagenes', []));
+        $restantes = ProductoImagen::where('producto_id', $producto->id)->count() - $cantidadAQuitar;
+
+        if ($restantes + $nuevas > Producto::MAX_IMAGENES_ADICIONALES) {
+            throw ValidationException::withMessages([
+                'imagenes' => 'Cada producto admite hasta '.Producto::MAX_IMAGENES_ADICIONALES.' fotos adicionales. Quita alguna antes de subir más.',
+            ]);
+        }
+    }
+
+    /** Guarda en el disco público las fotos adicionales y devuelve sus rutas. */
+    private function guardarArchivosAdicionales(Request $request): array
+    {
+        $rutas = [];
+        foreach ($request->file('imagenes', []) as $archivo) {
+            $ruta = $archivo->store('productos', 'public');
+            if (! $ruta) {
+                foreach ($rutas as $rutaGuardada) {
+                    $this->eliminarImagenAlmacenada($rutaGuardada);
+                }
+                throw ValidationException::withMessages(['imagenes' => 'No se pudo guardar una de las fotos. Inténtalo nuevamente.']);
+            }
+            $rutas[] = $ruta;
+        }
+
+        return $rutas;
+    }
+
+    /** Registra en la base de datos las fotos adicionales ya guardadas, a continuación de las existentes. */
+    private function registrarImagenesAdicionales(Producto $producto, array $rutas): void
+    {
+        $orden = (int) ProductoImagen::where('producto_id', $producto->id)->max('orden');
+        foreach ($rutas as $ruta) {
+            $producto->imagenes()->create(['ruta' => $ruta, 'orden' => ++$orden]);
+        }
     }
 
     /** Elimina solo imágenes cargadas por esta aplicación, nunca URL externas. */

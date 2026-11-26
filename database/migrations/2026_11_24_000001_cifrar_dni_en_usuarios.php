@@ -15,10 +15,21 @@ return new class extends Migration
             throw new RuntimeException('Configura APP_KEY antes de cifrar los DNI.');
         }
 
-        if (! Schema::hasColumn('users', 'dni_hash')) {
+        // Cada paso comprueba el estado actual, así la migración puede repetirse
+        // si una ejecución anterior se detuvo a medias (MySQL no deshace cambios de estructura).
+        $indices = array_column(Schema::getIndexes('users'), 'name');
+        if (in_array('users_dni_unique', $indices, true)) {
             Schema::table('users', function (Blueprint $table) {
                 $table->dropUnique(['dni']);
-                $table->text('dni')->nullable()->change();
+            });
+        }
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->text('dni')->nullable()->change();
+        });
+
+        if (! Schema::hasColumn('users', 'dni_hash')) {
+            Schema::table('users', function (Blueprint $table) {
                 $table->char('dni_hash', 64)->nullable()->unique();
             });
         }
