@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [InicioController::class, 'index'])->name('inicio');
 Route::get('/mercado', [MercadoController::class, 'index'])->name('mercado.indice');
 Route::get('/productos/{producto}/imagen', [ProductosController::class, 'verImagenPublica'])->name('productos.imagen');
+Route::get('/productos/imagenes/{imagen}', [ProductosController::class, 'verImagenAdicional'])->name('productos.imagenes.ver');
 Route::get('/alertas', [AlertasHeladasController::class, 'index'])->name('alertas.indice');
 Route::get('/alertas/{alertaHelada}/foto', [AlertasHeladasController::class, 'verFotoPublica'])->name('alertas.foto');
 Route::get('/mapa-comunitario', [MapaComunitarioController::class, 'index'])->name('mapa.indice');

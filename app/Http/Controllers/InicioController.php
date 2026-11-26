@@ -11,7 +11,7 @@ class InicioController extends Controller
     public function index(): View
     {
         return view('inicio', [
-            'productos' => Producto::with(['vendedor', 'comunidad'])
+            'productos' => Producto::with(['vendedor', 'comunidad', 'imagenes'])
                 ->where('estado', 'disponible')
                 ->where('cantidad', '>', 0)
                 ->latest()

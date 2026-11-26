@@ -1,8 +1,9 @@
 <article class="tarjeta-producto">
+    @php ($fotos = $producto->galeria())
     <div class="imagen-producto">
-        @if ($producto->urlImagen())
+        @if (count($fotos) > 0)
             <img
-                src="{{ $producto->urlImagen() }}"
+                src="{{ $fotos[0] }}"
                 alt="{{ $producto->nombre }}"
                 loading="lazy"
                 onerror="
@@ -13,6 +14,29 @@
             <div class="imagen-reemplazo" hidden>🌱<span>Producto local</span></div>
         @else
             <div class="imagen-reemplazo">🌱<span>Producto local</span></div>
+        @endif
+
+        @if (count($fotos) > 1)
+            <div class="miniaturas-producto">
+                @foreach ($fotos as $foto)
+                    <button
+                        type="button"
+                        class="miniatura-producto {{ $loop->first ? 'activa' : '' }}"
+                        data-foto="{{ $foto }}"
+                        aria-label="Ver foto {{ $loop->iteration }} de {{ count($fotos) }}"
+                        onclick="
+                            const tarjeta = this.closest('.tarjeta-producto');
+                            const principal = tarjeta.querySelector('.imagen-producto > img');
+                            principal.src = this.dataset.foto;
+                            principal.style.display = '';
+                            principal.nextElementSibling.hidden = true;
+                            tarjeta.querySelectorAll('.miniatura-producto').forEach((boton) => boton.classList.toggle('activa', boton === this));
+                        "
+                    >
+                        <img src="{{ $foto }}" alt="" loading="lazy" />
+                    </button>
+                @endforeach
+            </div>
         @endif
 
         <span class="etiqueta">{{ $producto->categoria ?: 'Cosecha local' }}</span>

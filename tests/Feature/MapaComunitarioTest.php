@@ -22,7 +22,10 @@ class MapaComunitarioTest extends TestCase
             'activo' => true, 'latitud' => -13.53, 'longitud' => -71.96, 'comunidad_id' => $comunidad->id,
         ]);
         ReporteRiesgo::create([
+            'reportante_id' => $usuario->id, 'comunidad_id' => $comunidad->id, 'titulo' => 'Reporte revisado visible',
+
             'reportante_id' => $usuario->id, 'comunidad_id' => $comunidad->id, 'titulo' => 'Reporte aprobado visible',
+
             'descripcion' => 'Descripción verificada', 'latitud' => -13.52, 'longitud' => -71.95, 'estado' => 'publicado',
         ]);
         ReporteRiesgo::create([
