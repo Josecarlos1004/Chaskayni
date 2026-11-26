@@ -217,7 +217,7 @@ class AdministracionController extends Controller
 
             $usuario->update([
                 'rol' => $datos['rol'],
-                'comunidad_id' => $datos['comunidad_id'],
+                'comunidad_id' => $datos['comunidad_id'] ?? null,
                 'comunidad_propuesta' => (bool) $datos['aprobado'] ? null : $usuario->comunidad_propuesta,
                 'distrito_propuesto' => (bool) $datos['aprobado'] ? null : $usuario->distrito_propuesto,
                 'activo' => $activo,
@@ -443,6 +443,31 @@ class AdministracionController extends Controller
         }
     }
 
+    /** Consulta el pronóstico para el punto elegido, aunque no pertenezca a una comunidad registrada. */
+    public function climaUbicacion(Request $request, ClimaComunidad $consultaClima): JsonResponse
+    {
+        $this->verificarAdministrador();
+        $coordenadas = $request->validate([
+            'latitud' => ['required', 'numeric', 'between:-90,90'],
+            'longitud' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        try {
+            $punto = new Comunidad([
+                'nombre' => 'Ubicación seleccionada',
+                'provincia' => 'Cusco',
+                'latitud' => $coordenadas['latitud'],
+                'longitud' => $coordenadas['longitud'],
+            ]);
+
+            return response()->json($consultaClima->consultar($punto));
+        } catch (Throwable) {
+            return response()->json([
+                'mensaje' => 'No se pudo obtener el clima para este punto. Puedes ingresar la temperatura manualmente.',
+            ], 503);
+        }
+    }
+
     /** Muestra una foto de alerta solo dentro del panel administrativo. */
     public function verFotoAlerta(AlertaHelada $alertaHelada): StreamedResponse
     {
@@ -558,7 +583,9 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
         $datos = $request->validate([
-            'comunidad_id' => ['required', Rule::exists('comunidades', 'id')->where('activo', true)],
+            'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where('activo', true)],
+            'latitud' => ['nullable', 'required_with:longitud', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'required_with:latitud', 'numeric', 'between:-180,180'],
             'temperatura_c' => ['required', 'numeric', 'between:-80,60'],
             'indicaciones' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -581,12 +608,18 @@ class AdministracionController extends Controller
             default => 'informacion',
         };
 
+        $comunidad = isset($datos['comunidad_id']) ? Comunidad::find($datos['comunidad_id']) : null;
+        $latitud = $datos['latitud'] ?? $comunidad?->latitud;
+        $longitud = $datos['longitud'] ?? $comunidad?->longitud;
+
         AlertaHelada::create([
             'creado_por' => Auth::id(),
-            'comunidad_id' => $datos['comunidad_id'],
+            'comunidad_id' => $datos['comunidad_id'] ?? null,
+            'latitud' => $latitud,
+            'longitud' => $longitud,
             'tipo' => 'clima',
             'titulo' => 'Riesgo '.$riesgo.' de helada',
-            'mensaje' => 'Temperatura prevista: '.$temperatura.' °C. Revisa las medidas de protección frente a heladas recomendadas para tu comunidad.'.(! empty($datos['indicaciones']) ? "\n\n".$datos['indicaciones'] : ''),
+            'mensaje' => 'Temperatura prevista: '.$temperatura.' °C. Revisa las medidas de protección frente a heladas recomendadas para la ubicación indicada.'.(! empty($datos['indicaciones']) ? "\n\n".$datos['indicaciones'] : ''),
             'nivel' => $nivelAviso,
             'temperatura_c' => $temperatura,
             'nivel_riesgo' => $riesgo,

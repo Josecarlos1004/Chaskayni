@@ -6,9 +6,18 @@
             <span class="sobrelinea">Información comunitaria</span>
             <h1>Alertas y avisos</h1>
             <p>Consulta avisos comunitarios aprobados por administración.</p>
-            @auth
-                <a class="boton boton-pequeno" href="{{ route('riesgos.crear') }}">{{ auth()->user()->esAdministrador() ? 'Publicar situación' : 'Enviar aviso para revisión' }}</a>
-            @endauth
+        </div>
+        <div class="acciones-tarjeta acciones-encabezado-alertas">
+            <a class="boton boton-primario" href="{{ route('riesgos.crear') }}">
+                @auth
+                    {{ auth()->user()->esAdministrador() ? 'Publicar situación' : 'Enviar aviso para revisión' }}
+                @else
+                    Enviar un aviso
+                @endauth
+            </a>
+            @guest
+                <small>Inicia sesión o crea una cuenta para reportar una situación.</small>
+            @endguest
         </div>
     </section>
 
@@ -87,6 +96,8 @@
                                         />
                                         <span>Ver fotografía del incidente</span>
                                     </a>
+                                @elseif ($alerta->tipo === 'clima')
+                                    @include('alertas._mapa-clima', ['alerta' => $alerta])
                                 @elseif ($alerta->reporteOrigen?->latitud !== null && $alerta->reporteOrigen?->longitud !== null)
                                     <div class="alerta-sin-imagen">
                                         <span aria-hidden="true">⌖</span>
