@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const datosClima = panelClima.querySelector('[data-datos-clima]');
     const formularioRegistro = document.querySelector('[data-registro-comunidad]');
     const temperatura = document.querySelector('input[name="temperatura_c"]');
+    const campoLatitud = document.querySelector('[data-latitud-clima]');
+    const campoLongitud = document.querySelector('[data-longitud-clima]');
     const botonPublicar = temperatura?.form?.querySelector('button[type="submit"]');
     let pronosticoConsultado = false;
 
@@ -26,7 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const textoCoordenadas = panelUbicacion.querySelector('[data-coordenadas-seleccionadas]');
     let mapa = null;
     let marcador = null;
-    let coordenadasPendientes = null;
+    let coordenadasPendientes = campoLatitud?.value && campoLongitud?.value
+        ? { latitud: Number(campoLatitud.value), longitud: Number(campoLongitud.value) }
+        : null;
     let solicitudClima = null;
 
     const opcionSeleccionada = () => selectorComunidad.options[selectorComunidad.selectedIndex];
@@ -40,10 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
             : null;
     };
 
-    const mostrarCoordenadas = (latitud, longitud, prefijo = 'Coordenadas guardadas') => {
-        textoCoordenadas.textContent = `${prefijo}: ${Number(latitud).toFixed(6)}, ${Number(longitud).toFixed(6)}`;
+    const coordenadasSeleccionadas = () => coordenadasPendientes || coordenadasGuardadas();
+
+    const guardarCoordenadasEnFormulario = (latitud, longitud) => {
+        campoLatitud.value = Number(latitud).toFixed(7);
+        campoLongitud.value = Number(longitud).toFixed(7);
     };
 
+    const mostrarCoordenadas = (latitud, longitud, prefijo = 'Coordenadas seleccionadas') => {
+        textoCoordenadas.textContent = prefijo + ': ' + Number(latitud).toFixed(6) + ', ' + Number(longitud).toFixed(6);
+    };
     const actualizarMarcador = (latitud, longitud, centrar = true) => {
         if (!mapa) return;
         if (marcador) mapa.removeLayer(marcador);
@@ -68,9 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 longitud: evento.latlng.lng,
             };
             actualizarMarcador(coordenadasPendientes.latitud, coordenadasPendientes.longitud, false);
+            guardarCoordenadasEnFormulario(coordenadasPendientes.latitud, coordenadasPendientes.longitud);
             mostrarCoordenadas(coordenadasPendientes.latitud, coordenadasPendientes.longitud, 'Punto seleccionado');
-            estadoUbicacion.textContent = 'Guarda el punto seleccionado para actualizar la comunidad y el pronóstico.';
-            botonGuardarUbicacion.hidden = false;
+            estadoUbicacion.textContent = 'Ubicación seleccionada. Consulta el clima o publícala sin asignar una comunidad.';
+            botonConsultar.disabled = false;
+            botonGuardarUbicacion.hidden = !selectorComunidad.value;
         });
         if (coordenadas) actualizarMarcador(coordenadas.latitud, coordenadas.longitud, false);
     };
@@ -133,26 +145,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const consultarClima = async () => {
-        const comunidadId = selectorComunidad.value;
-        if (!comunidadId) {
+        const coordenadas = coordenadasSeleccionadas();
+        if (!coordenadas) {
             pronosticoConsultado = false;
             if (botonPublicar) botonPublicar.disabled = false;
-            mostrarEstadoClima('Selecciona una comunidad para consultar su pronóstico.');
+            botonConsultar.disabled = true;
+            mostrarEstadoClima('Elige un punto en el mapa o activa el GPS para consultar el pronóstico.');
             datosClima.hidden = true;
             temperatura.value = '';
             return;
         }
-
-        if (!coordenadasGuardadas()) {
-            pronosticoConsultado = false;
-            if (botonPublicar) botonPublicar.disabled = false;
-            mostrarEstadoClima('Esta comunidad no tiene coordenadas. Usa el GPS o selecciona un punto en el mapa.');
-            datosClima.hidden = true;
-            temperatura.value = '';
-            botonGps.disabled = false;
-            return;
-        }
-
         pronosticoConsultado = false;
         if (botonPublicar) botonPublicar.disabled = false;
         solicitudClima?.abort();
@@ -162,10 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
         datosClima.hidden = true;
         temperatura.value = '';
         estadoTemperatura.textContent = 'Esperando el pronóstico para completar la temperatura.';
-        mostrarEstadoClima('Consultando el pronóstico para las coordenadas guardadas…');
+        mostrarEstadoClima('Consultando el pronóstico para las coordenadas seleccionadas…');
 
         try {
-            const url = panelClima.dataset.urlClima.replace('__ID__', encodeURIComponent(comunidadId));
+            const url = new URL(panelClima.dataset.urlClima, window.location.origin);
+            url.searchParams.set('latitud', coordenadas.latitud);
+            url.searchParams.set('longitud', coordenadas.longitud);
             const respuesta = await fetch(url, {
                 cache: 'no-store',
                 headers: { Accept: 'application/json' },
@@ -174,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const resultado = await respuesta.json();
             if (!respuesta.ok) throw new Error(resultado.mensaje || 'No se pudo consultar el clima.');
 
-            const nombreElegido = opcionSeleccionada().textContent.trim();
+            const nombreElegido = selectorComunidad.value ? opcionSeleccionada().textContent.trim().split('·')[0].trim() : 'Punto seleccionado';
             panelClima.querySelector('[data-titulo-clima]').textContent = nombreElegido.split('·')[0].trim();
             panelClima.querySelector('[data-clima-ubicacion]').textContent = `Coordenadas: ${Number(resultado.latitud).toFixed(6)}, ${Number(resultado.longitud).toFixed(6)} · Datos: ${resultado.actualizado_en}`;
             panelClima.querySelector('[data-temperatura-actual]').textContent = `${resultado.temperatura_actual}°`;
@@ -196,9 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 : `Temperatura completada automáticamente: mínima prevista de ${resultado.minima_24h} °C en las próximas 24 horas.`;
             datosClima.hidden = false;
             estadoClima.hidden = true;
-            const ubicacion = coordenadasGuardadas();
+            const ubicacion = coordenadasSeleccionadas();
             mostrarCoordenadas(ubicacion.latitud, ubicacion.longitud);
-            estadoUbicacion.textContent = 'Pronóstico cargado para la ubicación guardada de esta comunidad.';
+            estadoUbicacion.textContent = selectorComunidad.value ? 'Pronóstico cargado para la comunidad seleccionada.' : 'Pronóstico cargado para el punto elegido; la comunidad queda opcional.';
         } catch (error) {
             if (error.name !== 'AbortError') {
                 pronosticoConsultado = false;
@@ -210,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 estadoTemperatura.textContent = 'Si el pronóstico no está disponible, ingresa la temperatura manualmente.';
             }
         } finally {
-            botonConsultar.disabled = !selectorComunidad.value;
+            botonConsultar.disabled = !coordenadasSeleccionadas();
             botonConsultar.textContent = 'Actualizar clima';
         }
     };
@@ -243,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const opcion = opcionSeleccionada();
             opcion.dataset.latitud = resultado.latitud;
             opcion.dataset.longitud = resultado.longitud;
+            guardarCoordenadasEnFormulario(resultado.latitud, resultado.longitud);
             coordenadasPendientes = null;
             botonGuardarUbicacion.hidden = true;
             mostrarCoordenadas(resultado.latitud, resultado.longitud);
@@ -257,31 +262,44 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const actualizarSeleccion = () => {
-        const opcion = opcionSeleccionada();
         const coordenadas = coordenadasGuardadas();
-        botonConsultar.disabled = !selectorComunidad.value;
-        botonGps.disabled = !selectorComunidad.value;
+        botonGps.disabled = false;
         if (coordenadas) {
-            mostrarCoordenadas(coordenadas.latitud, coordenadas.longitud);
-            estadoUbicacion.textContent = 'Se usarán las coordenadas guardadas de la comunidad.';
+            coordenadasPendientes = null;
+            guardarCoordenadasEnFormulario(coordenadas.latitud, coordenadas.longitud);
+            mostrarCoordenadas(coordenadas.latitud, coordenadas.longitud, 'Coordenadas de la comunidad');
+            estadoUbicacion.textContent = 'Se usará la ubicación guardada de esta comunidad.';
+            botonGuardarUbicacion.hidden = true;
+            botonConsultar.disabled = false;
             actualizarMarcador(coordenadas.latitud, coordenadas.longitud);
-        } else {
-            textoCoordenadas.textContent = 'La comunidad todavía no tiene coordenadas guardadas.';
-            estadoUbicacion.textContent = 'Usa el GPS o haz clic en el mapa para registrar su ubicación.';
-            if (marcador && mapa) mapa.removeLayer(marcador);
-            marcador = null;
+            consultarClima();
+            return;
         }
-        if (opcion?.value) consultarClima();
-        else {
-            datosClima.hidden = true;
-            temperatura.value = '';
-            mostrarEstadoClima('Selecciona una comunidad para consultar su pronóstico.');
-        }
-    };
 
+        coordenadasPendientes = null;
+        campoLatitud.value = '';
+        campoLongitud.value = '';
+        textoCoordenadas.textContent = selectorComunidad.value
+            ? 'Esta comunidad no tiene coordenadas; elige un punto en el mapa o usa GPS.'
+            : 'Usa GPS o marca cualquier punto del mapa; no hace falta elegir comunidad.';
+        estadoUbicacion.textContent = 'El punto elegido se usará solo para esta alerta. Si asignas una comunidad, puedes guardar el punto en ella.';
+        botonGuardarUbicacion.hidden = true;
+        botonConsultar.disabled = true;
+        if (marcador && mapa) mapa.removeLayer(marcador);
+        marcador = null;
+        datosClima.hidden = true;
+        temperatura.value = '';
+        mostrarEstadoClima('Elige un punto en el mapa o activa el GPS para consultar el clima cercano.');
+    };
     iniciarMapa();
     if (typeof L === 'undefined') mapaElemento.textContent = 'No se pudo cargar el mapa. Comprueba la conexión a internet.';
-    if (selectorComunidad.value) actualizarSeleccion();
+    if (selectorComunidad.value) {
+        actualizarSeleccion();
+    } else if (coordenadasPendientes) {
+        mostrarCoordenadas(coordenadasPendientes.latitud, coordenadasPendientes.longitud, 'Punto seleccionado');
+        actualizarMarcador(coordenadasPendientes.latitud, coordenadasPendientes.longitud);
+        botonConsultar.disabled = false;
+    }
     selectorComunidad.addEventListener('change', actualizarSeleccion);
     botonConsultar.addEventListener('click', consultarClima);
 
@@ -295,13 +313,15 @@ document.addEventListener('DOMContentLoaded', () => {
         navigator.geolocation.getCurrentPosition(
             async (posicion) => {
                 const { latitude, longitude, accuracy } = posicion.coords;
-                mostrarCoordenadas(latitude, longitude, 'Ubicación GPS');
+                coordenadasPendientes = { latitud: latitude, longitud: longitude };
+                guardarCoordenadasEnFormulario(latitude, longitude);
+                mostrarCoordenadas(latitude, longitude, 'GPS · precisión ±' + Math.round(accuracy) + ' m');
                 actualizarMarcador(latitude, longitude);
+                botonConsultar.disabled = false;
+                botonGuardarUbicacion.hidden = !selectorComunidad.value;
+                estadoUbicacion.textContent = 'Punto GPS listo. Consultando el pronóstico para esta alerta.';
                 try {
-                    await guardarCoordenadas(latitude, longitude, 'GPS');
-                    estadoUbicacion.textContent = `Ubicación guardada. Precisión reportada por el dispositivo: ±${Math.round(accuracy)} m.`;
-                } catch (error) {
-                    mostrarEstadoClima(error.message, true);
+                    await consultarClima();
                 } finally {
                     botonGps.disabled = false;
                 }

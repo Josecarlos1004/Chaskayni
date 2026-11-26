@@ -11,7 +11,7 @@
         <div id="seccion-clima" class="tarjeta-formulario" data-panel-flujo="clima" @if ($flujoInicial !== 'clima') hidden @endif>
             <span class="sobrelinea">Clima y heladas</span>
             <h1>Evaluar riesgo de helada</h1>
-            <p>Selecciona una comunidad para consultar el pronóstico. La mínima prevista para las próximas 24 horas se completará automáticamente; puedes revisarla y ajustarla antes de publicar.</p>
+            <p>Puedes elegir una comunidad o usar directamente el GPS o un punto del mapa. La comunidad es opcional; la mínima prevista se completará con las coordenadas seleccionadas.</p>
             <details class="registro-comunidad-rapida">
                 <summary>¿Falta una comunidad? Registrar una nueva</summary>
                 <form method="post" action="{{ route('administracion.comunidades.rapida') }}" data-registro-comunidad data-formulario-comunidad data-url-datos-ubicacion="{{ route('administracion.comunidades.ubicacion') }}">
@@ -30,10 +30,12 @@
             </details>
             <form method="post" action="{{ route('administracion.alertas.temperatura') }}">
                 @csrf
+                <input type="hidden" name="latitud" data-latitud-clima value="{{ old('latitud') }}" />
+                <input type="hidden" name="longitud" data-longitud-clima value="{{ old('longitud') }}" />
                 <div class="flujo-clima-comunidad">
-                    <label>Comunidad
-                        <select name="comunidad_id" data-seleccionar-comunidad required>
-                            <option value="">Selecciona una comunidad</option>
+                    <label>Comunidad (opcional)
+                        <select name="comunidad_id" data-seleccionar-comunidad>
+                            <option value="">Sin comunidad · usar GPS o el mapa</option>
                             @foreach ($comunidades as $comunidad)
                                 <option
                                     value="{{ $comunidad->id }}"
@@ -55,23 +57,23 @@
                         <div class="encabezado-ubicacion-clima">
                             <div>
                                 <span class="sobrelinea">Ubicación para el pronóstico</span>
-                                <h2 id="titulo-ubicacion-clima">Punto de la comunidad</h2>
-                                <p data-coordenadas-seleccionadas>Selecciona una comunidad para ver sus coordenadas.</p>
+                                <h2 id="titulo-ubicacion-clima">Ubicación del aviso</h2>
+                                <p data-coordenadas-seleccionadas>Usa el GPS o marca cualquier punto del mapa.</p>
                             </div>
 
-                            <button class="boton boton-pequeno" type="button" data-usar-gps disabled>Usar ubicación GPS</button>
+                            <button class="boton boton-pequeno" type="button" data-usar-gps>Usar ubicación GPS</button>
                         </div>
-                        <p class="estado-ubicacion-clima" data-estado-ubicacion role="status" aria-live="polite">El pronóstico utilizará la ubicación guardada de la comunidad.</p>
-                        <div class="mapa-selector-comunidad mapa-pronostico-comunidad" data-mapa-pronostico role="region" aria-label="Mapa de ubicación de la comunidad"></div>
+                        <p class="estado-ubicacion-clima" data-estado-ubicacion role="status" aria-live="polite">Puedes consultar usando coordenadas de la comunidad, GPS o el punto elegido en el mapa.</p>
+                        <div class="mapa-selector-comunidad mapa-pronostico-comunidad" data-mapa-pronostico role="region" aria-label="Mapa para elegir la ubicación de la alerta"></div>
                         <div class="acciones-ubicacion-clima">
-                            <small>Si estás en la comunidad, usa GPS; si no, marca su punto en el mapa. La ubicación requiere permiso del navegador.</small>
+                            <small>La comunidad es opcional. El GPS requiere permiso del navegador; también puedes marcar cualquier punto en el mapa.</small>
                             <button class="boton boton-claro boton-pequeno" type="button" data-guardar-ubicacion hidden>Guardar punto seleccionado</button>
                         </div>
                     </section>
                     <section
                         class="panel-clima-comunidad"
                         data-panel-clima
-                        data-url-clima="{{ route('administracion.comunidades.clima', ['comunidad' => '__ID__']) }}"
+                        data-url-clima="{{ route('administracion.alertas.clima.ubicacion') }}"
                         aria-labelledby="titulo-clima-comunidad"
                     >
                         <div class="encabezado-clima-comunidad">
@@ -85,7 +87,7 @@
                             </button>
                         </div>
                         <p class="estado-clima-comunidad" data-clima-estado role="status" aria-live="polite">
-                            Selecciona una comunidad para consultar las condiciones cercanas.
+                            Elige un punto en el mapa o activa el GPS para consultar el clima cercano.
                         </p>
                         <div class="datos-clima-comunidad" data-datos-clima hidden>
                             <div class="clima-actual">
@@ -115,7 +117,7 @@
                             <p class="temperatura-autocompletada" data-temperatura-autocompletada role="status" aria-live="polite">La temperatura prevista se completará automáticamente con la mínima del pronóstico.</p>
                         </div>
                         <small class="atribucion-clima-comunidad">
-                            Pronóstico basado en las coordenadas guardadas; se actualizará automáticamente y es una estimación meteorológica.
+                            Pronóstico basado en las coordenadas seleccionadas; actualízalo antes de publicar. Es una estimación meteorológica.
                             Datos meteorológicos: <a href="https://open-meteo.com/en/license" target="_blank" rel="noopener">Open-Meteo (CC BY 4.0)</a>.
                         </small>
                     </section>
@@ -245,5 +247,5 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="{{ asset('js/mapa-comunidades-admin.js') }}?v={{ filemtime(public_path('js/mapa-comunidades-admin.js')) }}" defer></script>
-    <script src="{{ asset('js/clima-comunidad.js') }}?v={{ filemtime(public_path('js/clima-comunidad.js')) }}" defer></script>
+    <script src="{{ asset('js/clima-comunidad.js') }}?v={{ md5_file(public_path('js/clima-comunidad.js')) }}" defer></script>
     <script src="{{ asset('js/mapa-alerta-emergencia.js') }}?v={{ filemtime(public_path('js/mapa-alerta-emergencia.js')) }}" defer></script>

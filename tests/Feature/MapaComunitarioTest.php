@@ -13,7 +13,7 @@ class MapaComunitarioTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_el_mapa_publico_muestra_refugios_activos_y_solo_reportes_revisados(): void
+    public function test_el_mapa_publico_muestra_refugios_activos_y_solo_reportes_aprobados(): void
     {
         $usuario = Usuario::factory()->create();
         $comunidad = Comunidad::create(['nombre' => 'Comunidad de prueba', 'provincia' => 'Cusco']);
@@ -22,8 +22,8 @@ class MapaComunitarioTest extends TestCase
             'activo' => true, 'latitud' => -13.53, 'longitud' => -71.96, 'comunidad_id' => $comunidad->id,
         ]);
         ReporteRiesgo::create([
-            'reportante_id' => $usuario->id, 'comunidad_id' => $comunidad->id, 'titulo' => 'Reporte revisado visible',
-            'descripcion' => 'Descripción verificada', 'latitud' => -13.52, 'longitud' => -71.95, 'estado' => 'revisado',
+            'reportante_id' => $usuario->id, 'comunidad_id' => $comunidad->id, 'titulo' => 'Reporte aprobado visible',
+            'descripcion' => 'Descripción verificada', 'latitud' => -13.52, 'longitud' => -71.95, 'estado' => 'publicado',
         ]);
         ReporteRiesgo::create([
             'reportante_id' => $usuario->id, 'comunidad_id' => $comunidad->id, 'titulo' => 'Reporte pendiente privado',
@@ -33,7 +33,7 @@ class MapaComunitarioTest extends TestCase
         $this->get(route('mapa.indice'))
             ->assertOk()
             ->assertSee('Refugio de prueba')
-            ->assertSee('Reporte revisado visible')
+            ->assertSee('Reporte aprobado visible')
             ->assertDontSee('Reporte pendiente privado');
     }
 

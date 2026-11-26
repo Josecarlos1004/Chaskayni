@@ -3764,3 +3764,65 @@ body {
         padding-top: 68px;
     }
 }
+/* Mapa automático para alertas de clima sin fotografía. */
+.alerta-mapa-clima {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid var(--marca-borde);
+    border-radius: 14px;
+    background: #f7f8f2;
+}
+
+.alerta-mapa-clima iframe {
+    display: block;
+    width: 100%;
+    min-height: 210px;
+    border: 0;
+    background: #e8efe6;
+}
+
+.alerta-mapa-clima-resumen {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 12px 14px 5px;
+}
+
+.alerta-mapa-clima-resumen > span {
+    display: grid;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 50%;
+    background: #e6efdf;
+    color: var(--verde-oscuro);
+    font-size: 1.25rem;
+}
+
+.alerta-mapa-clima-resumen > div {
+    display: grid;
+    min-width: 0;
+    gap: 3px;
+}
+
+.alerta-mapa-clima-resumen strong {
+    color: var(--verde-oscuro);
+    font-size: .88rem;
+}
+
+.alerta-mapa-clima-resumen small,
+.alerta-mapa-clima-credito {
+    color: var(--atenuado);
+    font-size: .76rem;
+}
+
+.alerta-mapa-clima-credito {
+    padding: 0 14px 12px;
+}
+
+@media (max-width: 600px) {
+    .alerta-mapa-clima iframe {
+        min-height: 180px;
+    }
+}

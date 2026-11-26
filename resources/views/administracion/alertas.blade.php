@@ -97,6 +97,8 @@
                                         />
                                         <span>Abrir evidencia del reporte</span>
                                     </a>
+                                @elseif ($alerta->tipo === 'clima')
+                                    @include('alertas._mapa-clima', ['alerta' => $alerta])
                                 @else
                                     <div class="alerta-sin-imagen">
                                         <span aria-hidden="true">◎</span>
