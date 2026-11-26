@@ -9,11 +9,11 @@ class Comunidad extends Model
 {
     protected $table = 'comunidades';
 
-    protected $fillable = ['nombre', 'distrito', 'provincia', 'altitud_msnm', 'descripcion', 'activo'];
+    protected $fillable = ['nombre', 'distrito', 'provincia', 'altitud_msnm', 'latitud', 'longitud', 'descripcion', 'activo'];
 
     protected function casts(): array
     {
-        return ['altitud_msnm' => 'integer', 'activo' => 'boolean'];
+        return ['altitud_msnm' => 'integer', 'latitud' => 'decimal:7', 'longitud' => 'decimal:7', 'activo' => 'boolean'];
     }
 
     public function usuarios(): HasMany

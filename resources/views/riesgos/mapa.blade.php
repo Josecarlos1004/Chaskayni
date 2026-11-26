@@ -41,6 +41,7 @@
                 @forelse ($reportes as $reporte)
                     <article class="fila-mapa">
                         <strong>{{ $reporte->titulo }}</strong>
+                        <span>{{ $reporte->tipo === 'otro' ? ($reporte->tipo_personalizado ?: 'Otra emergencia') : ($reporte->tipo === 'refugio' ? 'Refugios' : 'Clima') }}</span>
                         <span>{{ $reporte->comunidad?->nombre ?? 'Comunidad no indicada' }}</span>
                         <small>{{ $reporte->descripcion }}</small>
                         <a class="enlace-texto" href="{{ route('riesgos.detalle', $reporte) }}"
@@ -67,5 +68,5 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""
     ></script>
-    <script src="{{ asset('js/mapa-comunitario.js') }}" defer></script>
+    <script src="{{ asset('js/mapa-comunitario.js') }}?v={{ filemtime(public_path('js/mapa-comunitario.js')) }}" defer></script>
 @endsection

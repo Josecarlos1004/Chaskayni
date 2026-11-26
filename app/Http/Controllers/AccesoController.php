@@ -55,7 +55,13 @@ class AccesoController extends Controller
         $datos = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:190', 'unique:users,email'],
-            'dni' => ['required', 'regex:/^[0-9]{8}$/', 'unique:users,dni'],
+            'dni' => ['required', 'regex:/^[0-9]{8}$/', function ($atributo, $valor, $fallar): void {
+                $huella = hash_hmac('sha256', (string) $valor, (string) config('app.key'));
+
+                if (Usuario::where('dni_hash', $huella)->exists()) {
+                    $fallar('Ya existe una cuenta registrada con ese DNI.');
+                }
+            }],
             'telefono' => ['required', 'regex:/^9[0-9]{8}$/'],
             'password' => ['required', 'string', 'min:10', 'confirmed'],
             'rol' => ['required', 'in:productor,comprador'],

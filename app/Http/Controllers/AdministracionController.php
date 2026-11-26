@@ -10,15 +10,19 @@ use App\Models\Producto;
 use App\Models\Refugio;
 use App\Models\ReporteRiesgo;
 use App\Models\Usuario;
+use App\Services\ClimaComunidad;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
@@ -34,15 +38,42 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
 
-        return view('administracion.panel', [
-            'cantidadUsuarios' => Usuario::count(),
-            'cantidadCuentasPendientes' => Schema::hasColumn('users', 'aprobado_en') ? Usuario::whereNull('aprobado_en')->count() : 0,
-            'cantidadProductos' => Producto::where('estado', 'disponible')->count(),
-            'cantidadPedidosPendientes' => Pedido::where('estado', 'pendiente')->count(),
-            'cantidadReportesPendientes' => ReporteRiesgo::where('estado', 'pendiente')->count(),
-            'cantidadAlertasActivas' => AlertaHelada::activas()->count(),
-            'cantidadRefugiosActivos' => Refugio::where('activo', true)->count(),
-        ]);
+        return view('administracion.panel', $this->datosEstadisticos());
+    }
+
+    /** Entrega datos recientes al panel para actualizar el gráfico sin recargar. */
+    public function estadisticas(): JsonResponse
+    {
+        $this->verificarAdministrador();
+
+        return response()->json($this->datosEstadisticos());
+    }
+
+    /** Resume los indicadores actuales que utiliza el gráfico del panel. */
+    private function datosEstadisticos(): array
+    {
+        $indicadores = [
+            'usuarios' => Usuario::count(),
+            'cuentas_pendientes' => Schema::hasColumn('users', 'aprobado_en') ? Usuario::whereNull('aprobado_en')->count() : 0,
+            'productos' => Producto::where('estado', 'disponible')->count(),
+            'pedidos_pendientes' => Pedido::where('estado', 'pendiente')->count(),
+            'reportes_pendientes' => ReporteRiesgo::where('estado', 'pendiente')->count(),
+            'alertas_activas' => AlertaHelada::activas()->count(),
+            'refugios_activos' => Refugio::where('activo', true)->count(),
+        ];
+
+        return [
+            'indicadores' => $indicadores,
+            'grafico' => [
+                'series' => [
+                    'usuarios' => $indicadores['usuarios'],
+                    'productos' => $indicadores['productos'],
+                    'pedidos' => $indicadores['pedidos_pendientes'],
+                    'reportes' => $indicadores['reportes_pendientes'],
+                ],
+            ],
+            'actualizado_en' => now()->format('H:i:s'),
+        ];
     }
 
     /** Lista cuentas para que administración pueda revisar roles y accesos. */
@@ -96,7 +127,53 @@ class AdministracionController extends Controller
 
         return view('administracion.alertas', [
             'alertas' => AlertaHelada::with(['comunidad', 'autor', 'reporteOrigen'])->latest()->paginate(15),
+            'reportesPendientes' => ReporteRiesgo::where('estado', 'pendiente')->count(),
         ]);
+    }
+
+    /** Abre la edición de un reporte antes de que se apruebe y se publique como alerta. */
+    public function editarReporte(ReporteRiesgo $reporteRiesgo): View
+    {
+        $this->verificarAdministrador();
+        abort_unless(in_array($reporteRiesgo->estado, ['pendiente', 'revisado'], true), 404);
+
+        return view('administracion.editar-reporte', [
+            'reporte' => $reporteRiesgo,
+            'comunidades' => Comunidad::where('activo', true)
+                ->orWhere('id', $reporteRiesgo->comunidad_id)
+                ->orderBy('nombre')
+                ->get(),
+        ]);
+    }
+
+    /** Actualiza el contenido de un reporte mientras todavía está en revisión. */
+    public function actualizarReporte(Request $request, ReporteRiesgo $reporteRiesgo): RedirectResponse
+    {
+        $this->verificarAdministrador();
+        $datos = $request->validate([
+            'tipo' => ['required', 'in:clima,refugio,otro'],
+            'tipo_personalizado' => ['exclude_unless:tipo,otro', 'required', 'string', 'min:3', 'max:100'],
+            'titulo' => ['required', 'string', 'max:160'],
+            'descripcion' => ['required', 'string', 'max:3000'],
+            'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')
+                ->where(fn ($consulta) => $consulta->where('activo', true)->orWhere('id', $reporteRiesgo->comunidad_id))],
+            'latitud' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'numeric', 'between:-180,180'],
+            'ubicacion_detallada' => ['nullable', 'string', 'max:500'],
+            'prioridad' => ['required', 'in:alta,media,baja'],
+        ]);
+        $datos['tipo_personalizado'] = $datos['tipo'] === 'otro' ? ($datos['tipo_personalizado'] ?? null) : null;
+
+        DB::transaction(function () use ($reporteRiesgo, $datos): void {
+            $reporte = ReporteRiesgo::query()->lockForUpdate()->findOrFail($reporteRiesgo->id);
+            if (! in_array($reporte->estado, ['pendiente', 'revisado'], true)) {
+                throw ValidationException::withMessages(['reporte' => 'Solo se pueden editar reportes que siguen en revisión.']);
+            }
+            $reporte->update($datos);
+        });
+
+        return redirect()->route('administracion.reportes.indice')
+            ->with('success', 'Se actualizaron los datos del reporte. Ya puedes revisarlo y aprobarlo.');
     }
 
     /** Actualiza rol y acceso sin permitir que se desactive al último administrador. */
@@ -196,6 +273,8 @@ class AdministracionController extends Controller
             'distrito' => ['nullable', 'string', 'max:120'],
             'provincia' => ['required', 'string', 'max:120'],
             'altitud_msnm' => ['nullable', 'integer', 'between:0,8000'],
+            'latitud' => ['nullable', 'required_with:longitud', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'required_with:latitud', 'numeric', 'between:-180,180'],
             'descripcion' => ['nullable', 'string', 'max:2000'],
         ]);
 
@@ -213,6 +292,8 @@ class AdministracionController extends Controller
             'distrito' => ['nullable', 'string', 'max:120'],
             'provincia' => ['required', 'string', 'max:120'],
             'altitud_msnm' => ['nullable', 'integer', 'between:0,8000'],
+            'latitud' => ['nullable', 'required_with:longitud', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'required_with:latitud', 'numeric', 'between:-180,180'],
             'descripcion' => ['nullable', 'string', 'max:2000'],
             'activo' => ['required', 'boolean'],
         ]);
@@ -239,6 +320,129 @@ class AdministracionController extends Controller
         ]);
     }
 
+    /** Registra una comunidad activa desde el formulario de alertas. */
+    public function guardarComunidadRapida(Request $request): JsonResponse
+    {
+        $this->verificarAdministrador();
+        $datos = $request->validate([
+            'nombre' => ['required', 'string', 'max:120', 'unique:comunidades,nombre'],
+            'distrito' => ['nullable', 'string', 'max:120'],
+            'provincia' => ['required', 'string', 'max:120'],
+            'altitud_msnm' => ['nullable', 'integer', 'between:0,8000'],
+            'latitud' => ['nullable', 'required_with:longitud', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'required_with:latitud', 'numeric', 'between:-180,180'],
+        ]);
+
+        $comunidad = Comunidad::create([...$datos, 'activo' => true]);
+
+        if (! $request->expectsJson()) {
+            return redirect()->route('administracion.alertas.crear')
+                ->with('success', 'La comunidad se registró. Ya puedes seleccionarla para la alerta.')
+                ->with('comunidadCreadaId', $comunidad->id);
+        }
+
+        return response()->json([
+            'id' => $comunidad->id,
+            'nombre' => $comunidad->nombre,
+            'altitud_msnm' => $comunidad->altitud_msnm,
+            'latitud' => $comunidad->latitud,
+            'longitud' => $comunidad->longitud,
+        ], 201);
+    }
+
+    /** Completa distrito, provincia y altitud a partir del punto elegido. */
+    public function datosUbicacionComunidad(Request $request): JsonResponse
+    {
+        $this->verificarAdministrador();
+        $coordenadas = $request->validate([
+            'latitud' => ['required', 'numeric', 'between:-90,90'],
+            'longitud' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        $latitud = number_format((float) $coordenadas['latitud'], 5, '.', '');
+        $longitud = number_format((float) $coordenadas['longitud'], 5, '.', '');
+        $claveCache = 'datos-comunidad:'.sha1($latitud.','.$longitud);
+
+        $datos = Cache::remember($claveCache, now()->addHours(6), function () use ($latitud, $longitud): array {
+            $propiedades = [];
+            try {
+                $respuestaLugar = Http::acceptJson()
+                    ->withHeaders(['User-Agent' => config('app.name').' (registro de comunidades)', 'Accept-Language' => 'es'])
+                    ->timeout(5)
+                    ->get(config('services.photon.url'), ['lat' => $latitud, 'lon' => $longitud, 'lang' => 'es', 'countrycode' => 'PE']);
+
+                if ($respuestaLugar->successful()) {
+                    $propiedades = $respuestaLugar->json('features.0.properties', []);
+                }
+            } catch (Throwable) {
+                // La altitud todavía puede obtenerse aunque falle la búsqueda del nombre.
+            }
+
+            $altitud = null;
+            try {
+                $respuestaAltitud = Http::acceptJson()
+                    ->timeout(5)
+                    ->get('https://api.open-meteo.com/v1/elevation', [
+                        'latitude' => $latitud,
+                        'longitude' => $longitud,
+                    ]);
+                $valorAltitud = $respuestaAltitud->json('elevation.0');
+                if ($respuestaAltitud->successful() && is_numeric($valorAltitud)) {
+                    $altitud = (int) round((float) $valorAltitud);
+                }
+            } catch (Throwable) {
+                // Se dejan vacíos los datos que el proveedor no pudo determinar.
+            }
+
+            return [
+                'distrito' => $propiedades['district'] ?? $propiedades['locality'] ?? null,
+                'provincia' => $propiedades['county'] ?? $propiedades['city'] ?? null,
+                'altitud_msnm' => $altitud,
+            ];
+        });
+
+        return response()->json($datos);
+    }
+    /** Actualiza las coordenadas elegidas en el mapa o recibidas del GPS del dispositivo. */
+    public function actualizarCoordenadasComunidad(Request $request, Comunidad $comunidad): JsonResponse
+    {
+        $this->verificarAdministrador();
+        abort_unless($comunidad->activo, 404);
+
+        $datos = $request->validate([
+            'latitud' => ['required', 'numeric', 'between:-90,90'],
+            'longitud' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        $comunidad->update($datos);
+
+        return response()->json([
+            'mensaje' => 'Se actualizaron las coordenadas de la comunidad.',
+            'latitud' => (float) $comunidad->latitud,
+            'longitud' => (float) $comunidad->longitud,
+        ]);
+    }
+    /** Consulta el pronóstico con las coordenadas registradas de la comunidad. */
+    public function climaComunidad(Comunidad $comunidad, ClimaComunidad $consultaClima): JsonResponse
+    {
+        $this->verificarAdministrador();
+        abort_unless($comunidad->activo, 404);
+
+        if ($comunidad->latitud === null || $comunidad->longitud === null) {
+            return response()->json([
+                'mensaje' => 'Esta comunidad aún no tiene coordenadas. Selecciónalas en el mapa de comunidades o ingresa la temperatura manualmente.',
+            ], 422);
+        }
+
+        try {
+            return response()->json($consultaClima->consultar($comunidad));
+        } catch (Throwable) {
+            return response()->json([
+                'mensaje' => 'No se pudo obtener el clima de esta comunidad. Puedes ingresar la temperatura manualmente.',
+            ], 503);
+        }
+    }
+
     /** Muestra una foto de alerta solo dentro del panel administrativo. */
     public function verFotoAlerta(AlertaHelada $alertaHelada): StreamedResponse
     {
@@ -259,7 +463,10 @@ class AdministracionController extends Controller
 
         return view('administracion.editar-alerta', [
             'alerta' => $alertaHelada,
-            'comunidades' => Comunidad::where('activo', true)->orWhereKey($alertaHelada->comunidad_id)->orderBy('nombre')->get(),
+            'comunidades' => Comunidad::where('activo', true)
+    ->orWhere('id', $alertaHelada->comunidad_id)
+    ->orderBy('nombre')
+    ->get(),
         ]);
     }
 
@@ -268,7 +475,8 @@ class AdministracionController extends Controller
         $this->verificarAdministrador();
         abort_if($alertaHelada->reporte_riesgo_id, 404);
         $datos = $request->validate([
-            'tipo' => ['required', 'in:clima,refugio'],
+            'tipo' => ['required', 'in:clima,refugio,otro'],
+            'tipo_personalizado' => ['exclude_unless:tipo,otro', 'required', 'string', 'min:3', 'max:100'],
             'titulo' => ['required', 'string', 'max:160'],
             'mensaje' => ['required', 'string', 'max:3000'],
             'nivel' => ['required', 'in:informacion,precaucion,urgente'],
@@ -278,6 +486,7 @@ class AdministracionController extends Controller
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'quitar_foto' => ['nullable', 'boolean'],
         ]);
+        $datos['tipo_personalizado'] = $datos['tipo'] === 'otro' ? ($datos['tipo_personalizado'] ?? null) : null;
         $foto = $datos['foto'] ?? null;
         $quitarFoto = (bool) ($datos['quitar_foto'] ?? false);
         unset($datos['foto'], $datos['quitar_foto']);
@@ -310,15 +519,19 @@ class AdministracionController extends Controller
     {
         $this->verificarAdministrador();
         $datos = $request->validate([
-            'tipo' => ['required', 'in:clima,refugio'],
+            'tipo' => ['required', 'in:refugio,otro'],
+            'tipo_personalizado' => ['exclude_unless:tipo,otro', 'required', 'string', 'min:3', 'max:100'],
             'titulo' => ['required', 'string', 'max:160'],
             'mensaje' => ['required', 'string', 'max:3000'],
             'nivel' => ['required', 'in:informacion,precaucion,urgente'],
             'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where('activo', true)],
+            'latitud' => ['nullable', 'required_with:longitud', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'required_with:latitud', 'numeric', 'between:-180,180'],
             'fecha_inicio' => ['nullable', 'date'],
             'fecha_fin' => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
+        $datos['tipo_personalizado'] = $datos['tipo'] === 'otro' ? ($datos['tipo_personalizado'] ?? null) : null;
         $foto = $datos['foto'] ?? null;
         unset($datos['foto']);
         $rutaFoto = null;
@@ -347,6 +560,7 @@ class AdministracionController extends Controller
         $datos = $request->validate([
             'comunidad_id' => ['required', Rule::exists('comunidades', 'id')->where('activo', true)],
             'temperatura_c' => ['required', 'numeric', 'between:-80,60'],
+            'indicaciones' => ['nullable', 'string', 'max:1000'],
         ]);
         $temperatura = round((float) $datos['temperatura_c'], 2);
 
@@ -372,7 +586,7 @@ class AdministracionController extends Controller
             'comunidad_id' => $datos['comunidad_id'],
             'tipo' => 'clima',
             'titulo' => 'Riesgo '.$riesgo.' de helada',
-            'mensaje' => 'Temperatura prevista: '.$temperatura.' °C. Revisa las medidas de protección frente a heladas recomendadas para tu comunidad.',
+            'mensaje' => 'Temperatura prevista: '.$temperatura.' °C. Revisa las medidas de protección frente a heladas recomendadas para tu comunidad.'.(! empty($datos['indicaciones']) ? "\n\n".$datos['indicaciones'] : ''),
             'nivel' => $nivelAviso,
             'temperatura_c' => $temperatura,
             'nivel_riesgo' => $riesgo,
@@ -414,7 +628,12 @@ class AdministracionController extends Controller
         $this->verificarAdministrador();
 
         return view('administracion.reportes', [
-            'reportes' => ReporteRiesgo::with(['reportante', 'comunidad'])->latest()->paginate(15),
+            'reportes' => ReporteRiesgo::with(['reportante', 'comunidad'])
+                ->orderByRaw("CASE estado WHEN 'pendiente' THEN 0 WHEN 'revisado' THEN 1 WHEN 'publicado' THEN 2 ELSE 3 END")
+                ->orderByRaw("CASE prioridad WHEN 'alta' THEN 0 WHEN 'media' THEN 1 WHEN 'baja' THEN 2 ELSE 3 END")
+                ->oldest('created_at')
+                ->paginate(15),
+            'reportesPendientes' => ReporteRiesgo::where('estado', 'pendiente')->count(),
         ]);
     }
 
@@ -491,7 +710,8 @@ class AdministracionController extends Controller
             $reporte->alerta()->firstOrCreate([], [
                 'creado_por' => Auth::id(),
                 'comunidad_id' => $reporte->comunidad_id,
-                'tipo' => in_array($reporte->tipo, ['clima', 'refugio'], true) ? $reporte->tipo : 'clima',
+                'tipo' => in_array($reporte->tipo, ['clima', 'refugio', 'otro'], true) ? $reporte->tipo : 'clima',
+                'tipo_personalizado' => $reporte->tipo === 'otro' ? $reporte->tipo_personalizado : null,
                 'titulo' => $reporte->titulo,
                 'mensaje' => $reporte->descripcion,
                 'nivel' => 'precaucion',

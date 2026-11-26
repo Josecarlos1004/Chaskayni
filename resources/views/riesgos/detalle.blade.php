@@ -12,13 +12,16 @@
     <section class="seccion seccion-superior">
         <article class="detalle-reporte">
             <div class="detalle-reporte-datos">
-                <span class="etiqueta-estado">{{ $reporte->tipo === 'refugio' ? 'Refugios' : 'Clima' }}</span>
+                <span class="etiqueta-estado">{{ $reporte->tipo === 'otro' ? ($reporte->tipo_personalizado ?: 'Otra emergencia') : ($reporte->tipo === 'refugio' ? 'Refugios' : 'Clima') }}</span>
                 <span>{{ $reporte->comunidad?->nombre ?? 'Comunidad no indicada' }}</span>
                 <span>Reportado el {{ $reporte->created_at->format('d/m/Y H:i') }}</span>
             </div>
             <h2>Descripción del incidente</h2>
             <p class="detalle-reporte-descripcion">{{ $reporte->descripcion }}</p>
             @if ($reporte->latitud !== null && $reporte->longitud !== null)
+                @if ($reporte->ubicacion_detallada)
+                    <p><strong>Lugar aproximado:</strong> {{ $reporte->ubicacion_detallada }}</p>
+                @endif
                 <p><strong>Ubicación del incidente:</strong> {{ $reporte->latitud }}, {{ $reporte->longitud }}</p>
             @endif
             @if ($reporte->foto_evidencia)

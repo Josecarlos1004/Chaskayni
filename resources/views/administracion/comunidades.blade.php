@@ -13,33 +13,16 @@
         <div class="tarjeta-formulario">
             <span class="sobrelinea">Nueva comunidad</span>
             <h2>Registrar comunidad</h2>
-            <form method="post" action="{{ route('administracion.comunidades.guardar') }}">
+            <form method="post" action="{{ route('administracion.comunidades.guardar') }}" data-formulario-comunidad data-url-datos-ubicacion="{{ route('administracion.comunidades.ubicacion') }}">
                 @csrf
-                <label>Nombre<input name="nombre" value="{{ old('nombre') }}" maxlength="120" required /></label>
-                <div class="fila-formulario">
-                    <label
-                        >Distrito (opcional)<input
-                            name="distrito"
-                            value="{{ old('distrito') }}"
-                            maxlength="120" /></label
-                    ><label
-                        >Provincia<input
-                            name="provincia"
-                            value="{{ old('provincia', 'Cusco') }}"
-                            maxlength="120"
-                            required
-                    /></label>
-                </div>
-                <label
-                    >Altitud (m s. n. m., opcional)<input
-                        type="number"
-                        name="altitud_msnm"
-                        min="0"
-                        max="8000"
-                        step="1"
-                        value="{{ old('altitud_msnm') }}"
-                /></label>
-                <small>Ingresa una altitud confirmada. Si no la conoces, déjala vacía.</small>
+                @include ('administracion.partials.campos-comunidad', [
+                    'nombre' => old('nombre'),
+                    'distrito' => old('distrito'),
+                    'provincia' => old('provincia', 'Cusco'),
+                    'altitud' => old('altitud_msnm'),
+                    'latitud' => old('latitud'),
+                    'longitud' => old('longitud'),
+                ])
                 <label
                     >Descripción<textarea
                         name="descripcion"
@@ -70,34 +53,17 @@
                     </div>
                     <details>
                         <summary>Editar o activar comunidad</summary>
-                        <form method="post" action="{{ route('administracion.comunidades.actualizar', $comunidad) }}">
+                        <form method="post" action="{{ route('administracion.comunidades.actualizar', $comunidad) }}" data-formulario-comunidad data-url-datos-ubicacion="{{ route('administracion.comunidades.ubicacion') }}">
                             @csrf
                             @method ('put')
-                            <label
-                                >Nombre<input name="nombre" value="{{ $comunidad->nombre }}" maxlength="120" required
-                            /></label>
-                            <div class="fila-formulario">
-                                <label
-                                    >Distrito<input
-                                        name="distrito"
-                                        value="{{ $comunidad->distrito }}"
-                                        maxlength="120" /></label
-                                ><label
-                                    >Provincia<input
-                                        name="provincia"
-                                        value="{{ $comunidad->provincia }}"
-                                        maxlength="120"
-                                        required
-                                /></label>
-                            </div>
-                            <label
-                                >Altitud (m s. n. m.)<input
-                                    type="number"
-                                    name="altitud_msnm"
-                                    min="0"
-                                    max="8000"
-                                    value="{{ $comunidad->altitud_msnm }}"
-                            /></label>
+                            @include ('administracion.partials.campos-comunidad', [
+                                'nombre' => $comunidad->nombre,
+                                'distrito' => $comunidad->distrito,
+                                'provincia' => $comunidad->provincia,
+                                'altitud' => $comunidad->altitud_msnm,
+                                'latitud' => $comunidad->latitud,
+                                'longitud' => $comunidad->longitud,
+                            ])
                             <label
                                 >Descripción<textarea
                                     name="descripcion"
@@ -129,7 +95,7 @@
                     >
                         @csrf
                         @method ('delete')
-                        <button class="boton boton-contorno boton-pequeno" type="submit">Eliminar comunidad</button>
+                        <button class="boton boton-destructivo boton-pequeno" type="submit">Eliminar comunidad</button>
                     </form>
                 </article>
             @empty
@@ -139,4 +105,7 @@
             @endforelse
         </div>
     </section>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="{{ asset('js/mapa-comunidades-admin.js') }}?v={{ filemtime(public_path('js/mapa-comunidades-admin.js')) }}" defer></script>
 @endsection

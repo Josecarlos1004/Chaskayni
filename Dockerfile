@@ -1,12 +1,3 @@
-FROM node:22-alpine AS recursos
-WORKDIR /app
-COPY package.json ./
-RUN npm install --no-audit --no-fund
-COPY resources ./resources
-COPY public ./public
-COPY vite.config.js ./
-RUN npm run build
-
 FROM php:8.3-apache
 RUN apt-get update \
     && apt-get install -y --no-install-recommends unzip git libzip-dev \
@@ -18,7 +9,6 @@ RUN apt-get update \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
-COPY --from=recursos /app/public/build ./public/build
 COPY docker/sitio-apache.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/iniciar.sh /usr/local/bin/iniciar-chaskayni
 

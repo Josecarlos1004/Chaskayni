@@ -49,22 +49,30 @@
         </div>
 
         @auth
-            @if (auth()->user()->esProductor() && (auth()->id() === $producto->usuario_id || auth()->user()->esAdministrador()))
+            @if (auth()->user()->esProductor() && ((int) auth()->id() === (int) $producto->usuario_id || auth()->user()->esAdministrador()))
                 <div class="acciones-tarjeta">
                     <a class="boton boton-contorno boton-pequeno" href="{{ route('productos.editar', $producto) }}">
                         Editar publicación
                     </a>
-                    <form
-                        action="{{ route('productos.eliminar', $producto) }}"
-                        method="post"
-                        onsubmit="return confirm('¿Confirmas esta acción sobre la publicación?');"
-                    >
-                        @csrf
-                        @method ('delete')
-                        <button class="boton boton-sutil boton-pequeno" type="submit">
-                            {{ auth()->user()->esAdministrador() ? 'Eliminar publicación' : 'Ocultar' }}
-                        </button>
-                    </form>
+                    @if (auth()->user()->esAdministrador())
+                        <form
+                            action="{{ route('productos.eliminar', $producto) }}"
+                            method="post"
+                            onsubmit="return confirm('¿Eliminar definitivamente esta publicación?');"
+                        >
+                            @csrf
+                            @method ('delete')
+                            <button class="boton boton-destructivo boton-pequeno" type="submit">Eliminar publicación</button>
+                        </form>
+                    @else
+                        <form action="{{ route('productos.visibilidad', $producto) }}" method="post">
+                            @csrf
+                            @method ('patch')
+                            <button class="boton boton-contorno boton-pequeno" type="submit">
+                                {{ $producto->estado === 'oculto' ? 'Volver a mostrar' : 'Ocultar publicación' }}
+                            </button>
+                        </form>
+                    @endif
                 </div>
             @elseif (auth()->user()->rol !== 'productor' && auth()->id() !== $producto->usuario_id)
                 <form class="formulario-pedido" action="{{ route('pedidos.guardar', $producto) }}" method="post">

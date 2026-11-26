@@ -56,12 +56,14 @@
             const contenido = document.createElement('div');
             const titulo = document.createElement('strong');
             titulo.textContent = reporte.titulo;
+            const tipo = document.createElement('small');
+            tipo.textContent = reporte.tipo || 'Reporte comunitario';
             const descripcion = document.createElement('p');
             descripcion.textContent = reporte.descripcion || '';
             const enlaceDetalle = document.createElement('a');
             enlaceDetalle.href = reporte.url;
             enlaceDetalle.textContent = 'Ver detalle y fotografía';
-            contenido.append(titulo, descripcion, enlaceDetalle);
+            contenido.append(titulo, tipo, descripcion, enlaceDetalle);
             marcador.bindPopup(contenido);
             limites.push([reporte.latitud, reporte.longitud]);
         });
@@ -81,13 +83,52 @@
         const latitud = document.getElementById('latitud');
         const longitud = document.getElementById('longitud');
         const estado = document.getElementById('estado-coordenadas');
+        const nombreUbicacion = document.getElementById('nombre-ubicacion');
+        const ubicacionDetallada = document.getElementById('ubicacion-detallada');
+        const urlUbicacion = selector.dataset.ubicacionUrl;
         let marcadorSeleccionado = null;
+        let consultaActual = 0;
+
+        const buscarNombreUbicacion = async (lat, lng) => {
+            if (!urlUbicacion || !nombreUbicacion || !ubicacionDetallada) return;
+            const numeroConsulta = ++consultaActual;
+            nombreUbicacion.hidden = false;
+            nombreUbicacion.setAttribute('aria-busy', 'true');
+            nombreUbicacion.textContent = 'Buscando el nombre aproximado del lugar…';
+            ubicacionDetallada.value = '';
+
+            try {
+                const url = new URL(urlUbicacion, window.location.origin);
+                url.searchParams.set('latitud', lat.toFixed(5));
+                url.searchParams.set('longitud', lng.toFixed(5));
+                const respuesta = await fetch(url, {
+                    headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
+                });
+                if (!respuesta.ok) throw new Error('No se pudo consultar la ubicación.');
+
+                const resultado = await respuesta.json();
+                if (numeroConsulta !== consultaActual) return;
+                const nombre = resultado.ubicacion?.nombre;
+                if (!nombre) throw new Error('No se encontró un nombre para este punto. Las coordenadas se conservarán.');
+
+                ubicacionDetallada.value = nombre;
+                nombreUbicacion.textContent = `Lugar aproximado: ${nombre}`;
+                nombreUbicacion.setAttribute('aria-busy', 'false');
+            } catch {
+                if (numeroConsulta !== consultaActual) return;
+                nombreUbicacion.textContent = 'No se encontró el nombre del lugar. Las coordenadas se conservarán para su revisión.';
+                nombreUbicacion.setAttribute('aria-busy', 'false');
+            }
+        };
+
         const actualizar = (lat, lng) => {
             latitud.value = lat.toFixed(7);
             longitud.value = lng.toFixed(7);
-            estado.textContent = `Ubicación seleccionada: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            estado.textContent = `Coordenadas seleccionadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
             if (marcadorSeleccionado) mapaSelector.removeLayer(marcadorSeleccionado);
             marcadorSeleccionado = L.marker([lat, lng]).addTo(mapaSelector);
+            buscarNombreUbicacion(lat, lng);
         };
         mapaSelector.on('click', (evento) => actualizar(evento.latlng.lat, evento.latlng.lng));
         if (latitud.value && longitud.value) {

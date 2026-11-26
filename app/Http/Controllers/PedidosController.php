@@ -16,6 +16,8 @@ class PedidosController extends Controller
 {
     public function index(): View
     {
+        abort_unless(Auth::user()->rol === 'comprador', 403, 'Esta sección está disponible solo para compradores.');
+
         return view('pedidos.indice', [
             'pedidos' => Pedido::with('detalles.producto.vendedor')
                 ->where('comprador_id', Auth::id())

@@ -109,38 +109,43 @@ class ProductosController extends Controller
         return redirect()->route('mercado.indice')->with('success', 'La publicación se actualizó.');
     }
 
-    public function destroy(Producto $producto): RedirectResponse
+    public function actualizarVisibilidad(Producto $producto): RedirectResponse
     {
         $this->verificarPropietario($producto);
 
-        if (Auth::user()->esAdministrador()) {
-            if ($producto->detallesPedido()->exists()) {
-                return back()->withErrors(['producto' => 'No se puede eliminar esta publicación porque forma parte de pedidos. Ocúltala para conservar el historial.']);
-            }
-
-            $imagen = $producto->imagen_url;
-            $producto->delete();
-            $this->eliminarImagenAlmacenada($imagen);
-
-            return back()->with('success', 'Se eliminó la publicación.');
-        }
-
-        // Los productos con pedidos se ocultan para conservar el historial asociado.
-        if ($producto->detallesPedido()->exists()) {
-            $producto->update(['estado' => 'oculto']);
+        if ($producto->estado === 'oculto') {
+            $estado = (float) $producto->cantidad > 0 ? 'disponible' : 'agotado';
+            $mensaje = 'La publicación volvió a mostrarse en el mercado.';
         } else {
-            $imagen = $producto->imagen_url;
-            $producto->delete();
-            $this->eliminarImagenAlmacenada($imagen);
+            $estado = 'oculto';
+            $mensaje = 'La publicación se ocultó y puedes volver a mostrarla desde tu panel.';
         }
 
-        return redirect()->route('mercado.indice')->with('success', 'La publicación dejó de mostrarse en el mercado.');
+        $producto->update(['estado' => $estado]);
+
+        return redirect()->route('panel')->with('success', $mensaje);
+    }
+
+    public function destroy(Producto $producto): RedirectResponse
+    {
+        $this->verificarPropietario($producto);
+        abort_unless(Auth::user()->esAdministrador(), 403);
+
+        if ($producto->detallesPedido()->exists()) {
+            return back()->withErrors(['producto' => 'No se puede eliminar esta publicación porque forma parte de pedidos. Ocúltala para conservar el historial.']);
+        }
+
+        $imagen = $producto->imagen_url;
+        $producto->delete();
+        $this->eliminarImagenAlmacenada($imagen);
+
+        return back()->with('success', 'Se eliminó la publicación.');
     }
 
     private function verificarPropietario(Producto $producto): void
     {
         abort_unless(Auth::user()->esProductor(), 403);
-        abort_unless($producto->usuario_id === Auth::id() || Auth::user()->esAdministrador(), 403);
+        abort_unless((int) $producto->usuario_id === (int) Auth::id() || Auth::user()->esAdministrador(), 403);
     }
 
     /** Ofrece comunidades activas y conserva la asociación existente al editar. */
@@ -148,7 +153,7 @@ class ProductosController extends Controller
     {
         $consulta = Comunidad::where('activo', true);
         if ($producto?->comunidad_id) {
-            $consulta->orWhereKey($producto->comunidad_id);
+            $consulta->orWhere('id', $producto->comunidad_id);
         }
 
         return $consulta->orderBy('nombre')->get();

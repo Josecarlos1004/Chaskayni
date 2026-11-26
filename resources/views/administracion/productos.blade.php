@@ -15,6 +15,33 @@
                 @foreach ($productos as $producto)
                     <div>
                         <p class="etiqueta-estado">Estado: {{ ucfirst($producto->estado) }}</p>
+                        @php ($telefonoProductor = $producto->vendedor?->telefono)
+                        @if ($telefonoProductor)
+                            @php ($numeroProductor = preg_replace('/\D+/', '', (string) $telefonoProductor))
+                            @php ($numeroInternacional = str_starts_with($numeroProductor, '51') ? $numeroProductor : '51' . $numeroProductor)
+                            <div class="panel">
+                                <strong>Contacto del productor</strong>
+                                <p>
+                                    {{ $producto->vendedor->name }} ·
+                                    <a href="tel:+{{ $numeroInternacional }}">{{ $telefonoProductor }}</a>
+                                </p>
+                                <div class="acciones-tarjeta">
+                                    <a class="boton boton-contorno boton-pequeno" href="tel:+{{ $numeroInternacional }}">
+                                        Llamar al productor
+                                    </a>
+                                    <a
+                                        class="boton boton-pequeno"
+                                        href="https://wa.me/{{ $numeroInternacional }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Escribir por WhatsApp
+                                    </a>
+                                </div>
+                            </div>
+                        @else
+                            <p class="texto-ayuda">Este productor no tiene un teléfono registrado.</p>
+                        @endif
                         @include ('components.tarjeta-producto', ['producto' => $producto])
                     </div>
                 @endforeach

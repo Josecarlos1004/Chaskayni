@@ -16,9 +16,18 @@
                     <div class="encabezado-panel">
                         <div>
                             <h2>Pedido #{{ $pedido->id }}</h2>
-                            <small
-                                >{{ $pedido->comprador?->name ?: 'Comprador no disponible' }} · {{ $pedido->created_at->format('d/m/Y H:i') }}</small
-                            >
+                            <small>
+                                {{ $pedido->comprador?->name ?: 'Comprador no disponible' }} · {{ $pedido->created_at->format('d/m/Y H:i') }}
+                            </small>
+                            @if (! auth()->user()->esAdministrador() && $pedido->comprador?->telefono)
+                                <small>
+                                    Contacto del comprador:
+                                    <a
+                                        href="tel:{{ $pedido->comprador->telefono }}"
+                                        >{{ $pedido->comprador->telefono }}</a
+                                    >
+                                </small>
+                            @endif
                         </div>
                         <span class="etiqueta-estado {{ $pedido->claseEstado() }}">{{ $pedido->nombreEstado() }}</span>
                     </div>
@@ -105,7 +114,7 @@
                         >
                             @csrf
                             @method ('delete')
-                            <button class="boton boton-contorno boton-pequeno" type="submit">Eliminar pedido</button>
+                            <button class="boton boton-destructivo boton-pequeno" type="submit">Eliminar pedido</button>
                         </form>
                     @endif
                 </article>

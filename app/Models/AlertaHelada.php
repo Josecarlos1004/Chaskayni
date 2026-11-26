@@ -14,9 +14,12 @@ class AlertaHelada extends Model
         'creado_por',
         'comunidad_id',
         'tipo',
+        'tipo_personalizado',
         'titulo',
         'mensaje',
         'foto',
+        'latitud',
+        'longitud',
         'nivel',
         'temperatura_c',
         'nivel_riesgo',
@@ -31,6 +34,8 @@ class AlertaHelada extends Model
     {
         return [
             'temperatura_c' => 'decimal:2',
+            'latitud' => 'decimal:7',
+            'longitud' => 'decimal:7',
             'fecha_inicio' => 'datetime',
             'fecha_fin' => 'datetime',
             'cerrado_en' => 'datetime',

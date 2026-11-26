@@ -10,6 +10,12 @@ class DatabaseSeeder extends Seeder
     /** Agrega comunidades de referencia sin duplicar ni borrar datos existentes. */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command?->warn('La siembra de demostración está deshabilitada en producción.');
+
+            return;
+        }
+
         $comunidadesDeDemostracion = [
             'Chinchero',
             'Maras',
@@ -24,5 +30,8 @@ class DatabaseSeeder extends Seeder
         foreach ($comunidadesDeDemostracion as $nombre) {
             Comunidad::firstOrCreate(['nombre' => $nombre]);
         }
+
+        $this->call(ProductosDemostracionSeeder::class);
+        $this->call(AlertasDemostracionSeeder::class);
     }
 }

@@ -60,5 +60,21 @@
                 ><a class="enlace-lateral" href="{{ route('alertas.indice') }}">Consultar alertas publicadas →</a>
             </aside>
         </div>
+        @if (auth()->user()->esProductor() && $productosOcultos->isNotEmpty())
+            <article class="panel publicaciones-ocultas">
+                <div class="encabezado-panel">
+                    <div>
+                        <span class="sobrelinea">Visibilidad</span>
+                        <h2>Publicaciones ocultas</h2>
+                    </div>
+                    <small>Solo tú puedes verlas aquí.</small>
+                </div>
+                <div class="cuadricula-productos">
+                    @foreach ($productosOcultos as $producto)
+                        @include ('components.tarjeta-producto', ['producto' => $producto])
+                    @endforeach
+                </div>
+            </article>
+        @endif
     </section>
 @endsection

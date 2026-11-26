@@ -177,7 +177,7 @@
                     >
                         @csrf
                         @method ('delete')
-                        <button class="boton boton-contorno boton-pequeno" type="submit">Eliminar refugio</button>
+                        <button class="boton boton-destructivo boton-pequeno" type="submit">Eliminar refugio</button>
                     </form>
                 </article>
             @empty
@@ -186,7 +186,7 @@
         </div>
     </section>
     <script>
-        window.datosMapa = @json ($datosMapa);
+        window.datosMapa = @json($datosMapa);
     </script>
     <link
         rel="stylesheet"
@@ -199,5 +199,5 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""
     ></script>
-    <script src="{{ asset('js/mapa-comunitario.js') }}" defer></script>
+    <script src="{{ asset('js/mapa-comunitario.js') }}?v={{ filemtime(public_path('js/mapa-comunitario.js')) }}" defer></script>
 @endsection
