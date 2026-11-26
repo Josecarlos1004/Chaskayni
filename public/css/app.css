@@ -3671,9 +3671,7 @@ body {
     padding-inline: clamp(16px, 4vw, 48px);
 }
 .pagina-publicar-alerta > .selector-flujo-publicacion {
-    position: sticky;
-    top: 82px;
-    z-index: 8;
+    position: static;
     padding: 12px;
     border: 1px solid var(--borde);
     border-radius: 14px;
@@ -3727,7 +3725,6 @@ body {
         padding-inline: 14px;
     }
     .pagina-publicar-alerta > .selector-flujo-publicacion {
-        top: 68px;
         gap: 8px;
         margin-block: 12px 18px;
     }
@@ -3748,9 +3745,22 @@ body {
         gap: 10px;
     }
 }
-/* Mantiene la navegación en el encabezado del documento. */
+/* Navegación principal fija arriba en todas las páginas. */
+body {
+    padding-top: 82px;
+}
 .encabezado-sitio {
-    position: relative;
-    inset: auto;
-    z-index: 20;
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 100;
+}
+@media (min-width: 621px) and (max-width: 1100px) {
+    body {
+        padding-top: 76px;
+    }
+}
+@media (max-width: 620px) {
+    body {
+        padding-top: 68px;
+    }
 }

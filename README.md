@@ -29,14 +29,12 @@ La alerta por temperatura se calcula a partir del valor ingresado por administra
 1. Windows con XAMPP y PHP 8.2 o superior.
 2. MySQL iniciado desde el panel de XAMPP.
 3. Composer.
-4. Node.js y npm para compilar los recursos del frontend.
+4. Git (opcional, para clonar o actualizar el repositorio).
 
 Comprueba las versiones:
 
     php -v
     composer --version
-    node --version
-    npm --version
 
 ## Instalación en Windows
 
@@ -79,11 +77,6 @@ Prepara el almacenamiento público de imágenes:
 
     php artisan storage:link
 
-Instala y compila los recursos del frontend cuando corresponda:
-
-    npm install
-    npm run build
-
 ## Crear la primera cuenta administradora
 
 Con MySQL iniciado y las migraciones aplicadas, ejecuta:
@@ -100,7 +93,7 @@ En una terminal de PowerShell, desde la carpeta del proyecto:
 
     php artisan serve
 
-Abre http://127.0.0.1:8000. Para editar CSS o JavaScript durante el desarrollo, deja otra terminal ejecutando npm run dev.
+Abre http://127.0.0.1:8000. Los estilos y scripts propios del proyecto se sirven desde la carpeta public.
 
 ## Pruebas
 
@@ -124,6 +117,25 @@ Desde el panel /administracion se accede a cuentas, publicaciones, pedidos, aler
 - No se elimina una publicación asociada a pedidos.
 - Eliminar un pedido pendiente o aceptado devuelve su cantidad al inventario; eliminar uno completado no lo devuelve.
 - Las comunidades y refugios se eliminan individualmente. Al quitar una comunidad, las referencias relacionadas quedan sin comunidad cuando la relación de base de datos lo permite.
+
+## Recuperación segura por correo
+
+El restablecimiento usa enlaces temporales de Laravel, responde igual si el correo existe o no y limita las solicitudes. Al cambiar la contraseña, invalida las sesiones almacenadas en la base cuando `SESSION_DRIVER=database`, cambia el token de sesión persistente y envía un aviso de seguridad al correo de la cuenta.
+
+El ejemplo local mantiene `MAIL_MAILER=log`, que guarda el contenido del mensaje en los registros y no lo envía a una bandeja. Para correo real, configura estos valores privados en `.env` local o en las variables del servidor, siguiendo el host, puerto y esquema indicados por el proveedor:
+
+    MAIL_MAILER=smtp
+    MAIL_SCHEME=smtp
+    MAIL_HOST=host-smtp-del-proveedor
+    MAIL_PORT=587
+    MAIL_USERNAME=tu-cuenta-de-correo
+    MAIL_PASSWORD=clave-o-token-del-proveedor
+    MAIL_FROM_ADDRESS=remitente-verificado
+    MAIL_FROM_NAME="${APP_NAME}"
+    APP_URL=https://dominio-publico-de-chaskayni
+    SESSION_DRIVER=database
+
+Después de cambiar la configuración, ejecuta `php artisan config:clear`. En producción, define las mismas variables en el panel del servidor, usa un dominio HTTPS válido y no subas credenciales a GitHub ni las compartas por chat. Si se compromete la cuenta, protege primero también el correo asociado; el enlace de recuperación no es seguro si otra persona controla esa bandeja.
 
 ## Protección de configuración y datos
 

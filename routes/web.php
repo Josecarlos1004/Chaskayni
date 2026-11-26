@@ -67,7 +67,6 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
     Route::get('/reportes/ubicacion', [ReportesRiesgoController::class, 'buscarUbicacion'])
         ->middleware('throttle:30,1')
         ->name('riesgos.ubicacion');
-    /* Route::post('/reportes', [ReportesRiesgoController::class, 'store'])->name('guardar'); */
 
     Route::prefix('administracion')->name('administracion.')->group(function () {
         Route::get('/', [AdministracionController::class, 'panel'])->name('panel');
