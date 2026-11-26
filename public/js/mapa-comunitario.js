@@ -130,7 +130,50 @@
             marcadorSeleccionado = L.marker([lat, lng]).addTo(mapaSelector);
             buscarNombreUbicacion(lat, lng);
         };
-        mapaSelector.on('click', (evento) => actualizar(evento.latlng.lat, evento.latlng.lng));
+        const requiereGps = selector.dataset.requiereGps === 'true';
+        const gpsConfirmado = document.getElementById('gps-confirmado');
+        const botonGps = document.getElementById('usar-ubicacion-gps');
+        const estadoGps = document.getElementById('estado-gps');
+
+        if (!requiereGps) {
+            mapaSelector.on('click', (evento) => actualizar(evento.latlng.lat, evento.latlng.lng));
+        }
+
+        botonGps?.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                estadoGps.textContent = 'Este navegador no permite consultar la ubicación GPS.';
+                return;
+            }
+
+            botonGps.disabled = true;
+            estadoGps.textContent = 'Esperando permiso y ubicación del dispositivo…';
+            navigator.geolocation.getCurrentPosition(
+                ({ coords }) => {
+                    actualizar(coords.latitude, coords.longitude);
+                    mapaSelector.setView([coords.latitude, coords.longitude], 16);
+                    if (gpsConfirmado) gpsConfirmado.value = '1';
+                    estadoGps.textContent = 'Ubicación actual obtenida. Puedes enviar el reporte.';
+                    botonGps.disabled = false;
+                },
+                (error) => {
+                    const mensajes = {
+                        1: 'No se concedió permiso. Autoriza la ubicación en el navegador para enviar el reporte.',
+                        2: 'El dispositivo no pudo determinar la ubicación. Activa el GPS o inténtalo en otro lugar.',
+                        3: 'La consulta tardó demasiado. Inténtalo otra vez.',
+                    };
+                    estadoGps.textContent = mensajes[error.code] || 'No se pudo obtener la ubicación actual.';
+                    botonGps.disabled = false;
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+            );
+        });
+
+        if (requiereGps) {
+            [latitud, longitud].forEach((campo) => campo.addEventListener('input', () => {
+                if (gpsConfirmado) gpsConfirmado.value = '';
+            }));
+        }
+
         if (latitud.value && longitud.value) {
             const lat = Number(latitud.value);
             const lng = Number(longitud.value);
@@ -139,6 +182,44 @@
                 actualizar(lat, lng);
             }
         }
+    }
+
+    if (!mapaSelector) {
+        const botonGps = document.getElementById('usar-ubicacion-gps');
+        const estadoGps = document.getElementById('estado-gps');
+        const gpsConfirmado = document.getElementById('gps-confirmado');
+        const latitud = document.getElementById('latitud');
+        const longitud = document.getElementById('longitud');
+
+        botonGps?.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                estadoGps.textContent = 'Este navegador no permite consultar la ubicación GPS.';
+                return;
+            }
+
+            botonGps.disabled = true;
+            estadoGps.textContent = 'Esperando permiso y ubicación del dispositivo…';
+            navigator.geolocation.getCurrentPosition(
+                ({ coords }) => {
+                    latitud.value = coords.latitude.toFixed(7);
+                    longitud.value = coords.longitude.toFixed(7);
+                    gpsConfirmado.value = '1';
+                    document.getElementById('estado-coordenadas').textContent = `Coordenadas GPS obtenidas: ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`;
+                    estadoGps.textContent = 'Ubicación actual obtenida. Puedes enviar el reporte.';
+                    botonGps.disabled = false;
+                },
+                (error) => {
+                    const mensajes = {
+                        1: 'No se concedió permiso. Autoriza la ubicación en el navegador para enviar el reporte.',
+                        2: 'El dispositivo no pudo determinar la ubicación. Activa el GPS o inténtalo en otro lugar.',
+                        3: 'La consulta tardó demasiado. Inténtalo otra vez.',
+                    };
+                    estadoGps.textContent = mensajes[error.code] || 'No se pudo obtener la ubicación actual.';
+                    botonGps.disabled = false;
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+            );
+        });
     }
 
     document.querySelectorAll('.mapa-comunitario, .mapa-selector').forEach((elemento) => {

@@ -84,30 +84,34 @@ class ReportesRiesgoController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $usuario = Auth::user();
+        $esAnonimo = $usuario === null;
         $datos = $request->validate([
             'tipo' => ['required', 'in:clima,refugio,otro'],
             'tipo_personalizado' => ['exclude_unless:tipo,otro', 'required', 'string', 'min:3', 'max:100'],
             'titulo' => ['required', 'string', 'max:160'],
             'descripcion' => ['required', 'string', 'max:3000'],
-            'latitud' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitud' => ['nullable', 'numeric', 'between:-180,180'],
+            'latitud' => [$esAnonimo ? 'required' : 'nullable', 'numeric', 'between:-90,90'],
+            'longitud' => [$esAnonimo ? 'required' : 'nullable', 'numeric', 'between:-180,180'],
+            'gps_confirmado' => [$esAnonimo ? 'accepted' : 'nullable'],
             'ubicacion_detallada' => ['nullable', 'string', 'max:500'],
             'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where('activo', true)],
-            'foto_evidencia' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'foto_evidencia' => [$esAnonimo ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
         $datos['tipo_personalizado'] = $datos['tipo'] === 'otro' ? ($datos['tipo_personalizado'] ?? null) : null;
         $fotoEvidencia = $datos['foto_evidencia'] ?? null;
         unset($datos['foto_evidencia']);
         $rutaEvidencia = null;
-        $esAdministrador = Auth::user()->esAdministrador();
+        unset($datos['gps_confirmado']);
+        $esAdministrador = $usuario?->esAdministrador() ?? false;
 
         try {
-            DB::transaction(function () use ($datos, $fotoEvidencia, &$rutaEvidencia, $esAdministrador): void {
+            DB::transaction(function () use ($datos, $fotoEvidencia, &$rutaEvidencia, $esAdministrador, $usuario): void {
                 $reporte = ReporteRiesgo::create([
                     ...$datos,
-                    'reportante_id' => Auth::id(),
-                    'comunidad_id' => $datos['comunidad_id'] ?? (Auth::user()->comunidad?->activo ? Auth::user()->comunidad_id : null),
+                    'reportante_id' => $usuario?->id,
+                    'comunidad_id' => $datos['comunidad_id'] ?? ($usuario?->comunidad?->activo ? $usuario->comunidad_id : null),
                     'estado' => $esAdministrador ? 'publicado' : 'pendiente',
                 ]);
 
@@ -143,6 +147,10 @@ class ReportesRiesgoController extends Controller
 
         if ($esAdministrador) {
             return redirect()->route('alertas.indice')->with('success', 'La situación se publicó directamente como alerta comunitaria.');
+        }
+
+        if (! $usuario) {
+            return redirect()->route('alertas.indice')->with('success', 'Reporte recibido. Administración lo revisará antes de publicarlo. No necesitas crear una cuenta para enviar avisos urgentes.');
         }
 
         return redirect()->route('panel')->with('success', 'Gracias. Tu reporte quedó pendiente de revisión.');

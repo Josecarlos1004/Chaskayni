@@ -12,11 +12,11 @@
                 @auth
                     {{ auth()->user()->esAdministrador() ? 'Publicar situación' : 'Enviar aviso para revisión' }}
                 @else
-                    Enviar un aviso
+                    Reportar una emergencia
                 @endauth
             </a>
             @guest
-                <small>Inicia sesión o crea una cuenta para reportar una situación.</small>
+                <small>No necesitas una cuenta. Administración revisará el reporte antes de publicarlo.</small>
             @endguest
         </div>
     </section>

@@ -21,6 +21,11 @@ Route::get('/productos/{producto}/imagen', [ProductosController::class, 'verImag
 Route::get('/alertas', [AlertasHeladasController::class, 'index'])->name('alertas.indice');
 Route::get('/alertas/{alertaHelada}/foto', [AlertasHeladasController::class, 'verFotoPublica'])->name('alertas.foto');
 Route::get('/mapa-comunitario', [MapaComunitarioController::class, 'index'])->name('mapa.indice');
+Route::get('/reportes/nuevo', [ReportesRiesgoController::class, 'create'])->name('riesgos.crear');
+Route::post('/reportes', [ReportesRiesgoController::class, 'store'])->middleware('throttle:3,1')->name('riesgos.guardar');
+Route::get('/reportes/ubicacion', [ReportesRiesgoController::class, 'buscarUbicacion'])
+    ->middleware('throttle:30,1')
+    ->name('riesgos.ubicacion');
 Route::view('/privacidad', 'privacidad')->name('privacidad');
 Route::view('/acerca-de', 'acerca')->name('acerca');
 Route::view('/seguridad', 'seguridad')->name('seguridad');
@@ -62,12 +67,6 @@ Route::middleware(['auth', VerificarCuentaActiva::class])->group(function () {
     Route::put('/productos/{producto}', [ProductosController::class, 'update'])->name('productos.actualizar');
     Route::patch('/productos/{producto}/visibilidad', [ProductosController::class, 'actualizarVisibilidad'])->name('productos.visibilidad');
     Route::delete('/productos/{producto}', [ProductosController::class, 'destroy'])->name('productos.eliminar');
-    Route::get('/reportes/nuevo', [ReportesRiesgoController::class, 'create'])->name('riesgos.crear');
-    Route::post('/reportes', [ReportesRiesgoController::class, 'store'])->name('riesgos.guardar');
-    Route::get('/reportes/ubicacion', [ReportesRiesgoController::class, 'buscarUbicacion'])
-        ->middleware('throttle:30,1')
-        ->name('riesgos.ubicacion');
-
     Route::prefix('administracion')->name('administracion.')->group(function () {
         Route::get('/', [AdministracionController::class, 'panel'])->name('panel');
         Route::get('/estadisticas', [AdministracionController::class, 'estadisticas'])->name('estadisticas');

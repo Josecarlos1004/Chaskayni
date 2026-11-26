@@ -20,7 +20,7 @@
                         <div>
                             <h2>{{ $reporte->titulo }}</h2>
                             <small
-                                >{{ $reporte->reportante->name }} · {{ $reporte->comunidad?->nombre ?: 'Sin comunidad' }} · {{ $reporte->created_at->format('d/m/Y H:i') }}</small
+                                >{{ $reporte->reportante?->name ?: 'Reporte anónimo' }} · {{ $reporte->comunidad?->nombre ?: 'Sin comunidad' }} · {{ $reporte->created_at->format('d/m/Y H:i') }}</small
                             >
                         </div>
                         <span class="etiqueta-estado">{{ ucfirst($reporte->estado) }}</span>
