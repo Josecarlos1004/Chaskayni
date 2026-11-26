@@ -1,17 +1,17 @@
 @extends ('layouts.app')
 @section ('titulo', 'Publicar alerta')
 @section ('content')
-    <section class="pagina-formulario">
+    <section class="pagina-formulario pagina-publicar-alerta">
         <a class="enlace-regreso" href="{{ route('administracion.comunidades.indice') }}">← Administración</a>
-
-        <div id="seccion-clima" class="tarjeta-formulario">
-            <span class="sobrelinea">Alerta por temperatura</span>
+    @php($flujoInicial = session()->hasOldInput('tipo') ? 'otras-emergencias' : 'clima')
+        <div class="selector-flujo-publicacion" role="group" aria-label="Selecciona qué deseas publicar">
+            <button class="boton boton-claro" type="button" data-seleccionar-flujo="clima" aria-controls="seccion-clima" aria-pressed="{{ $flujoInicial === 'clima' ? 'true' : 'false' }}">Clima y heladas</button>
+            <button class="boton boton-claro" type="button" data-seleccionar-flujo="otras-emergencias" aria-controls="seccion-otras-emergencias" aria-pressed="{{ $flujoInicial === 'otras-emergencias' ? 'true' : 'false' }}">Otras emergencias y refugios</button>
+        </div>
+        <div id="seccion-clima" class="tarjeta-formulario" data-panel-flujo="clima" @if ($flujoInicial !== 'clima') hidden @endif>
+            <span class="sobrelinea">Clima y heladas</span>
             <h1>Evaluar riesgo de helada</h1>
-            <p>Ingresa la temperatura prevista para la madrugada. El pronóstico cercano es orientativo. Puedes usar su mínima de las próximas 24 horas o ingresar la temperatura manualmente.</p>
-            <nav class="acciones-formulario" aria-label="Secciones de publicación">
-                <a class="boton boton-claro" href="#seccion-clima">Clima y heladas</a>
-                <a class="boton boton-claro" href="#seccion-otras-emergencias">Otras emergencias y refugios</a>
-            </nav>
+            <p>Selecciona una comunidad para consultar el pronóstico. La mínima prevista para las próximas 24 horas se completará automáticamente; puedes revisarla y ajustarla antes de publicar.</p>
             <details class="registro-comunidad-rapida">
                 <summary>¿Falta una comunidad? Registrar una nueva</summary>
                 <form method="post" action="{{ route('administracion.comunidades.rapida') }}" data-registro-comunidad data-formulario-comunidad data-url-datos-ubicacion="{{ route('administracion.comunidades.ubicacion') }}">
@@ -23,7 +23,8 @@
                         'altitud' => old('altitud_msnm'),
                         'latitud' => old('latitud'),
                         'longitud' => old('longitud'),
-                    ])                    <button class="boton boton-pequeno" type="submit">Registrar y seleccionar comunidad</button>
+                    ])
+                    <button class="boton boton-pequeno" type="submit">Registrar y seleccionar comunidad</button>
                     <p class="estado-registro-comunidad" data-registro-estado role="status" aria-live="polite" hidden></p>
                 </form>
             </details>
@@ -57,6 +58,7 @@
                                 <h2 id="titulo-ubicacion-clima">Punto de la comunidad</h2>
                                 <p data-coordenadas-seleccionadas>Selecciona una comunidad para ver sus coordenadas.</p>
                             </div>
+
                             <button class="boton boton-pequeno" type="button" data-usar-gps disabled>Usar ubicación GPS</button>
                         </div>
                         <p class="estado-ubicacion-clima" data-estado-ubicacion role="status" aria-live="polite">El pronóstico utilizará la ubicación guardada de la comunidad.</p>
@@ -146,17 +148,16 @@
             </form>
         </div>
 
-        <div id="seccion-otras-emergencias" class="tarjeta-formulario formulario-alerta-manual">
-            <span class="sobrelinea">Aviso verificado</span>
-            <h2>Publicar alerta manual</h2>
-            <p>Usa este formulario para avisos revisados que no dependen de una temperatura.</p>
+        <div id="seccion-otras-emergencias" class="tarjeta-formulario formulario-alerta-manual" data-panel-flujo="otras-emergencias" @if ($flujoInicial !== 'otras-emergencias') hidden @endif>
+            <span class="sobrelinea">Emergencias no meteorológicas</span>
+            <h2>Otros avisos y refugios</h2>
+            <p>Publica avisos de refugios u otras emergencias, como sismos, derrumbes, inundaciones o incendios. Las alertas por clima se gestionan en la sección anterior.</p>
             <form method="post" action="{{ route('administracion.alertas.guardar') }}" enctype="multipart/form-data">
                 @csrf
                 <label
                     >Tipo de aviso
                     <select name="tipo" data-tipo-emergencia required>
-                        <option value="clima" @selected (old('tipo', 'clima') === 'clima')>Clima</option>
-                        <option value="refugio" @selected (old('tipo') === 'refugio')>Refugios</option>
+                        <option value="refugio" @selected (old('tipo', 'refugio') === 'refugio')>Refugios</option>
                         <option value="otro" @selected (old('tipo') === 'otro')>Otra emergencia</option>
                     </select>
                 </label>
@@ -182,10 +183,35 @@
                         >Comunidad<select name="comunidad_id">
                             <option value="">Todas las comunidades</option>
                             @foreach ($comunidades as $comunidad)
-                                <option value="{{ $comunidad->id }}">{{ $comunidad->nombre }}</option>
+                                <option
+                                    value="{{ $comunidad->id }}"
+                                    data-latitud="{{ $comunidad->latitud }}"
+                                    data-longitud="{{ $comunidad->longitud }}"
+                                    @selected ((string) old('comunidad_id') === (string) $comunidad->id)
+                                >{{ $comunidad->nombre }}</option>
                             @endforeach</select
                     ></label>
                 </div>
+                <section class="ubicacion-alerta-manual" data-mapa-alerta-emergencia aria-labelledby="titulo-mapa-alerta">
+                    <div class="encabezado-mapa-alerta">
+                        <div>
+                            <span class="sobrelinea">Ubicación del aviso</span>
+                            <h3 id="titulo-mapa-alerta">Marca el punto de la emergencia o refugio</h3>
+                            <p data-estado-mapa-alerta role="status" aria-live="polite">Selecciona una comunidad o marca el lugar directamente en el mapa.</p>
+                        </div>
+                        <button class="boton boton-claro boton-pequeno" type="button" data-gps-alerta>Usar mi ubicación</button>
+                    </div>
+                    <div class="mapa-selector-comunidad mapa-alerta-emergencia" data-mapa-emergencia role="region" aria-label="Mapa para elegir la ubicación del aviso"></div>
+                    <div class="coordenadas-alerta-manual">
+                        <label>Latitud
+                            <input type="number" name="latitud" value="{{ old('latitud') }}" min="-90" max="90" step="0.0000001" inputmode="decimal" />
+                        </label>
+                        <label>Longitud
+                            <input type="number" name="longitud" value="{{ old('longitud') }}" min="-180" max="180" step="0.0000001" inputmode="decimal" />
+                        </label>
+                    </div>
+                    <small>La ubicación es opcional. Puedes mover el marcador o editar las coordenadas.</small>
+                </section>
                 <div class="fila-formulario">
                     <label
                         >Inicio de vigencia (opcional)<input
@@ -220,3 +246,4 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="{{ asset('js/mapa-comunidades-admin.js') }}?v={{ filemtime(public_path('js/mapa-comunidades-admin.js')) }}" defer></script>
     <script src="{{ asset('js/clima-comunidad.js') }}?v={{ filemtime(public_path('js/clima-comunidad.js')) }}" defer></script>
+    <script src="{{ asset('js/mapa-alerta-emergencia.js') }}?v={{ filemtime(public_path('js/mapa-alerta-emergencia.js')) }}" defer></script>

@@ -525,6 +525,8 @@ class AdministracionController extends Controller
             'mensaje' => ['required', 'string', 'max:3000'],
             'nivel' => ['required', 'in:informacion,precaucion,urgente'],
             'comunidad_id' => ['nullable', Rule::exists('comunidades', 'id')->where('activo', true)],
+            'latitud' => ['nullable', 'required_with:longitud', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'required_with:latitud', 'numeric', 'between:-180,180'],
             'fecha_inicio' => ['nullable', 'date'],
             'fecha_fin' => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],

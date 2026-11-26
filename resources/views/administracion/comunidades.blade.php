@@ -22,7 +22,8 @@
                     'altitud' => old('altitud_msnm'),
                     'latitud' => old('latitud'),
                     'longitud' => old('longitud'),
-                ])                <label
+                ])
+                <label
                     >Descripción<textarea
                         name="descripcion"
                         rows="3"
@@ -62,7 +63,8 @@
                                 'altitud' => $comunidad->altitud_msnm,
                                 'latitud' => $comunidad->latitud,
                                 'longitud' => $comunidad->longitud,
-                            ])                            <label
+                            ])
+                            <label
                                 >Descripción<textarea
                                     name="descripcion"
                                     rows="2"

@@ -3624,3 +3624,133 @@ body {
         padding: 12px;
     }
 }
+
+/* Selector para elegir entre clima y otras emergencias. */
+[data-panel-flujo][hidden] {
+    display: none !important;
+}
+
+.selector-flujo-publicacion {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0 24px;
+}
+
+.selector-flujo-publicacion .boton {
+    min-height: 48px;
+}
+
+.selector-flujo-publicacion .boton[aria-pressed="true"] {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: #fff;
+}
+
+.selector-flujo-publicacion .boton[aria-pressed="false"] {
+    background: #fff;
+    border-color: var(--borde);
+    color: var(--tinta);
+}
+
+@media (max-width: 600px) {
+    .selector-flujo-publicacion {
+        flex-direction: column;
+    }
+
+    .selector-flujo-publicacion .boton {
+        width: 100%;
+    }
+}
+
+/* Publicación de avisos: selector visible, mapa y formulario adaptable. */
+.pagina-publicar-alerta {
+    width: min(1180px, 100%);
+    max-width: none;
+    margin-inline: auto;
+    padding-inline: clamp(16px, 4vw, 48px);
+}
+.pagina-publicar-alerta > .selector-flujo-publicacion {
+    position: sticky;
+    top: 82px;
+    z-index: 8;
+    padding: 12px;
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    background: rgba(251, 248, 239, .96);
+    box-shadow: var(--sombra-suave);
+}
+.pagina-publicar-alerta > [data-panel-flujo] {
+    min-width: 0;
+}
+.ubicacion-alerta-manual {
+    display: grid;
+    gap: 14px;
+    margin-block: 18px;
+    padding: clamp(14px, 2vw, 22px);
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    background: #fafbf7;
+}
+.encabezado-mapa-alerta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px 20px;
+}
+.encabezado-mapa-alerta h3 {
+    margin: 4px 0 6px;
+    color: var(--verde-oscuro);
+}
+.encabezado-mapa-alerta p,
+.ubicacion-alerta-manual > small {
+    margin: 0;
+    color: var(--atenuado);
+    overflow-wrap: anywhere;
+}
+.mapa-alerta-emergencia {
+    width: 100%;
+    height: clamp(250px, 38vw, 390px);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.coordenadas-alerta-manual {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+.coordenadas-alerta-manual label {
+    min-width: 0;
+}
+@media (max-width: 700px) {
+    .pagina-publicar-alerta {
+        padding-inline: 14px;
+    }
+    .pagina-publicar-alerta > .selector-flujo-publicacion {
+        top: 68px;
+        gap: 8px;
+        margin-block: 12px 18px;
+    }
+    .pagina-publicar-alerta .tarjeta-formulario {
+        padding: clamp(16px, 5vw, 24px);
+    }
+    .encabezado-mapa-alerta {
+        flex-direction: column;
+    }
+    .encabezado-mapa-alerta .boton {
+        width: 100%;
+    }
+    .mapa-alerta-emergencia {
+        height: 250px;
+    }
+    .coordenadas-alerta-manual {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+/* Mantiene la navegación en el encabezado del documento. */
+.encabezado-sitio {
+    position: relative;
+    inset: auto;
+    z-index: 20;
+}
